@@ -1,0 +1,1926 @@
+import React, { useContext, useEffect, useState } from 'react';
+import {
+  View,
+  StatusBar,
+  StyleSheet,
+  Dimensions,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Alert,
+  ScrollView,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  Platform,
+  SafeAreaView,
+  TextInput,
+  PermissionsAndroid,
+} from 'react-native';
+
+//ASSETS
+import { FONTS, IMAGES } from '../../assets';
+
+//CONTEXT
+import { AuthContext, ThemeContext, ThemeContextType } from '../../context';
+
+//CONSTANT
+import { DummyData, formatDecimalInput, getScaleSize, prepareMediaForUpload, SHOW_TOAST, useString } from '../../constant';
+
+//COMPONENT
+import {
+  AccountCreatedModal,
+  AssistanceItems,
+  Button,
+  CalendarComponent,
+  CategoryDropdown,
+  CustomTimePicker,
+  Header,
+  Input,
+  ProgressSlider,
+  ProgressView,
+  SearchComponent,
+  ServiceCard,
+  ServiceItem,
+  Text,
+  TimePicker,
+  UploadDocumentBox,
+} from '../../components';
+
+//PACKAGES
+import { CommonActions, useFocusEffect } from '@react-navigation/native';
+import { SCREENS } from '..';
+import { API } from '../../api';
+import { launchImageLibrary } from 'react-native-image-picker';
+import moment from 'moment';
+import { createThumbnail } from 'react-native-create-thumbnail';
+import Geolocation from 'react-native-geolocation-service';
+import { PERMISSIONS, request, RESULTS } from 'react-native-permissions';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Collapsible from 'react-native-collapsible';
+import { RecentSearchCard } from '../home/Search';
+
+const { width } = Dimensions.get('window');
+const cellSize = (width - 30) / 7;
+
+type ProductValidationResult =
+  | { valid: true; value: string }
+  | { valid: false; message: string };
+
+const servicesData = [
+  { id: 1, label: "DIY", value: "diy", category_name: "DIY" },
+  { id: 2, label: "Gardening", value: "gardening", category_name: "Gardening" },
+  { id: 3, label: "Moving", value: "moving", category_name: "Moving" },
+  { id: 4, label: "Housekeeping", value: "housekeeping", category_name: "Housekeeping" },
+  { id: 5, label: "Childcare", value: "childcare", category_name: "Childcare" },
+  { id: 6, label: "Pets", value: "pets", category_name: "Pets" },
+];
+
+export default function CreateRequest(props: any) {
+
+  const STRING = useString();
+  const { theme } = useContext<any>(ThemeContext);
+  const { selectedAddress } = useContext<any>(AuthContext);
+
+  const category = props.route.params?.category;
+  const subCategory = props.route.params?.subCategory;
+
+
+  useEffect(() => {
+    setSelectedCategoryItem(category ?? null);
+    setSelectSubCategoryItem(subCategory ?? null);
+  }, [category, subCategory]);
+
+  const patterns = ['small', 'large', 'large', 'small'];
+
+  const [selectedProgress, setSelectedProgress] = useState(category ? 3 : 1);
+  const [selectedCategory, setSelectedCategory] = useState('professional');
+  const [selectedCategoryItem, setSelectedCategoryItem] = useState<any>(null);
+  const [description, setDescription] = useState('');
+  const [valuation, setValuation] = useState('');
+  const [isLoading, setLoading] = useState(false);
+  const [allCategories, setAllCategories] = useState([]);
+  const [subCategoryList, setSubCategoryList] = useState(DummyData.filteredSubCategories);
+  const [selectSubCategoryItem, setSelectSubCategoryItem] = useState<any>(null);
+  const [firstImage, setFirstImage] = useState<any>(null);
+  const [secondImage, setSecondImage] = useState<any>(null);
+  const [firstImageURL, setFirstImageURL] = useState<any>(null);
+  const [secondImageURL, setSecondImageURL] = useState<any>(null);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedTime, setSelectedTime] = useState(new Date());
+  const [productName, setProductName] = useState('')
+  const [productNameError, setProductNameError] = useState<any>('')
+  const [quantity, setQuantity] = useState('')
+  const [quantityError, setQuantityError] = useState('')
+  const [firstProductImage, setFirstProductImage] = useState<any>(null);
+  const [secondProductImage, setSecondProductImage] = useState<any>(null);
+  const [firstProductImageURL, setFirstProductImageURL] = useState<any>(null);
+  const [secondProductImageURL, setSecondProductImageURL] = useState<any>(null);
+  const [addressError, setAddressError] = useState('')
+  const [descriptionError, setDescriptionError] = useState('')
+  const [firstImageError, setFirstImageError] = useState('')
+  const [location, setLocation] = useState<any>(null);
+
+
+  const [minBudget, setMinBudget] = useState('')
+  const [maxBudget, setMaxBudget] = useState('')
+  const [selectedType, setSelectedType] = useState<'instant' | 'scheduled'>('instant');
+  const [urgencyTime, setUrgencyTime] = useState('10 min')
+  const [isVisible, setIsVisible] = useState(false)
+
+  const totalSteps = selectedCategory === 'professional' ? 6 : 7;
+  const progressPercent = Math.round((selectedProgress / totalSteps) * 100);
+
+  // useEffect(() => {
+  //   getAllCategories();
+  //   getLocation()
+  // }, []);
+
+  const hasLocationPermission = async () => {
+    if (Platform.OS === 'ios') {
+      const status = await request(PERMISSIONS.IOS.CAMERA);
+      if (status === RESULTS.GRANTED) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+    );
+
+    return granted === PermissionsAndroid.RESULTS.GRANTED;
+  };
+
+  async function getLocation() {
+    const permission = await hasLocationPermission();
+    if (!permission) return;
+
+    Geolocation.getCurrentPosition(
+      position => {
+        const { latitude, longitude } = position.coords;
+        console.log('latitude', latitude);
+        console.log('longitude', longitude);
+        setLocation({ latitude, longitude });
+      },
+      error => console.log('Error:', error),
+      {
+        enableHighAccuracy: false,
+        timeout: 20000,
+        maximumAge: 10000,
+      },
+    );
+  }
+
+  async function getAllCategories() {
+    try {
+      setLoading(true);
+      const result = await API.Instance.get(API.API_ROUTES.allCategories);
+      setLoading(false);
+      console.log('result', result.status, result)
+      if (result.status) {
+        console.log('allCategories==', result?.data?.data)
+        const sortedData: any = [...(result?.data?.data || [])].sort(
+          (a: any, b: any) =>
+            a.category_name?.toLowerCase().localeCompare(b.category_name?.toLowerCase())
+        );
+        setAllCategories(sortedData);
+      } else {
+        SHOW_TOAST(result?.data?.message ?? '', 'error')
+        console.log('error==>', result?.data?.message)
+      }
+    } catch (error: any) {
+      setLoading(false);
+      SHOW_TOAST(error?.message ?? '', 'error');
+      console.log(error?.message)
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function getSubCategoryData(id: any) {
+    try {
+      setLoading(true);
+      const result = await API.Instance.get(API.API_ROUTES.getHomeData + `/${id}`);
+      setLoading(false);
+      console.log('result', result.status, result)
+      if (result.status) {
+        console.log('subcategoryList==', result?.data?.data)
+        setSubCategoryList(result?.data?.data?.subcategories ?? []);
+      } else {
+        SHOW_TOAST(result?.data?.message ?? '', 'error')
+        console.log('error==>', result?.data?.message)
+      }
+    } catch (error: any) {
+      setLoading(false);
+      SHOW_TOAST(error?.message ?? '', 'error');
+      console.log(error?.message)
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const pickImage = async (type: string) => {
+    launchImageLibrary(
+      {
+        mediaType: 'mixed', // 👈 image + video
+        selectionLimit: 1,
+      },
+      async (response) => {
+        if (!response.didCancel && !response.errorCode && response.assets) {
+          const asset: any = response.assets[0];
+          console.log('asset', asset);
+
+          // 👇 ADD thumbnail handling
+          const finalAsset = await handleThumbnail(asset);
+
+          // 🔥 IMPORTANT FIX
+          if (asset?.type?.startsWith('video')) {
+            await new Promise((resolve: any) => setTimeout(resolve, 600));
+          }
+
+          if (type === 'first') {
+            setFirstImage(finalAsset);
+            uploadProfileImage(finalAsset, type);
+          } else if (type === 'second') {
+            setSecondImage(finalAsset);
+            uploadProfileImage(finalAsset, type);
+          } else if (type === 'firstProduct') {
+            setFirstProductImage(finalAsset);
+            uploadProfileImage(finalAsset, type);
+          } else if (type === 'secondProduct') {
+            setSecondProductImage(finalAsset);
+            uploadProfileImage(finalAsset, type);
+          }
+        } else {
+          setLoading(false);
+        }
+      }
+    );
+  };
+
+  const handleThumbnail = async (asset: any) => {
+    // IMAGE → return same asset
+    if (asset?.type?.startsWith('image')) {
+      return asset;
+    }
+
+    // VIDEO → create thumbnail
+    if (asset?.type?.startsWith('video')) {
+      try {
+        const thumbnail = await createThumbnail({
+          url: asset.uri,
+          timeStamp: 1000, // 1 second
+        });
+
+        return {
+          ...asset,
+          thumbnailUri: thumbnail.path,
+          thumbnailType: 'image/jpeg',
+        };
+      } catch (e) {
+        console.log('Thumbnail error:', e);
+        return asset;
+      }
+    }
+
+    return asset;
+  };
+
+  async function uploadProfileImage(asset: any, type: string) {
+    try {
+      const isVideo = asset?.type?.startsWith('video');
+
+      // 🔥 IMPORTANT: wait for video file to be ready
+      if (isVideo) {
+        await new Promise((resolve: any) => setTimeout(resolve, 600));
+      }
+      const uploadAsset = await prepareMediaForUpload(asset);
+      const formData = new FormData();
+      const cleanUri =
+        Platform.OS === 'ios'
+          ? uploadAsset.uri.replace('file://', '')
+          : uploadAsset.uri;
+      formData.append('file', {
+        uri: cleanUri,
+        name: isVideo
+          ? uploadAsset.fileName || `video_${Date.now()}.mp4`
+          : uploadAsset.fileName || `image_${Date.now()}.jpg`,
+        type: uploadAsset.type || (isVideo ? 'video/mp4' : 'image/jpeg'),
+      });
+      setLoading(true);
+      const result = await API.Instance.post(API.API_ROUTES.uploadServiceRequestImage, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 30000
+      });
+      if (result.status) {
+        const file = result?.data?.files?.[0];
+        if (!file) return;
+        if (type === 'first') setFirstImageURL(file);
+        else if (type === 'second') setSecondImageURL(file);
+        else if (type === 'firstProduct') setFirstProductImageURL(file);
+        else if (type === 'secondProduct') setSecondProductImageURL(file);
+      } else {
+        console.log('ERR', result?.data?.message)
+        SHOW_TOAST(result?.data?.message ?? '', 'error');
+        if (type === 'first') setFirstImage(null);
+        else if (type === 'second') setSecondImage(null);
+        else if (type === 'firstProduct') setFirstProductImage(null);
+        else if (type === 'secondProduct') setSecondProductImage(null);
+      }
+    } catch (error: any) {
+      if (type === 'first') setFirstImage(null);
+      else if (type === 'second') setSecondImage(null);
+      else if (type === 'firstProduct') setFirstProductImage(null);
+      else if (type === 'secondProduct') setSecondProductImage(null);
+      console.log('ERR CATCH', error?.message)
+      SHOW_TOAST(error?.message ?? '', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function onNextProfessional() {
+    if (selectedProgress === 1) {
+      if (!selectedCategoryItem) {
+        SHOW_TOAST(STRING.please_select_category, 'error');
+        return;
+      } else {
+        setSelectedProgress(2);
+      }
+    } else if (selectedProgress === 2) {
+      if (!selectSubCategoryItem) {
+        SHOW_TOAST(STRING.please_select_service, 'error');
+        return;
+      } else {
+        setSelectedProgress(3);
+      }
+    }
+    // else if (selectedProgress === 3) {
+    //   if (!selectedCategory) {
+    //     SHOW_TOAST(STRING.please_select_service_provider, 'error');
+    //     return;
+    //   } else {
+    //     setSelectedProgress(4);
+    //   }
+    // } 
+    else if (selectedProgress === 3) {
+      if (!selectedAddress && !firstImageURL && !description.trim()) {
+        setDescriptionError(STRING.please_enter_description);
+        setFirstImageError(STRING.please_upload_photo);
+        setAddressError(STRING.please_select_address);
+        return;
+      } else if (!validateDescription()) {
+        return;
+      } else if (!firstImageURL) {
+        SHOW_TOAST(STRING.please_upload_photo, 'error');
+        return;
+      } else if (!selectedAddress) {
+        setAddressError(STRING.please_select_address);
+        return;
+      } else {
+        setSelectedProgress(4);
+      }
+    } else if (selectedProgress == 4) {
+      if (!valuation) {
+        SHOW_TOAST(STRING.please_enter_valuation, 'error');
+        return;
+      } else if (!selectedDate) {
+        SHOW_TOAST(STRING.please_select_date, 'error');
+        return;
+      } else if (!selectedTime) {
+        SHOW_TOAST(STRING.please_select_time, 'error');
+        return;
+      } else {
+        setSelectedProgress(5);
+      }
+    } else if (selectedProgress == 5) {
+      if (!isLoading) {
+        onCreateRequest();
+      }
+    }
+  }
+
+  function onNextNonProfessional() {
+    if (selectedProgress === 1) {
+      if (!selectedCategoryItem) {
+        SHOW_TOAST(STRING.please_select_category, 'error');
+        return;
+      } else {
+        setSelectedProgress(2);
+      }
+    } else if (selectedProgress === 2) {
+      if (!selectSubCategoryItem) {
+        SHOW_TOAST(STRING.please_select_service, 'error');
+        return;
+      } else {
+        setSelectedProgress(3);
+      }
+    } else if (selectedProgress === 3) {
+      if (!selectedCategory) {
+        SHOW_TOAST(STRING.please_select_service_provider, 'error');
+        return;
+      } else {
+        setSelectedProgress(4);
+      }
+    } else if (selectedProgress === 4) {
+      if (!selectedAddress && !firstImageURL && !description.trim()) {
+        setDescriptionError(STRING.please_enter_description);
+        setFirstImageError(STRING.please_upload_photo);
+        setAddressError(STRING.please_select_address);
+        return;
+      } else if (!validateDescription()) {
+        return;
+      } else if (!firstImageURL) {
+        SHOW_TOAST(STRING.please_upload_photo, 'error');
+        return;
+      } else if (!selectedAddress) {
+        setAddressError(STRING.please_select_address);
+        return;
+      } else {
+        setSelectedProgress(5);
+      }
+    } else if (selectedProgress == 5) {
+      if (!selectedDate) {
+        SHOW_TOAST(STRING.please_select_date, 'error');
+        return;
+      } else if (!selectedTime) {
+        SHOW_TOAST(STRING.please_select_time, 'error');
+        return;
+      } else {
+        setSelectedProgress(6);
+      }
+    } else if (selectedProgress == 6) {
+      if (!productName) {
+        const validation = validateProductName(productName);
+
+        if (!validation.valid) {
+          setProductNameError(validation.message);
+          return;
+        }
+      }
+      else if (!quantity.trim()) {
+        setQuantityError(STRING.quantity_required);
+        return;
+      }
+      else if (!firstProductImageURL) {
+        SHOW_TOAST(STRING.please_upload_photo, 'error');
+        return;
+      } else {
+        setSelectedProgress(7);
+      }
+    } else if (selectedProgress == 7) {
+      if (!isLoading) {
+        onCreateRequest();
+      }
+
+    }
+  }
+
+  function onBackProfessional() {
+    if (selectedProgress === 1) {
+      props.navigation.goBack();
+    } else if (selectedProgress === 2) {
+      setSelectedProgress(1);
+    } else if (selectedProgress === 3) {
+      if (category && subCategory) {
+        props.navigation.goBack();
+      } else {
+        setSelectedProgress(2);
+      }
+    } else if (selectedProgress === 4) {
+      setSelectedProgress(3);
+    } else if (selectedProgress == 5) {
+      setSelectedProgress(4);
+    } else if (selectedProgress === 6) {
+      setSelectedProgress(4);
+    }
+  }
+
+  function onBackNonProfessional() {
+    if (selectedProgress === 1) {
+      props.navigation.goBack();
+    } else if (selectedProgress === 2) {
+      setSelectedProgress(1);
+    } else if (selectedProgress === 3) {
+      if (category && subCategory) {
+        props.navigation.goBack();
+      } else {
+        setSelectedProgress(2);
+      }
+    } else if (selectedProgress === 4) {
+      setSelectedProgress(3);
+    } else if (selectedProgress == 5) {
+      setSelectedProgress(4);
+    } else if (selectedProgress === 6) {
+      setSelectedProgress(5);
+    } else if (selectedProgress === 7) {
+      setSelectedProgress(4);
+    }
+  }
+
+  async function onCreateRequest() {
+    try {
+      setLoading(true);
+      const date = moment(selectedDate).format("YYYY-MM-DD");
+      const time = moment(selectedTime).format("hh:mm A");
+      const dateTime = moment(`${date} ${time}`, "YYYY-MM-DD hh:mm A").utc().format();
+      const productImageUrls = [];
+      const imageUrls = [];
+
+      if (firstProductImageURL) {
+        productImageUrls.push({ storage_key: firstProductImageURL?.storage_key });
+      }
+
+      if (secondProductImageURL) {
+        productImageUrls.push({ storage_key: secondProductImageURL?.storage_key });
+      }
+
+      if (firstImageURL) {
+        imageUrls.push({ storage_key: firstImageURL?.storage_key });
+      }
+
+      if (secondImageURL) {
+        imageUrls.push({ storage_key: secondImageURL?.storage_key });
+      }
+
+      let params = {};
+      if (selectedCategory == 'professional') {
+        params = {
+          is_professional: true,
+          category_id: selectedCategoryItem?.id,
+          sub_category_id: selectSubCategoryItem?.id,
+          description: description.trim(),
+          description_files: imageUrls,
+          address_id: selectedAddress?.id,
+          validation_amount: valuation,
+          chosen_datetime: dateTime
+        }
+      } else if (selectedCategory == 'non_professional') {
+        params = {
+          is_professional: false,
+          category_id: selectedCategoryItem?.id,
+          sub_category_id: selectSubCategoryItem?.id,
+          description: description.trim(),
+          description_files: imageUrls,
+          chosen_datetime: dateTime,
+          address_id: selectedAddress?.id,
+          barter_product: {
+            product_name: productName,
+            quantity: Number(quantity),
+            barter_photo_files: productImageUrls
+          }
+        }
+      }
+
+      const result = await API.Instance.post(API.API_ROUTES.onServiceRequest, params);
+      console.log('result', result.status, result)
+      if (result.status) {
+        SHOW_TOAST(result?.data?.message ?? '', 'success')
+        props?.navigation?.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: SCREENS.Thankyou.identifier }],
+          }),
+        );
+      } else {
+        SHOW_TOAST(result?.data?.message ?? '', 'error')
+        console.log('error==>', result?.data?.message)
+      }
+    } catch (error: any) {
+      setLoading(false);
+      SHOW_TOAST(error?.message ?? '', 'error');
+
+      console.log('erro sbqwhdr==>', error?.message)
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const validateDescription = () => {
+    const clean = description.trim();
+
+    if (clean.length === 0) {
+      setDescriptionError(STRING.des_cannot_be_empty);
+      return false;
+    }
+
+    if (clean.length < 10) {
+      setDescriptionError(STRING.minimum_10_char_required);
+      return false;
+    }
+
+    if (clean.length > 500) {
+      setDescriptionError(STRING.maximum_500_char_allowed);
+      return false;
+    }
+
+    if (/^[^a-zA-Z0-9]/.test(clean)) {
+      setDescriptionError(STRING.description_cannot_start_with_special_character);
+      return false;
+    }
+
+    if (/^[^a-zA-Z0-9]+$/.test(clean)) {
+      setDescriptionError(STRING.description_cannot_contain_only_special_characters);
+      return false;
+    }
+
+    setDescription(clean);
+    setDescriptionError('');
+    return true;
+  };
+
+  const validateProductName = (text: string): ProductValidationResult => {
+    let value = text.trim();
+
+    // 1️ Required
+    if (!value) {
+      return { valid: false, message: STRING.product_name_required };
+    }
+
+    // 2️ Length check
+    if (value.length < 2) {
+      return { valid: false, message: STRING.minimum_2_char_required };
+    }
+
+    if (value.length > 50) {
+      return { valid: false, message: STRING.maximum_50_char_allowed };
+    }
+
+    // 3️ Block emojis
+    const emojiRegex = /[\p{Extended_Pictographic}]/gu;
+    if (emojiRegex.test(value)) {
+      return { valid: false, message: STRING.emojis_not_allowed };
+    }
+
+    // 4️Block HTML tags
+    if (/<[^>]*>/g.test(value)) {
+      return { valid: false, message: STRING.html_tags_not_allowed };
+    }
+
+    // 5️Block SQL injection patterns
+    const sqlRegex = /(script|select|insert|delete|drop|update|--|;|\/\*|\*\/)/i;
+    if (sqlRegex.test(value)) {
+      return { valid: false, message: STRING.sql_injection_detected };
+    }
+
+    // 6 Allow only specific characters
+    const allowedRegex = /^[a-zA-Z0-9\s\-&.()]+$/;
+    if (!allowedRegex.test(value)) {
+      return {
+        valid: false,
+        message: STRING.only_letters_numbers_special_characters_allowed,
+      };
+    }
+
+    // 7 Block consecutive special characters
+    const consecutiveSpecial = /[\-&.()]{2,}/;
+    if (consecutiveSpecial.test(value)) {
+      return {
+        valid: false,
+        message: STRING.consecutive_special_characters_not_allowed,
+      };
+    }
+
+    // 8 Block only numbers
+    if (/^\d+$/.test(value)) {
+      return {
+        valid: false,
+        message: STRING.only_numbers_not_allowed,
+      };
+    }
+
+    return { valid: true, value };
+  };
+
+  function renderProfessional() {
+    if (selectedProgress === 1) {
+      return renderCategoryView();
+    } else if (selectedProgress === 2) {
+      return renderServiceView();
+    }
+    // else if (selectedProgress === 3) {
+    //   return renderServiceProviderView()
+    // }
+    else if (selectedProgress === 3) {
+      return renderDescriptionView();
+    } else if (selectedProgress === 4) {
+      return renderValuationOfJOB();
+    } else if (selectedProgress === 5) {
+      return renderPreview();
+    }
+  }
+
+  function renderNonProfessional() {
+    if (selectedProgress === 1) {
+      return renderCategoryView();
+    } else if (selectedProgress === 2) {
+      return renderServiceView();
+    } else if (selectedProgress === 3) {
+      return renderServiceProviderView();
+    } else if (selectedProgress === 4) {
+      return renderDescriptionView();
+    } else if (selectedProgress === 5) {
+      return renderValuationOfJOB();
+    } else if (selectedProgress === 6) {
+      return renderBarterProductDetails();
+    } else if (selectedProgress === 7) {
+      return renderPreview();
+    }
+  }
+
+  const getPreviewUri = (asset: any) => {
+    return asset?.thumbnailUri || asset?.uri;
+  };
+
+  function renderPreview() {
+    return (
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={[styles(theme).serviceProviderCotainer, { marginHorizontal: getScaleSize(22) }]}>
+          <Text
+            size={getScaleSize(20)}
+            font={FONTS.Lato.Bold}
+            color={theme.primaryText}>
+            {STRING.Preview}
+          </Text>
+          <Text
+            style={{ marginTop: getScaleSize(12) }}
+            size={getScaleSize(14)}
+            font={FONTS.Lato.SemiBold}
+            color={theme._8C8C8C}>
+            {STRING.Preview_message}
+          </Text>
+          <Text
+            style={{ marginTop: getScaleSize(16) }}
+            size={getScaleSize(20)}
+            font={FONTS.Lato.Bold}
+            color={theme.primaryText}>
+            {selectedCategoryItem?.category_name ?? "DIY Service"
+              // 'No Category Selected'
+            }
+          </Text>
+          <RecentSearchCard
+            onPress={() => { }}
+            containerStyle={{ marginHorizontal: 0, marginTop: getScaleSize(16) }}
+            image={IMAGES.furnitureAssemblyImg}
+            title={"Furniture Assembly"}
+          />
+          <Text
+            style={{ marginTop: getScaleSize(24) }}
+            size={getScaleSize(18)}
+            font={FONTS.Lato.SemiBold}
+            color={theme._323232}>
+            {STRING.Servicedescription}
+          </Text>
+          <View style={styles(theme).serviceDescriptionView}>
+            <Text
+              size={getScaleSize(16)}
+              font={FONTS.Lato.Regular}
+              color={theme.secondaryText}>
+              {/* {description ?? 'No Description'} */}
+              {"Transform your space with our expert furniture assembly services. Our skilled team will handle everything from unpacking to setup, ensuring your new pieces are perfectly assembled and ready for use. We specialize in a wide range of furniture types, including flat-pack items, complex modular systems, and custom installations. Enjoy a hassle-free experience as we take care of the details, allowing you to focus on enjoying your newly furnished area. Schedule your assembly today and let us help you create the perfect environment!"}
+            </Text>
+          </View>
+          <Text
+            style={{ marginTop: getScaleSize(24) }}
+            size={getScaleSize(18)}
+            font={FONTS.Lato.SemiBold}
+            color={theme._323232}>
+            {STRING.Jobphotos}
+          </Text>
+          <View style={styles(theme).photosViewContainer}>
+            {/* {firstImage && ( */}
+            <Image
+              style={[styles(theme).photosView]}
+              // source={{ uri: getPreviewUri(firstImage) }}
+              source={IMAGES.furnitureAssemblyImg}
+            />
+            {/* // )} */}
+            {/* {secondImage && ( */}
+
+            <Image
+              style={[styles(theme).photosView]}
+              // source={{ uri: getPreviewUri(secondImage) }}
+              source={IMAGES.furnitureAssemblyImg}
+            />
+            {/* )} */}
+          </View>
+          {/* <View style={styles(theme).categoryView}> */}
+          {/* {selectSubCategoryItem?.image ?
+              <Image
+                style={styles(theme).imageView}
+                source={{ uri: selectSubCategoryItem?.image }}
+              />
+              :
+              <View style={[styles(theme).imageView, { backgroundColor: theme._D5D5D5 }]} />
+            } */}
+          {/* <Text
+              style={{
+                marginTop: getScaleSize(16),
+                marginHorizontal: getScaleSize(12),
+              }}
+              size={getScaleSize(20)}
+              font={FONTS.Lato.SemiBold}
+              color={theme.primary}>
+              {selectSubCategoryItem?.subcategory_name ?? 'No Service Selected'}
+            </Text> */}
+          {/* </View> */}
+          {/* <Text
+            style={{ marginTop: getScaleSize(24) }}
+            size={getScaleSize(18)}
+            font={FONTS.Lato.SemiBold}
+            color={theme._323232}>
+            {"Job Photos"}
+          </Text>
+         
+
+  <View style={{
+    flexDirection: 'row',
+    flexWrap: 'wrap', // 👈 KEY (wrap items)
+    justifyContent: 'space-between',
+  }}>
+    {DummyData.jobPhotos.map((item) => (
+      <View key={item.id} style={{
+    width: '48%', // 👈 2 per row
+    marginBottom: 16,
+  }}>
+        <Image
+          source={{ uri: item.image }}
+          style={{
+    width: '100%',
+    height: getScaleSize(150),
+    borderRadius: getScaleSize(10),
+  }}
+        />
+      </View>
+    ))}
+  </View> */}
+
+          <Text
+            style={{ marginTop: getScaleSize(24) }}
+            size={getScaleSize(18)}
+            font={FONTS.Lato.SemiBold}
+            color={theme._323232}>
+            {STRING.JobDetails}
+          </Text>
+          <View style={styles(theme).detailsView}>
+            <View style={styles(theme).itemView}>
+              <Text
+                size={getScaleSize(16)}
+                font={FONTS.Lato.SemiBold}
+                color={theme._8C8C8C}>
+                {selectedCategory === 'professional' ? STRING.budget : STRING.product}
+              </Text>
+              <Text
+                style={{ marginTop: getScaleSize(6) }}
+                size={getScaleSize(18)}
+                font={FONTS.Lato.Bold}
+                color={theme.primary}>
+                {selectedCategory === 'professional' ? `€${valuation}` : productName}
+              </Text>
+            </View>
+            <View style={styles(theme).deviderVerticalView} />
+            <View style={styles(theme).itemView}>
+              <Text
+                size={getScaleSize(16)}
+                font={FONTS.Lato.SemiBold}
+                color={theme._8C8C8C}>
+                {STRING.JobDate}
+              </Text>
+              <Text
+                style={{ marginTop: getScaleSize(6) }}
+                size={getScaleSize(18)}
+                font={FONTS.Lato.Bold}
+                color={theme.primary}>
+                {moment(selectedDate).format('DD MMM')}
+              </Text>
+            </View>
+            <View style={styles(theme).deviderVerticalView} />
+            <View style={styles(theme).itemView}>
+              <Text
+                size={getScaleSize(18)}
+                font={FONTS.Lato.SemiBold}
+                color={theme._8C8C8C}>
+                {STRING.JobTime}
+              </Text>
+              <Text
+                style={{ marginTop: getScaleSize(6) }}
+                size={getScaleSize(16)}
+                font={FONTS.Lato.Bold}
+                color={theme.primary}>
+                {moment(selectedTime).format('hh:mm A')}
+              </Text>
+            </View>
+          </View>
+          {selectedCategory == 'non_professional' && (
+            <View style={{ marginTop: getScaleSize(24) }}>
+              <Input
+                placeholder={STRING.enter_name}
+                placeholderTextColor={theme._939393}
+                inputTitle={STRING.quantity}
+                inputColor={true}
+                continerStyle={{}}
+                value={quantity.toString()}
+                editable={false}
+              />
+              <Text
+                style={{ marginTop: getScaleSize(16) }}
+                size={getScaleSize(18)}
+                font={FONTS.Lato.SemiBold}
+                color={theme._323232}>
+                {STRING.product_images}
+              </Text>
+              <View style={styles(theme).photosViewContainer}>
+                {firstProductImage && (
+                  <Image
+                    style={[styles(theme).photosView]}
+                    source={{ uri: getPreviewUri(firstProductImage) }}
+                  />
+                )}
+                {secondProductImage && (
+                  <Image
+                    style={[styles(theme).photosView]}
+                    source={{ uri: getPreviewUri(secondProductImage) }}
+                  />
+                )}
+              </View>
+            </View>
+          )}
+
+          <Text
+            style={{ marginTop: getScaleSize(20) }}
+            size={getScaleSize(18)}
+            font={FONTS.Lato.SemiBold}
+            color={theme._939393}>
+            {STRING.address}
+          </Text>
+          <View style={[styles(theme).addressContainer, { borderColor: addressError ? theme._EF5350 : theme._D5D5D5, }]}>
+            <Image source={IMAGES.home_unselected} style={styles(theme).addressIcon} />
+            <View style={{ flex: 1, alignSelf: 'flex-start' }}>
+              <Text
+                size={getScaleSize(18)}
+                font={FONTS.Lato.Medium}
+                color={theme._2B2B2B}>
+                {selectedAddress ?
+                  `${selectedAddress.banglo}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.postal_code}`
+                  : addressError ? addressError : '-'}
+              </Text>
+            </View>
+          </View>
+          <View style={{ height: 16 }} />
+        </View>
+      </ScrollView>
+    );
+  }
+
+  function renderValuationOfJOB() {
+    return (
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={[styles(theme).serviceProviderCotainer, { marginHorizontal: getScaleSize(22), }]}>
+          <Text
+            size={getScaleSize(20)}
+            font={FONTS.Lato.Bold}
+            color={theme.primaryText}>
+            {selectedCategory === 'professional' ? STRING.ValuationofJob : STRING.Choose_Date_Time}
+          </Text>
+          <Text
+            style={{ marginTop: getScaleSize(12) }}
+            size={getScaleSize(14)}
+            font={FONTS.Lato.SemiBold}
+            color={theme._8C8C8C}>
+            {STRING.valuation_message}
+          </Text>
+          <Text
+            style={{ marginTop: getScaleSize(32) }}
+            size={getScaleSize(16)}
+            font={FONTS.Lato.SemiBold}
+            color={theme.secondaryText}
+          >{"Enter Budget"}</Text>
+          <View style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingTop: getScaleSize(12),
+            justifyContent: 'space-between'
+          }}>
+            <View style={{
+              width: getScaleSize(180)
+            }}>
+              <Text
+                size={getScaleSize(12)}
+                font={FONTS.Lato.Medium}
+                color={theme._8C8C8C}
+              >{"Max Budget"}</Text>
+              <TextInput
+                value={maxBudget}
+                style={{
+                  padding: getScaleSize(15),
+                  borderWidth: 1,
+                  borderColor: theme._D9D9D9,
+                  borderRadius: getScaleSize(10),
+                  marginTop: getScaleSize(6)
+                }}
+                onChangeText={(text) => setMaxBudget(text)}
+              />
+            </View>
+            <View
+              style={{
+                width: getScaleSize(187),
+              }}
+            >
+              <Text
+                size={getScaleSize(12)}
+                font={FONTS.Lato.Medium}
+                color={theme._8C8C8C}
+              >{"Min Budget"}</Text>
+              <TextInput
+                value={minBudget}
+                style={{
+                  padding: getScaleSize(15),
+                  borderWidth: 1,
+                  borderColor: theme._D9D9D9,
+                  borderRadius: getScaleSize(10),
+                  marginTop: getScaleSize(6)
+                }}
+                onChangeText={(text) => setMinBudget(text)}
+              />
+            </View>
+
+          </View>
+          <Text
+            style={{ marginTop: getScaleSize(32) }}
+            font={FONTS.Lato.SemiBold}
+            size={getScaleSize(16)}
+            color={theme.primaryText}
+          >
+            {"Select Service Type"}
+          </Text>
+
+          <TouchableOpacity
+            style={{
+              borderWidth: 1,
+              borderRadius: getScaleSize(12),
+              padding: getScaleSize(14),
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: getScaleSize(10),
+              borderColor: theme._D9D9D9,
+              marginTop: getScaleSize(24)
+            }}
+            onPress={() => setSelectedType('instant')}
+          >
+            <Text
+              size={getScaleSize(16)}
+              font={FONTS.Lato.SemiBold}
+              color={selectedType === 'instant' ? theme.primary : theme.secondaryText}
+            >Instant Service</Text>
+            <View style={[{
+              width: getScaleSize(18),
+              height: getScaleSize(18),
+              borderRadius: getScaleSize(10),
+              borderWidth: 2,
+              borderColor: theme._B3B3B3,
+            }, selectedType === 'instant' && {
+              backgroundColor: theme.white,
+              borderColor: theme.primary,
+              borderWidth: getScaleSize(5)
+            }]} />
+          </TouchableOpacity>
+
+          <Collapsible collapsed={selectedType !== 'instant'}>
+            <View style={{
+              backgroundColor: theme.white,
+              paddingHorizontal: getScaleSize(16),
+              paddingVertical: getScaleSize(20),
+              borderRadius: getScaleSize(12),
+              marginBottom: getScaleSize(10),
+              elevation: 2,
+              shadowColor: theme._000000,
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.1,
+              shadowRadius: 2,
+              overflow: 'hidden'
+            }}>
+              <Text
+                font={FONTS.Lato.Medium}
+                size={getScaleSize(16)}
+                style={{ marginBottom: getScaleSize(10) }}
+              >Enter Service Urgency Time</Text>
+
+              <View style={{
+                borderWidth: 1,
+                padding: getScaleSize(12),
+                borderRadius: getScaleSize(10),
+                marginBottom: getScaleSize(10),
+                borderColor: theme._D9D9D9
+              }}>
+                <Text
+                  size={getScaleSize(18)}
+                  color={theme.secondaryText}
+                  font={FONTS.Lato.SemiBold}
+                >{urgencyTime}</Text>
+              </View>
+
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: getScaleSize(13), paddingTop: getScaleSize(20) }}>
+                {["10 min", "30 min", "60 min", "90 min"].map((item) => (
+                  <TouchableOpacity
+                    key={item}
+                    onPress={() => setUrgencyTime(item)}
+                    style={{
+                      paddingVertical: getScaleSize(6),
+                      paddingHorizontal: getScaleSize(12),
+                      backgroundColor: theme._F0F0F0,
+                      borderRadius: getScaleSize(10)
+                    }}>
+                    <Text
+                      color={theme._8C8C8C}
+                      font={FONTS.Lato.Regular}
+                    >{item}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </Collapsible>
+
+
+          <TouchableOpacity
+            style={{
+              borderWidth: 1,
+              borderRadius: getScaleSize(12),
+              padding: getScaleSize(14),
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: getScaleSize(10),
+              borderColor: theme._D9D9D9,
+              marginTop: getScaleSize(20)
+            }}
+            onPress={() => setSelectedType('scheduled')}
+          >
+            <Text
+              size={getScaleSize(16)}
+              font={FONTS.Lato.SemiBold}
+              color={selectedType === 'scheduled' ? theme.primary : theme.secondaryText}
+            >Scheduled Service</Text>
+            <View style={[{
+              width: getScaleSize(18),
+              height: getScaleSize(18),
+              borderRadius: getScaleSize(10),
+              borderWidth: 2,
+              borderColor: theme._B3B3B3,
+            }, selectedType === 'scheduled' && {
+              backgroundColor: theme.white,
+              borderColor: theme.primary,
+              borderWidth: getScaleSize(5)
+            }]} />
+          </TouchableOpacity>
+
+          <Collapsible collapsed={selectedType !== 'scheduled'}>
+
+            {/* Scheduled Service Card */}
+            <View style={{
+              flexDirection: 'row',
+              backgroundColor: '#fff',
+              borderRadius: getScaleSize(16),
+              // paddingVertical: getScaleSize(12),
+              // maxHeight:getScaleSize(350),
+              // Shadow
+              elevation: 3,
+              shadowColor: '#000',
+              shadowOpacity: 0.1,
+              shadowRadius: 8,
+              shadowOffset: { width: 0, height: 2 },
+            }}>
+
+              {/* LEFT → Calendar */}
+              <View style={{
+                flex: 2, // 👈 more space
+                paddingHorizontal: getScaleSize(10),
+              }}>
+                <CalendarComponent
+                  selectedDate={selectedDate}
+                  onDateChange={(date: any) => {
+                    setSelectedDate(date);
+                  }}
+                />
+              </View>
+
+              {/* Divider */}
+              <View style={{
+                width: 1,
+                backgroundColor: '#262B431F',
+              }} />
+
+              {/* RIGHT → Time Picker */}
+              <View style={{
+                paddingHorizontal: getScaleSize(10),
+                alignItems: 'center',
+                paddingTop: getScaleSize(14),
+                // height: getScaleSize(320), 
+              }}>
+                <Text
+                  font={FONTS.Lato.Bold}
+                  size={getScaleSize(14)}
+                  style={{
+                    marginBottom: getScaleSize(10),
+                    textAlign: 'center'
+                  }}>Time Picker</Text>
+                <View style={{ height: getScaleSize(350) }}>
+                  <CustomTimePicker
+                    selectedTime={selectedTime}
+                    onTimeChange={(item: any) => { setSelectedTime(item) }}
+                  />
+                </View>
+              </View>
+
+            </View>
+
+          </Collapsible>
+
+          <View style={{ height: 16 }} />
+        </View>
+      </ScrollView>
+    );
+  }
+
+  function renderDescriptionView() {
+    return (
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={[styles(theme).serviceProviderCotainer, { marginHorizontal: getScaleSize(22) }]}>
+          <Text
+            size={getScaleSize(22)}
+            font={FONTS.Lato.Bold}
+            color={theme.primaryText}>
+            {STRING.DescribeAboutService}
+          </Text>
+          <Text
+            style={{ marginTop: getScaleSize(12) }}
+            size={getScaleSize(14)}
+            font={FONTS.Lato.SemiBold}
+            color={theme._939393}>
+            {STRING.descriptionMessage}
+          </Text>
+
+          <Text
+            style={{ marginTop: getScaleSize(12) }}
+            size={getScaleSize(17)}
+            font={FONTS.Lato.Medium}
+            color={theme._424242}>
+            {STRING.EnterServicedescription}
+          </Text>
+          <View style={[styles(theme).inputContainer, { borderColor: descriptionError ? theme._EF5350 : theme._D5D5D5, }]}>
+            <TextInput
+              style={styles(theme).textInput}
+              value={description}
+              onChangeText={(text: any) => {
+                const noEmoji = text.replace(
+                  /[\p{Extended_Pictographic}]/gu,
+                  ''
+                );
+                const space = noEmoji.replace(/^\s+/, '');
+                const noHtml = space.replace(/<[^>]*>/g, '');
+                const trimmedToMax = noHtml.slice(0, 500);
+                setDescription(trimmedToMax);
+                setDescriptionError('');
+              }}
+              placeholder={STRING.Enterdescriptionhere}
+              placeholderTextColor={theme._999999}
+              multiline={true}
+              numberOfLines={8}
+              textAlignVertical="top"
+              returnKeyType="default"
+            />
+          </View>
+          {descriptionError ? (
+            <Text
+              size={getScaleSize(14)}
+              font={FONTS.Lato.Regular}
+              color="red"
+              style={{ marginTop: getScaleSize(6) }}>
+              {descriptionError}
+            </Text>
+          ) : null}
+          <Text
+            style={{ marginTop: getScaleSize(20) }}
+            size={getScaleSize(17)}
+            font={FONTS.Lato.Medium}
+            color={theme._424242}>
+            {STRING.UploadPhotosofaJob}
+          </Text>
+          <View style={styles(theme).imageUploadContent}>
+            <UploadDocumentBox
+              onPress={() => { }}
+              containerStyle={{ width: getScaleSize(182) }}
+              icon={IMAGES.upload_attachment}
+            />
+            <UploadDocumentBox
+              onPress={() => { }}
+              containerStyle={{ width: getScaleSize(182) }}
+              icon={IMAGES.ic_camera}
+              label={"Take Photo"}
+            />
+          </View>
+          <Text
+            style={{ marginTop: getScaleSize(8) }}
+            size={getScaleSize(14)}
+            font={FONTS.Lato.SemiBold}
+            color={theme._939393}>
+            {STRING.upload_message}
+          </Text>
+          <Text
+            style={{ marginTop: getScaleSize(20) }}
+            size={getScaleSize(18)}
+            font={FONTS.Lato.SemiBold}
+            color={theme._939393}>
+            {STRING.address}
+          </Text>
+          <View style={[styles(theme).addressContainer, { borderColor: addressError ? theme._EF5350 : theme._D5D5D5, }]}>
+            <Image source={IMAGES.home_unselected} style={styles(theme).addressIcon} />
+            <View style={{ flex: 1, alignSelf: 'flex-start' }}>
+              <Text
+                size={getScaleSize(18)}
+                font={FONTS.Lato.Medium}
+                color={theme._2B2B2B}>
+                {selectedAddress ?
+                  `${selectedAddress.banglo}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.postal_code}`
+                  : addressError ? addressError : '-'}
+              </Text>
+            </View>
+            <TouchableOpacity
+              activeOpacity={1}
+              style={styles(theme).selectAddressButton}
+              onPress={() => {
+                props.navigation.navigate(SCREENS.Address.identifier);
+                setAddressError('');
+              }}
+            >
+              <Text
+                size={getScaleSize(12)}
+                font={FONTS.Lato.Regular}
+                color={theme.white}>
+                {STRING.change}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
+
+  function renderBarterProductDetails() {
+    return (
+      <ScrollView showsVerticalScrollIndicator={false} >
+        <View style={[styles(theme).serviceProviderCotainer, { marginHorizontal: getScaleSize(22) }]}>
+          <Text
+            size={getScaleSize(24)}
+            font={FONTS.Lato.Bold}
+            color={theme.primary}>
+            {STRING.barter_product_details}
+          </Text>
+          <Text
+            style={{ marginTop: getScaleSize(12) }}
+            size={getScaleSize(16)}
+            font={FONTS.Lato.SemiBold}
+            color={theme._939393}>
+            {STRING.add_details_of_the_product_or_thing_you_want_to_offer_in_exchange_for_the_service}
+          </Text>
+          <View style={styles(theme).deviderView} />
+          <Input
+            placeholder={STRING.enter_name}
+            placeholderTextColor={theme._939393}
+            inputTitle={STRING.add_product_name}
+            inputColor={true}
+            continerStyle={{ marginBottom: getScaleSize(22) }}
+            value={productName}
+            maxLength={50}
+            onChangeText={(text: any) => {
+
+              const result = validateProductName(text);
+
+              if (result.valid) {
+                setProductName(result.value);
+                setProductNameError('');
+              } else {
+                setProductName(text.slice(0, 50));
+                setProductNameError(result.message);
+              }
+            }}
+            isError={productNameError}
+          />
+          <Input
+            placeholder={"Enter Quantity"}
+            placeholderTextColor={theme._939393}
+            inputTitle={STRING.quantity}
+            inputColor={true}
+            keyboardType="number-pad"
+            quantityIcon={true}
+            maxLength={7}
+            continerStyle={{ marginBottom: getScaleSize(22) }}
+            value={quantity.toString()}
+            onChangeText={(text: string) => {
+              const cleaned = text.replace(/[^0-9]/g, '').slice(0, 7);
+              setQuantity(cleaned);
+              setQuantityError('');
+            }}
+            isError={quantityError}
+            onPressQuantityRemove={() => {
+              if (quantity.length === 0) return;
+              const newQty = Math.max(Number(quantity) - 1, 0).toString();
+              setQuantity(newQty === '0' ? '' : newQty);
+            }}
+            onPressQuantityAdd={() => {
+              const newQty = (Number(quantity || 0) + 1).toString();
+              if (newQty.length <= 7) setQuantity(newQty);
+            }}
+          />
+          <Text
+            style={{ marginTop: getScaleSize(20) }}
+            size={getScaleSize(17)}
+            font={FONTS.Lato.Medium}
+            color={theme._424242}>
+            {STRING.upload_photos_of_a_product}
+          </Text>
+          <View style={styles(theme).imageUploadContent}>
+            <TouchableOpacity
+              style={[styles(theme).uploadButton, { marginRight: getScaleSize(9), borderColor: theme._818285, }]}
+              activeOpacity={1}
+              onPress={() => {
+                pickImage('firstProduct');
+              }}>
+              {firstProductImage ? (
+                <Image
+                  resizeMode='cover'
+                  style={styles(theme).viewImage}
+                  source={{ uri: getPreviewUri(firstProductImage) }}
+                />
+              ) : (
+                <>
+                  <Image
+                    style={styles(theme).attachmentIcon}
+                    source={IMAGES.upload_attachment}
+                  />
+                  <Text
+                    style={{ marginTop: getScaleSize(8) }}
+                    size={getScaleSize(15)}
+                    font={FONTS.Lato.Regular}
+                    color={theme._818285}>
+                    {STRING.upload_from_device}
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles(theme).uploadButton, { marginLeft: getScaleSize(9), borderColor: theme._818285, }]}
+              activeOpacity={1}
+              onPress={() => {
+                pickImage('secondProduct');
+              }}>
+              {secondProductImage ? (
+                <Image
+                  resizeMode='cover'
+                  style={styles(theme).viewImage}
+                  source={{ uri: getPreviewUri(secondProductImage) }}
+                />
+              ) : (
+                <>
+                  <Image
+                    style={styles(theme).attachmentIcon}
+                    source={IMAGES.upload_attachment}
+                  />
+                  <Text
+                    style={{ marginTop: getScaleSize(8) }}
+                    size={getScaleSize(15)}
+                    font={FONTS.Lato.Regular}
+                    color={theme._818285}>
+                    {STRING.upload_from_device}
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
+
+  function renderServiceView() {
+    return (
+      <View style={{ flex: 1 }}>
+        <View style={{ marginHorizontal: getScaleSize(22) }}>
+          <Text
+            size={getScaleSize(24)}
+            font={FONTS.Lato.Bold}
+            color={theme.primaryText}>
+            {"Select Your Service Provider"}
+          </Text>
+          <Text
+            style={{ marginTop: getScaleSize(12) }}
+            size={getScaleSize(14)}
+            font={FONTS.Lato.SemiBold}
+            color={theme._8C8C8C}>
+            {"To get started, please select a category. This will ensure we match you with the most suitable professional for your requirements."}
+          </Text>
+          <View style={{ marginTop: getScaleSize(22) }} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <FlatList
+            data={subCategoryList}
+            numColumns={2}
+            contentContainerStyle={{
+              paddingHorizontal: getScaleSize(24),
+              paddingBottom: getScaleSize(20),
+            }}
+            keyExtractor={(item: any, index: number) => index.toString()}
+            showsVerticalScrollIndicator={false}
+            columnWrapperStyle={{
+              justifyContent: 'space-between',
+              marginBottom: getScaleSize(16),
+            }}
+            ListFooterComponent={() => {
+              return <View style={{ height: getScaleSize(50) }} />;
+            }}
+            renderItem={({ item, index }) => {
+              const type = patterns[index % 4];
+              return (
+                <ServiceCard
+                  name={item?.subcategory_name}
+                  bgImage={{ uri: item?.image }}
+                  handleOnPress={() => {
+                    setSelectSubCategoryItem(item);
+                  }}
+                />
+              )
+            }}
+          />
+        </View>
+      </View>
+    );
+  }
+
+  function renderCategoryView() {
+    return (
+      <View style={[styles(theme).serviceProviderCotainer, { marginHorizontal: getScaleSize(22) }]}>
+        <Text
+          size={getScaleSize(24)}
+          font={FONTS.Lato.Bold}
+          color={theme.primaryText}>
+          {"Select Your Service Provider"}
+        </Text>
+        <Text
+          style={{ marginTop: getScaleSize(12) }}
+          size={getScaleSize(14)}
+          font={FONTS.Lato.SemiBold}
+          color={theme._8C8C8C}>
+          {"To get started, please select a category. This will ensure we match you with the most suitable professional for your requirements."}
+        </Text>
+        <Text
+          style={{ marginTop: getScaleSize(32) }}
+          size={getScaleSize(17)}
+          font={FONTS.Lato.Medium}
+          color={theme._424242}>
+          {STRING.Selectacategory}
+        </Text>
+        <View style={{ marginTop: getScaleSize(8) }}>
+          <CategoryDropdown
+            onChange={item => {
+              setSelectedCategoryItem(item);
+              // getSubCategoryData(item?.id);
+            }}
+            selectedItem={selectedCategoryItem}
+            container={{}}
+            // data={allCategories}
+            data={servicesData}
+          />
+        </View>
+      </View>
+    );
+  }
+
+  function renderServiceProviderView() {
+    return (
+      <View style={[styles(theme).serviceProviderCotainer, { marginHorizontal: getScaleSize(22) }]}>
+        <Text
+          size={getScaleSize(24)}
+          font={FONTS.Lato.Bold}
+          color={theme.primary}>
+          {STRING.select_your_service_provider}
+        </Text>
+        <Text
+          style={{ marginTop: getScaleSize(12) }}
+          size={getScaleSize(16)}
+          font={FONTS.Lato.SemiBold}
+          color={theme._939393}>
+          {STRING.service_provider_message}
+        </Text>
+        <TouchableOpacity
+          style={styles(theme).radioButtonContainer}
+          activeOpacity={1}
+          onPress={() => {
+            setSelectedCategory('professional');
+          }}>
+          <Text
+            style={{ flex: 1.0 }}
+            size={getScaleSize(18)}
+            font={FONTS.Lato.Medium}
+            color={theme.primary}>
+            {STRING.Professional}
+          </Text>
+          <Image
+            style={styles(theme).radioButton}
+            source={
+              selectedCategory == 'professional' ? IMAGES.ic_radio_select : IMAGES.ic_radio_unselect
+            }
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles(theme).radioButtonContainer}
+          activeOpacity={1}
+          onPress={() => {
+            setSelectedCategory('non_professional');
+          }}>
+          <Text
+            style={{ flex: 1.0 }}
+            size={getScaleSize(18)}
+            font={FONTS.Lato.Medium}
+            color={theme.primary}>
+            {STRING.Nonprofessional}
+          </Text>
+          <Image
+            style={styles(theme).radioButton}
+            source={
+              selectedCategory == 'non_professional' ? IMAGES.ic_radio_select : IMAGES.ic_radio_unselect
+            }
+          />
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const insets = useSafeAreaInsets()
+
+  return (
+    <View style={[styles(theme).container, { paddingTop: insets.top + 20 }]}>
+      <View
+        style={[styles(theme).container, {}]}>
+        <>
+          {selectedCategory == 'professional' ? renderProfessional() : renderNonProfessional()}
+        </>
+      </View>
+      <View style={styles(theme).buttonContainer}>
+        <TouchableOpacity
+          style={styles(theme).backButtonContainer}
+          activeOpacity={1}
+          onPress={() => {
+            if (selectedCategory == 'professional') {
+              onBackProfessional();
+            } else {
+              onBackNonProfessional();
+            }
+          }}>
+          <Text
+            size={getScaleSize(19)}
+            font={FONTS.Lato.Bold}
+            color={theme.primary}
+            style={{ alignSelf: 'center' }}>
+            {selectedProgress === (selectedCategory == 'professional' ? 5 : 6) ? 'Edit' : STRING.Back}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles(theme).nextButtonContainer}
+          activeOpacity={1}
+          onPress={() => {
+            if (isLoading) return;
+            if (selectedCategory == 'professional') {
+              if (selectedProgress < 5) {
+
+                setSelectedProgress(selectedProgress + 1);
+              } else {
+                setIsVisible(true)
+              }
+              // onNextProfessional();
+              // setSelectedProgress(selectedProgress + 1);
+            } else {
+              onNextNonProfessional();
+            }
+          }}>
+          <Text
+            size={getScaleSize(19)}
+            font={FONTS.Lato.Bold}
+            color={theme.white}
+            style={{ alignSelf: 'center' }}>
+            {selectedProgress === (selectedCategory == 'professional' ? 5 : 6) ? 'Submit' : STRING.Next}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      {isLoading && <ProgressView />}
+      <AccountCreatedModal
+        visible={isVisible}
+        isGoToHome
+        discription={"Great job! Your request is now submitted successfully."}
+      />
+    </View>
+  );
+}
+
+const styles = (theme: ThemeContextType['theme']) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme._fafafa },
+    progressSlider: {
+      marginTop: getScaleSize(16),
+      marginHorizontal: getScaleSize(22),
+      flex: 1.0,
+    },
+    buttonContainer: {
+      flexDirection: 'row',
+      marginHorizontal: getScaleSize(22),
+      marginVertical: getScaleSize(17),
+    },
+    backButtonContainer: {
+      flex: 1.0,
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: theme.primary,
+      borderRadius: getScaleSize(12),
+      paddingVertical: getScaleSize(18),
+      backgroundColor: theme.white,
+      marginRight: getScaleSize(8),
+    },
+    nextButtonContainer: {
+      flex: 1.0,
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: theme.primary,
+      borderRadius: getScaleSize(12),
+      paddingVertical: getScaleSize(18),
+      backgroundColor: theme.primary,
+      marginLeft: getScaleSize(8),
+    },
+    serviceProviderCotainer: {
+      flexDirection: 'column',
+    },
+    radioButtonContainer: {
+      marginTop: getScaleSize(20),
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme._D5D5D5,
+      paddingVertical: getScaleSize(12),
+      paddingHorizontal: getScaleSize(17),
+      borderRadius: getScaleSize(12),
+    },
+    radioButton: {
+      height: getScaleSize(36),
+      width: getScaleSize(36),
+      alignSelf: 'center',
+    },
+    listContainer: {
+      marginTop: getScaleSize(16),
+    },
+    inputContainer: {
+      borderWidth: 1,
+
+      borderRadius: getScaleSize(12),
+      marginTop: getScaleSize(12),
+    },
+    textInput: {
+      fontSize: getScaleSize(18),
+      color: theme._323232,
+      padding: getScaleSize(16),
+      minHeight: getScaleSize(240),
+      textAlignVertical: 'top',
+      fontFamily: FONTS.Lato.Regular,
+    },
+    imageUploadContent: {
+      // marginTop: getScaleSize(12),
+      flexDirection: 'row',
+      justifyContent: 'space-between'
+    },
+    uploadButton: {
+      flex: 1.0,
+      borderWidth: 1,
+      borderColor: theme._818285,
+      borderStyle: 'dashed',
+      borderRadius: getScaleSize(8),
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: getScaleSize(160),
+    },
+    attachmentIcon: {
+      height: getScaleSize(24),
+      width: getScaleSize(24),
+      alignSelf: 'center',
+    },
+    textInputContainer: {
+      marginTop: getScaleSize(12),
+    },
+    calenderHeader: {
+      marginTop: getScaleSize(12),
+      paddingVertical: getScaleSize(8),
+      paddingHorizontal: getScaleSize(12),
+      borderRadius: getScaleSize(18),
+      backgroundColor: theme._FBFBFB,
+      flexDirection: 'row',
+    },
+    nextImage: {
+      height: getScaleSize(24),
+      width: getScaleSize(24),
+    },
+    categoryView: {
+      height: getScaleSize(228),
+      backgroundColor: theme._EAF0F3,
+      borderRadius: getScaleSize(20),
+      marginTop: getScaleSize(18),
+    },
+    imageView: {
+      height: getScaleSize(172),
+      borderRadius: getScaleSize(20),
+    },
+
+    imageViewc: {
+      flex: 1.0,
+      borderRadius: getScaleSize(20),
+    },
+
+    detailsView: {
+      paddingVertical: getScaleSize(21),
+      flexDirection: 'row',
+      borderRadius: getScaleSize(16),
+      backgroundColor: theme._FBFBFB,
+      marginTop: getScaleSize(18),
+    },
+    itemView: {
+      flex: 1.0,
+      alignSelf: 'center',
+      flexDirection: 'column',
+      alignItems: 'center',
+    },
+    deviderView: {
+      height: getScaleSize(1),
+      backgroundColor: theme._D6D6D6,
+      marginVertical: getScaleSize(18),
+    },
+    serviceDescriptionView: {
+      marginTop: getScaleSize(18),
+      borderWidth: 1,
+      borderColor: theme._D5D5D5,
+      borderRadius: 12,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+    },
+    photosView: {
+      height: getScaleSize(144),
+      width: (Dimensions.get('window').width - getScaleSize(70)) / 2,
+      borderRadius: 8,
+    },
+    cardContainer: {
+      borderRadius: getScaleSize(20),
+      backgroundColor: theme._EAF0F3,
+      width: (Dimensions.get('window').width - getScaleSize(64)) / 2,
+      marginLeft: getScaleSize(16),
+      borderColor: theme.primary,
+    },
+    viewImage: {
+      width: '100%',
+      height: '100%',
+      borderRadius: getScaleSize(8),
+      overflow: 'hidden',
+    },
+    photosViewContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: getScaleSize(26),
+      marginTop: getScaleSize(18),
+    },
+    deviderVerticalView: {
+      height: '100%',
+      backgroundColor: theme._D6D6D6,
+      width: getScaleSize(1),
+    },
+    addressContainer: {
+      marginTop: getScaleSize(8),
+      borderWidth: 1,
+      borderRadius: getScaleSize(12),
+      paddingBottom: getScaleSize(14),
+      paddingTop: getScaleSize(12),
+      paddingHorizontal: getScaleSize(16),
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      flex: 1,
+      marginBottom: getScaleSize(20),
+    },
+    addressIcon: {
+      width: getScaleSize(24),
+      height: getScaleSize(24),
+      marginRight: getScaleSize(12),
+      tintColor: theme.primary,
+      marginTop: getScaleSize(6),
+    },
+    selectAddressButton: {
+      backgroundColor: theme.primary,
+      paddingVertical: getScaleSize(12),
+      paddingHorizontal: getScaleSize(16),
+      borderRadius: getScaleSize(12),
+      alignSelf: 'flex-start',
+      marginTop: getScaleSize(4),
+      marginLeft: getScaleSize(12),
+    }
+  });

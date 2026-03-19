@@ -1,0 +1,289 @@
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import {
+    View,
+    StatusBar,
+    StyleSheet,
+    FlatList,
+    TouchableOpacity,
+    Image,
+    Platform,
+    ImageBackground,
+} from 'react-native';
+
+//ASSETS
+import { FONTS, IMAGES } from '../../assets';
+
+//CONTEXT
+import { AuthContext, ThemeContext, ThemeContextType } from '../../context';
+
+//CONSTANT
+import { getScaleSize, SHOW_TOAST, useString } from '../../constant';
+
+//COMPONENT
+import {
+    Header,
+    ProgressView,
+    RequestItem,
+    SearchComponent,
+    Text,
+} from '../../components';
+
+//PACKAGES
+import { useFocusEffect } from '@react-navigation/native';
+import { SCREENS } from '..';
+import { API } from '../../api';
+import { debounce } from 'lodash';
+import LinearGradient from 'react-native-linear-gradient';
+
+export const RecentSearchCard = (props: any) => {
+    const { onPress, image, title,containerStyle } = props
+    return (
+        <TouchableOpacity
+        activeOpacity={onPress ? 0.9 : 1}
+            style={[{
+                height: getScaleSize(220),
+                borderRadius: getScaleSize(20),
+                overflow: "hidden",
+                marginHorizontal: getScaleSize(24),
+                // // shadowColor: "#000",
+                // shadowOpacity: 0.1,
+                // shadowRadius: 8,
+                // elevation: 1,
+            },containerStyle]}
+            onPress={onPress}
+        >
+            <ImageBackground
+                source={image}
+                style={{
+                    width: "100%",
+                    height: getScaleSize(220),
+                    overflow: "hidden",
+                    marginBottom: getScaleSize(16),
+                    shadowColor: "#000",
+                    shadowOpacity: 0.1,
+                    shadowRadius: 8,
+                    elevation: 4
+                }}
+            >
+                <LinearGradient
+                    colors={["transparent","#ffffff","#ffffff"]}
+                    locations={[0.6, 1, 1]}
+                    style={{
+                        borderRadius: getScaleSize(20),flex:1,
+                        justifyContent:'flex-end',
+                        paddingBottom:getScaleSize(16)
+                    }}
+                >
+                    
+                    <Text
+                    size={getScaleSize(14)}
+                    font={FONTS.Lato.Bold}
+                    align='center'
+                    >
+                        {title}
+                    </Text>
+                </LinearGradient>
+             </ImageBackground>
+        </TouchableOpacity>
+    )
+
+}
+
+const recenSearchData = [
+{id:"1",title:"Furniture Assembly",image:IMAGES.furnitureAssemblyImg},
+{id:"1",title:"Furniture Assembly",image:IMAGES.furnitureAssemblyImg}
+]
+
+export default function Search(props: any) {
+    const STRING = useString();
+    const { theme } = useContext<any>(ThemeContext);
+
+    const [searchText, setSearchText] = useState('');
+    const [isLoading, setLoading] = useState(false);
+    const [searchData, setSearchData] = useState<any>([]);
+    const [searchDebouncedText, setSearchDebouncedText] = useState('')
+
+    const abortControllerRef = useRef<AbortController | undefined>(undefined);
+
+    useEffect(() => {
+        if (searchDebouncedText.trim().length > 0) {
+            getSearchData();
+        } else {
+            setSearchData([]);
+        }
+    }, [searchDebouncedText]);
+
+    const debouncedSearch = useCallback(debounce((text: string) => {
+        setSearchDebouncedText(text);
+    }, 500), []);
+
+    async function getSearchData() {
+        try {
+            setLoading(true);
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+            const abortController = new AbortController();
+            abortControllerRef.current = abortController;
+            const result = await API.Instance.get(API.API_ROUTES.getHomeData + `?search=${searchDebouncedText.trim()}`);
+            console.log('result', result.status, result)
+            if (result.status) {
+                console.log('searchData==', result?.data?.data)
+                setSearchData(result?.data?.data);
+            } else {
+                SHOW_TOAST(result?.data?.message ?? '', 'error')
+                console.log('error==>', result?.data?.message)
+            }
+        } catch (error: any) {
+            SHOW_TOAST(error?.message ?? '', 'error');
+            console.log(error?.message)
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return (
+        <View style={styles(theme).container}>
+            <Header
+                onBack={() => {
+                    props.navigation.goBack();
+                }}
+                screenName={STRING.Search}
+            />
+            <View style={styles(theme).notificationContainer}>
+                <View style={{
+                    marginHorizontal: getScaleSize(24), marginBottom: getScaleSize(24)
+                }}>
+                    <SearchComponent
+                        value={searchText}
+                        onCancelPress={() => {
+                            setSearchText('');
+                            setSearchDebouncedText('');
+                            setSearchData([]);
+                        }}
+                        onChangeText={(text: any) => {
+                            setSearchText(text);
+
+                            const trimmed = text.trim();
+
+                            if (trimmed.length === 0) {
+                                setSearchDebouncedText('');
+                                setSearchData([]);
+                                return;
+                            }
+
+                            // debouncedSearch(trimmed);
+                        }} />
+                </View>
+                <Text
+                font={FONTS.Lato.SemiBold}
+                size={getScaleSize(16)}
+                color={theme.primaryText}
+                style={{marginLeft:getScaleSize(24),marginBottom:getScaleSize(16)}}
+                >Recent Search</Text>
+                <FlatList
+                    // data={searchData?.services ?? []}
+                    data={recenSearchData}
+                    contentContainerStyle={{
+                        paddingBottom: getScaleSize(50),
+                        flexGrow: 1,
+                        gap:getScaleSize(16)
+                    }}
+                    showsVerticalScrollIndicator={false}
+                    keyExtractor={(item: any, index: number) => index.toString()}
+                    renderItem={({ item, index }) => (
+                        <RecentSearchCard
+                        title={item?.title}
+                        image={item?.image}
+                        onPress={()=>{
+
+                            props.navigation.navigate(SCREENS.RequestDetails.identifier, {
+                                        item: item
+                                    })
+                        }}
+                        />
+                        // <RequestItem
+                        //     selectedFilter={typeof searchText === 'string' ? { id: '1', title: 'All', filter: 'all' } : null}
+                        //     key={index}
+                        //     isFromSearch={true}
+                        //     onPress={() => {
+                        //         if (item?.task_status?.toLowerCase() === 'expired') {
+
+                        //         } else {
+                        //             props.navigation.navigate(SCREENS.RequestDetails.identifier, {
+                        //                 item: item
+                        //             })
+                        //         }
+                        //     }}
+                        //     item={item} />
+                    )}
+                    ListEmptyComponent={() => {
+                        if (isLoading) return null;
+
+                        if ((searchData?.services ?? []).length === 0) {
+                            return (
+                                <View style={styles(theme).emptyContainer}>
+                                    <Text
+                                        size={getScaleSize(16)}
+                                        font={FONTS.Lato.Regular}
+                                        color={theme._565656}
+                                    >
+                                        {STRING.no_results_found}
+                                    </Text>
+                                </View>
+                            );
+                        }
+
+                        return null;
+                    }}
+                />
+            </View>
+            {isLoading && <ProgressView />}
+        </View>
+    );
+}
+
+const styles = (theme: ThemeContextType['theme']) =>
+    StyleSheet.create({
+        container: { flex: 1, backgroundColor: theme.white },
+        notificationContainer: {
+            marginTop: getScaleSize(16),
+            flex: 1.0,
+        },
+        profilePic: {
+            height: getScaleSize(42),
+            width: getScaleSize(42),
+            borderRadius: getScaleSize(21),
+        },
+        buttonContainer: {
+            flexDirection: 'row',
+            marginHorizontal: getScaleSize(55),
+            marginBottom: getScaleSize(17),
+            marginTop: getScaleSize(16),
+        },
+        backButtonContainer: {
+            justifyContent: 'center',
+            borderWidth: 1,
+            borderColor: '#ACADAD',
+            borderRadius: getScaleSize(12),
+            paddingVertical: getScaleSize(8),
+            backgroundColor: theme.white,
+            marginLeft: getScaleSize(8),
+            paddingHorizontal: getScaleSize(10),
+        },
+        nextButtonContainer: {
+            justifyContent: 'center',
+            borderWidth: 1,
+            borderColor: theme.primary,
+            borderRadius: getScaleSize(12),
+            paddingVertical: getScaleSize(8),
+            backgroundColor: theme.primary,
+            marginRight: getScaleSize(8),
+            paddingHorizontal: getScaleSize(10),
+        },
+        emptyContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+    });

@@ -1,0 +1,836 @@
+import React, {useContext, useEffect, useMemo, useState} from 'react';
+import {
+  View,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Platform,
+  TextInput,
+  FlatList,
+  KeyboardAvoidingView,
+  ActivityIndicator,
+  StyleProp,
+  ViewStyle,
+  SafeAreaView,
+  Pressable,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ScrollView,
+} from 'react-native';
+
+//ASSETS
+import {FONTS, IMAGES} from '../../assets';
+
+//CONTEXT
+import {ThemeContext, ThemeContextType, AuthContext} from '../../context';
+
+//CONSTANT
+import {getScaleSize, SHOW_TOAST, useString} from '../../constant';
+
+//COMPONENT
+import {Text} from '../../components';
+
+//PACKAGES
+import {useFocusEffect} from '@react-navigation/native';
+import {
+  getReadCount,
+  messagesListThread,
+  updateReadCount,
+  userMessage,
+} from '../../services/chat';
+import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
+import {launchImageLibrary} from 'react-native-image-picker';
+import {API} from '../../api';
+import {SCREENS} from '..';
+
+export default function ChatDetails(props: any) {
+  const STRING = useString();
+  const {theme} = useContext<any>(ThemeContext);
+  const {profile} = useContext<any>(AuthContext);
+  const peerUser = props?.route?.params?.peerUser;
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState<any[]>([]);
+  const [loadingMessages, setLoadingMessages] = useState(true);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+
+  const [commanId, setCommanId] = useState<string | ''>(
+    props?.route?.params?.conversationId || '',
+  );
+
+  const peerUserId = peerUser?.user_id;
+  const peerUserName = peerUser?.name;
+  const peerUserAvatar = peerUser?.avatarUrl;
+  const messageListContentStyle = useMemo<StyleProp<ViewStyle>>(
+    () => ({
+      paddingVertical: getScaleSize(12),
+      flexGrow: 1,
+      justifyContent: 'flex-end',
+    }),
+    [],
+  );
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor(theme.white);
+        StatusBar.setBarStyle('dark-content');
+      }
+    }, [theme.white]),
+  );
+
+  const handleChoosePhoto = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        quality: 0.8,
+        maxWidth: 800,
+        maxHeight: 800,
+        selectionLimit: 4,
+      },
+      response => {
+        if (response.didCancel) return;
+
+        if (response.errorCode) {
+          SHOW_TOAST(response.errorMessage, 'error');
+          return;
+        }
+
+        const asset = response.assets;
+        if (!asset || asset.length === 0) return;
+        console.log('asset', asset);
+
+        uploadProfileImage(asset);
+      },
+    );
+  };
+
+  async function uploadProfileImage(assets: any) {
+    try {
+      const formData = new FormData();
+      assets.forEach((assets: any, index: number) => {
+        formData.append('file', {
+          uri: assets.uri,
+          name: assets?.fileName || `image_${index}.jpg`,
+          type: assets?.type || 'image/jpeg',
+        });
+      });
+
+      console.log('FORM DATA', formData);
+      setLoading(true);
+      const result = await API.Instance.post(
+        API.API_ROUTES.uploadServiceRequestImage,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+      setLoading(false);
+
+      if (result.status) {
+        if (result?.data?.files && result?.data?.files?.length > 0) {
+          const imageUrls = result?.data?.files.map((item: any) => item.url);
+          const readCount = await getReadCount(peerUserId, commanId);
+
+          userMessage(
+            profile?.user?.id,
+            profile?.user?.first_name || 'User',
+            peerUserId,
+            peerUserName,
+            commanId,
+            'Image',
+            imageUrls,
+            profile?.user?.profile_photo_url || '',
+            peerUserAvatar,
+            'IMAGE',
+            readCount + 1,
+          );
+
+          setMessage('');
+          setButtonDisabled(false);
+          updateReadCount(profile?.user?.id, commanId);
+        }
+      } else {
+        SHOW_TOAST(result?.data?.message, 'error');
+      }
+    } catch (error: any) {
+      setLoading(false);
+      SHOW_TOAST(error?.message ?? '', 'error');
+      console.log(error?.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    // chat found, so we need to get the messages
+    setCommanId(props.route.params.conversationId);
+
+    const unsubscribe = messagesListThread(
+      props.route.params.conversationId,
+    ).onSnapshot(querySnapshot => {
+      const formattedMessages = querySnapshot.docs.map((doc: any) => {
+        return {
+          _id: doc.id,
+          text: '',
+          createdAt: new Date().getTime(),
+          ...doc.data(),
+        };
+      });
+      setLoadingMessages(false);
+      if (formattedMessages.length > 0) {
+        updateReadCount(profile?.user?.id, commanId);
+      }
+      setMessages(formattedMessages.reverse());
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  const handleSendMessage = async () => {
+    if (!message.trim()) {
+      SHOW_TOAST('Please enter a message', 'error');
+      return;
+    }
+    setButtonDisabled(true);
+
+    if (!profile?.user?.id || !commanId) {
+      throw new Error('Chat not initialized');
+    }
+    const readCount = await getReadCount(peerUserId, commanId);
+
+    userMessage(
+      profile?.user?.id,
+      profile?.user?.first_name || 'User',
+      peerUserId,
+      peerUserName,
+      commanId,
+      message,
+      [],
+      profile?.user?.profile_photo_url || '',
+      peerUserAvatar,
+      'TEXT',
+      readCount + 1,
+    );
+    setMessage('');
+    setButtonDisabled(false);
+    await updateReadCount(profile?.user?.id, commanId);
+  };
+
+  const renderMessage = ({item}: {item: any}) => {
+    const isMessageMe = item.senderId === profile?.user?.id;
+    const currentUserAvatar = profile?.user?.profile_photo_url;
+    switch (item.type) {
+      case 'TEXT':
+        return (
+          <View
+            style={[
+              styles(theme).messageRow,
+              isMessageMe
+                ? styles(theme).messageRowRight
+                : styles(theme).messageRowLeft,
+            ]}>
+            {!isMessageMe && (
+              <Image
+                style={styles(theme).userProfilePic}
+                source={
+                  peerUserAvatar
+                    ? {uri: peerUserAvatar}
+                    : IMAGES.user_placeholder
+                }
+              />
+            )}
+            <View
+              style={[
+                styles(theme).messageContainer,
+                isMessageMe
+                  ? styles(theme).selfBubble
+                  : styles(theme).peerBubble,
+              ]}>
+              <Text
+                size={getScaleSize(16)}
+                font={FONTS.Lato.SemiBold}
+                color={isMessageMe ? theme.white : theme._818285}>
+                {item?.text}
+              </Text>
+              <Text
+                size={getScaleSize(10)}
+                font={FONTS.Lato.Regular}
+                color={isMessageMe ? theme.white : theme._ACADAD}
+                style={[styles(theme).messageTime]}>
+                {formatTimestamp(item.createdAt)}
+              </Text>
+            </View>
+            {isMessageMe && (
+              <Image
+                style={styles(theme).userProfilePic}
+                source={
+                  currentUserAvatar
+                    ? {uri: currentUserAvatar}
+                    : IMAGES.user_placeholder
+                }
+              />
+            )}
+          </View>
+        );
+      case 'IMAGE':
+        return (
+          <View
+            style={[
+              styles(theme).messageRow,
+              isMessageMe
+                ? styles(theme).messageRowRight
+                : styles(theme).messageRowLeft,
+            ]}>
+            {item.images.length === 1 ? (
+              <Pressable
+                style={{
+                  flexDirection: 'row',
+                  gap: getScaleSize(10),
+                  backgroundColor: theme._F5F5F5,
+                  padding: getScaleSize(10),
+                  borderRadius: getScaleSize(10),
+                }}
+                onPress={() => {
+                  props.navigation.navigate(
+                    SCREENS.ImageDetailsScreen.identifier,
+                    {
+                      itemData: item.images[0],
+                    },
+                  );
+                }}>
+                <Image
+                  source={{uri: item.images[0]}}
+                  style={styles(theme).image}
+                />
+              </Pressable>
+            ) : item.images.length === 2 ? (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  gap: getScaleSize(10),
+                  backgroundColor: theme._F5F5F5,
+                  padding: getScaleSize(10),
+                  borderRadius: getScaleSize(10),
+                }}>
+                <Pressable
+                  onPress={() => {
+                    props.navigation.navigate(
+                      SCREENS.ImageDetailsScreen.identifier,
+                      {
+                        itemData: item.images[0],
+                      },
+                    );
+                  }}>
+                  <Image
+                    source={{uri: item.images[0]}}
+                    style={styles(theme).image}
+                  />
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    props.navigation.navigate(
+                      SCREENS.ImageDetailsScreen.identifier,
+                      {
+                        itemData: item.images[1],
+                      },
+                    );
+                  }}>
+                  <Image
+                    source={{uri: item.images[1]}}
+                    style={styles(theme).image}
+                  />
+                </Pressable>
+              </View>
+            ) : item.images.length === 3 ? (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  gap: getScaleSize(10),
+                  backgroundColor: theme._F5F5F5,
+                  padding: getScaleSize(10),
+                  borderRadius: getScaleSize(10),
+                }}>
+                <View style={{gap: getScaleSize(10)}}>
+                  <Pressable
+                    onPress={() => {
+                      props.navigation.navigate(
+                        SCREENS.ImageDetailsScreen.identifier,
+                        {
+                          itemData: item.images[0],
+                        },
+                      );
+                    }}>
+                    <Image
+                      source={{uri: item.images[0]}}
+                      style={styles(theme).image}
+                    />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => {
+                      props.navigation.navigate(
+                        SCREENS.ImageDetailsScreen.identifier,
+                        {
+                          itemData: item.images[1],
+                        },
+                      );
+                    }}>
+                    <Image
+                      source={{uri: item.images[1]}}
+                      style={styles(theme).image}
+                    />
+                  </Pressable>
+                </View>
+                <View style={{gap: getScaleSize(10)}}>
+                  <Pressable
+                    onPress={() => {
+                      props.navigation.navigate(
+                        SCREENS.ImageDetailsScreen.identifier,
+                        {
+                          itemData: item.images[2],
+                        },
+                      );
+                    }}>
+                    <Image
+                      source={{uri: item.images[2]}}
+                      style={styles(theme).image}
+                    />
+                  </Pressable>
+                </View>
+              </View>
+            ) : item.images.length === 4 ? (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  gap: getScaleSize(10),
+                  backgroundColor: theme._F5F5F5,
+                  padding: getScaleSize(10),
+                  borderRadius: getScaleSize(10),
+                }}>
+                <View style={{gap: getScaleSize(10)}}>
+                  <Pressable
+                    onPress={() => {
+                      props.navigation.navigate(
+                        SCREENS.ImageDetailsScreen.identifier,
+                        {
+                          itemData: item.images[0],
+                        },
+                      );
+                    }}>
+                    <Image
+                      source={{uri: item.images[0]}}
+                      style={styles(theme).image}
+                    />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => {
+                      props.navigation.navigate(
+                        SCREENS.ImageDetailsScreen.identifier,
+                        {
+                          itemData: item.images[1],
+                        },
+                      );
+                    }}>
+                    <Image
+                      source={{uri: item.images[1]}}
+                      style={styles(theme).image}
+                    />
+                  </Pressable>
+                </View>
+                <View style={{gap: getScaleSize(10)}}>
+                  <Pressable
+                    onPress={() => {
+                      props.navigation.navigate(
+                        SCREENS.ImageDetailsScreen.identifier,
+                        {
+                          itemData: item.images[2],
+                        },
+                      );
+                    }}>
+                    <Image
+                      source={{uri: item.images[2]}}
+                      style={styles(theme).image}
+                    />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => {
+                      props.navigation.navigate(
+                        SCREENS.ImageDetailsScreen.identifier,
+                        {
+                          itemData: item.images[3],
+                        },
+                      );
+                    }}>
+                    <Image
+                      source={{uri: item.images[3]}}
+                      style={styles(theme).image}
+                    />
+                  </Pressable>
+                </View>
+              </View>
+            ) : null}
+          </View>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView
+      style={styles(theme).container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={{flex: 1}}>
+          <StatusBar
+            barStyle="dark-content"
+            backgroundColor={theme.white}
+            translucent={false}
+          />
+          <SafeAreaView style={styles(theme).hearderContainer}>
+            <TouchableOpacity
+              style={styles(theme).backImage}
+              activeOpacity={1}
+              onPress={() => {
+                props.navigation.goBack();
+              }}>
+              <Image
+                style={styles(theme).backImage}
+                source={IMAGES.back_black}
+              />
+            </TouchableOpacity>
+            <Image
+              style={styles(theme).userImage}
+              source={
+                peerUserAvatar ? {uri: peerUserAvatar} : IMAGES.user_placeholder
+              }
+            />
+            <View style={styles(theme).headerDetails}>
+              <Text
+                size={getScaleSize(16)}
+                font={FONTS.Lato.Bold}
+                color={theme._2B2B2B}>
+                {peerUserName || STRING.unknown_user}
+              </Text>
+              <Text
+                size={getScaleSize(14)}
+                font={FONTS.Lato.Medium}
+                color={theme._2E7D32}>
+                {'Available'}
+              </Text>
+            </View>
+          </SafeAreaView>
+          <View style={styles(theme).messagesWrapper}>
+            {loadingMessages ? (
+              <View style={styles(theme).loaderContainer}>
+                <ActivityIndicator size="small" color={theme.primary} />
+              </View>
+            ) : (
+              <FlatList
+                data={messages}
+                renderItem={renderMessage}
+                keyExtractor={item => item.id}
+                contentContainerStyle={messageListContentStyle}
+                showsVerticalScrollIndicator={false}
+              />
+            )}
+          </View>
+          <View style={styles(theme).sendMessageContainer}>
+            {/* <Image style={styles(theme).microphoneImage} source={IMAGES.mic} /> */}
+            <TextInput
+              style={styles(theme).searchInput}
+              placeholderTextColor={'#939393'}
+              placeholder={STRING.Sendamessagehere}
+              value={message}
+              onChangeText={setMessage}
+              multiline
+            />
+            <Pressable
+              onPress={() => {
+                handleChoosePhoto();
+              }}
+              style={styles(theme).imageContainer}>
+              <Image source={IMAGES.attachment} style={styles(theme).image1} />
+            </Pressable>
+            <TouchableOpacity
+              style={styles(theme).sendButtonWrapper}
+              disabled={buttonDisabled || !message.trim()}
+              onPress={handleSendMessage}>
+              <Image
+                style={[
+                  styles(theme).microphoneImage,
+                  (buttonDisabled || !message.trim()) &&
+                    styles(theme).disabledSendIcon,
+                ]}
+                source={IMAGES.message_send}
+              />
+            </TouchableOpacity>
+          </View>
+          {loading && (
+            <View style={styles(theme).loaderContainer}>
+              <ActivityIndicator size="small" color={theme.primary} />
+            </View>
+          )}
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
+  );
+}
+
+const formatTimestamp = (
+  timestamp?: FirebaseFirestoreTypes.Timestamp | null,
+) => {
+  if (!timestamp) {
+    return '';
+  }
+  const date = timestamp.toDate
+    ? timestamp.toDate()
+    : new Date(timestamp as any);
+  return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+};
+
+const styles = (theme: ThemeContextType['theme']) =>
+  StyleSheet.create({
+    container: {flex: 1, backgroundColor: theme.white},
+    hearderContainer: {
+      paddingVertical: getScaleSize(12),
+      flexDirection: 'row',
+      marginHorizontal: getScaleSize(22),
+    },
+    sheetContainer: {
+      borderTopLeftRadius: getScaleSize(24),
+      borderTopRightRadius: getScaleSize(24),
+      paddingVertical: getScaleSize(20),
+      height: 'auto',
+      paddingHorizontal: getScaleSize(24),
+    },
+    headerDetails: {
+      alignSelf: 'center',
+      marginLeft: getScaleSize(12),
+      gap: getScaleSize(4),
+    },
+    backImage: {
+      height: getScaleSize(32),
+      width: getScaleSize(32),
+      alignSelf: 'center',
+    },
+    userImage: {
+      height: getScaleSize(50),
+      width: getScaleSize(50),
+      borderRadius: getScaleSize(30),
+      marginLeft: getScaleSize(8),
+    },
+    deviderView: {
+      width: '100%',
+      height: 1,
+      backgroundColor: '#F5F5F5',
+    },
+    messagesWrapper: {
+      flex: 1,
+      paddingHorizontal: getScaleSize(16),
+    },
+    loaderContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      top: 0,
+    },
+    sendMessageContainer: {
+      marginHorizontal: getScaleSize(24),
+      marginBottom: getScaleSize(17),
+      flexDirection: 'row',
+      paddingVertical: getScaleSize(16),
+      paddingHorizontal: getScaleSize(20),
+      borderRadius: getScaleSize(22),
+      backgroundColor: theme._F6F7F7,
+    },
+    image: {
+      height: getScaleSize(100),
+      width: getScaleSize(100),
+      borderRadius: getScaleSize(10),
+    },
+    negotiateButton: {
+      alignSelf: 'center',
+      marginRight: getScaleSize(12),
+      paddingHorizontal: getScaleSize(12),
+      paddingVertical: getScaleSize(8),
+      borderRadius: getScaleSize(10),
+      backgroundColor: theme.white,
+      borderWidth: 1,
+      borderColor: theme.primary,
+    },
+    microphoneImage: {
+      height: getScaleSize(24),
+      width: getScaleSize(24),
+      alignSelf: 'center',
+    },
+    searchInput: {
+      fontFamily: FONTS.Lato.Regular,
+      fontSize: getScaleSize(16),
+      color: theme.black,
+      marginLeft: getScaleSize(12),
+      flex: 1.0,
+      maxHeight: getScaleSize(80),
+      paddingTop: 0,
+    },
+    userProfilePic: {
+      height: getScaleSize(32),
+      width: getScaleSize(32),
+      borderRadius: getScaleSize(16),
+      alignSelf: 'flex-end',
+    },
+    messageContainer: {
+      paddingVertical: getScaleSize(10),
+      paddingHorizontal: getScaleSize(17),
+      borderRadius: getScaleSize(16),
+      maxWidth: '75%',
+    },
+    selfBubble: {
+      backgroundColor: theme.primary,
+      marginLeft: getScaleSize(40),
+      marginRight: getScaleSize(12),
+    },
+    peerBubble: {
+      backgroundColor: '#F5F5F5',
+      marginLeft: getScaleSize(12),
+      marginRight: getScaleSize(40),
+    },
+    messageTime: {
+      marginTop: getScaleSize(4),
+    },
+    messageRow: {
+      flexDirection: 'row',
+      marginBottom: getScaleSize(12),
+      alignItems: 'flex-end',
+    },
+    messageRowLeft: {
+      justifyContent: 'flex-start',
+    },
+    messageRowRight: {
+      justifyContent: 'flex-end',
+    },
+    sendButtonWrapper: {
+      marginRight: getScaleSize(12),
+      justifyContent: 'center',
+    },
+    disabledSendIcon: {
+      opacity: 0.5,
+    },
+    pricingBreakdownContainer: {
+      marginHorizontal: getScaleSize(16),
+      marginVertical: getScaleSize(12),
+      paddingHorizontal: getScaleSize(16),
+      paddingVertical: getScaleSize(16),
+      borderRadius: getScaleSize(12),
+      backgroundColor: theme._F5F5F5,
+    },
+
+    quoteCardContainer: {
+      width: '65%',
+      alignSelf: 'flex-end',
+      borderRadius: getScaleSize(16),
+      padding: getScaleSize(8),
+      backgroundColor: theme._F5F5F5,
+      marginBottom: getScaleSize(10),
+    },
+    negotiationCard: {
+      width: '65%',
+      alignSelf: 'flex-start',
+      padding: getScaleSize(8),
+      borderRadius: getScaleSize(16),
+      backgroundColor: theme._F5F5F5,
+      marginBottom: getScaleSize(10),
+    },
+    pricingRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: getScaleSize(8),
+    },
+    offersHeaderRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: getScaleSize(2),
+    },
+    offerRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: getScaleSize(6),
+    },
+    pricingRowSeparator: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      borderTopWidth: 1,
+      borderTopColor: theme._D5D5D5,
+      paddingTop: getScaleSize(12),
+      marginTop: getScaleSize(8),
+    },
+    editOfferButton: {
+      height: getScaleSize(44),
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: getScaleSize(8),
+      backgroundColor: theme.white,
+    },
+    offerInputWrapper: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: getScaleSize(8),
+      paddingHorizontal: getScaleSize(12),
+      borderRadius: getScaleSize(10),
+      backgroundColor: theme.white,
+      height: getScaleSize(44),
+    },
+    offerTextInput: {
+      flex: 1,
+      marginLeft: getScaleSize(8),
+      fontFamily: FONTS.Lato.Medium,
+      fontSize: getScaleSize(16),
+      color: theme._424242,
+      padding: 0,
+    },
+    actionRow: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      marginTop: getScaleSize(10),
+    },
+    actionButtonPrimary: {
+      paddingHorizontal: getScaleSize(16),
+      paddingVertical: getScaleSize(10),
+      borderRadius: getScaleSize(12),
+      backgroundColor: theme.primary,
+    },
+    actionButtonSecondary: {
+      paddingHorizontal: getScaleSize(12),
+      paddingVertical: getScaleSize(8),
+      borderRadius: getScaleSize(10),
+      backgroundColor: theme.white,
+      borderWidth: 1,
+      borderColor: theme.primary,
+      marginRight: getScaleSize(8),
+    },
+    imageContainer: {
+      alignItems: 'center',
+      marginRight: getScaleSize(12),
+      justifyContent: 'center',
+    },
+    image1: {
+      width: getScaleSize(24),
+      height: getScaleSize(24),
+    },
+  });
