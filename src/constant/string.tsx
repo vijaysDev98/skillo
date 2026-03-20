@@ -274,7 +274,7 @@ export const useString = () => {
     Quote: 'Quote',
     RecentTasks: 'Recent Tasks',
     ServicePreview: 'Service Preview',
-    TaskDetails: 'Task Details',
+    // TaskDetails: 'Task Details',
     Aboutclient: 'About client',
     Addquoteamount: 'Add quote amount',
     EnterQuoteAmount: 'Enter Quote Amount',

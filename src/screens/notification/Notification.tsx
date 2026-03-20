@@ -567,7 +567,7 @@ export default function Notification(props: any) {
         height={getScaleSize(450)}
         // description={STRING.please_confirm_that_the_expert_has_arrived_at_the_service_location_Do_you_acknowledge_their_arrival}
         title={STRING.please_confirm_that_the_expert_has_arrived_at_the_service_location_Do_you_acknowledge_their_arrival}
-        buttonTitle={STRING.yes_i_confirm}
+        buttonTitle={STRING.Confirm}
         secondButtonTitle={STRING.not_arrived}
         security_Code={selectedItem?.service_code?.replace(/\*/g, '') ?? '0'}
         onPressSecondButton={() => {

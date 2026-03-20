@@ -828,6 +828,73 @@ export default function RequestDetails(props: any) {
           </View>
         </View>
 
+        {type == "Track Details" && (
+          <>
+          <Text
+          font={FONTS.Lato.SemiBold}
+          color={theme.primaryText}
+          size={getScaleSize(16)}
+          style={{ marginTop: getScaleSize(16) }}
+        >
+          {"Payment Breakdown"}
+        </Text>
+        <View style={styles(theme).informationContainer}>
+          <View style={{
+      flexDirection: 'row',
+    }}>
+            <Text
+              style={{ flex: 1.0 }}
+              size={getScaleSize(14)}
+              font={FONTS.Lato.SemiBold}
+              color={theme._8C8C8C}>
+              {STRING.FinalizedQuoteAmount}
+            </Text>
+            <Text
+              size={getScaleSize(14)}
+              font={FONTS.Lato.SemiBold}
+              color={theme._404040}>
+              {`P${"350" ?? 0}`}
+            </Text>
+          </View>
+          <View style={{
+      flexDirection: 'row',
+    }}>
+            <Text
+              style={{ flex: 1.0 }}
+              size={getScaleSize(14)}
+              font={FONTS.Lato.SemiBold}
+              color={theme._8C8C8C}>
+              {`${STRING.PlatformFee} (10%)`}
+            </Text>
+            <Text
+              size={getScaleSize(14)}
+              font={FONTS.Lato.SemiBold}
+              color={theme._404040}>
+              {`P${"35"}`}
+            </Text>
+          </View>
+          <View style={styles(theme).dotView} />
+          <View style={{
+      flexDirection: 'row',
+    }}>
+            <Text
+              style={{ flex: 1.0 }}
+              size={getScaleSize(18)}
+              font={FONTS.Lato.Bold}
+              color={theme.primaryText}>
+              {STRING.Total}
+            </Text>
+            <Text
+              size={getScaleSize(20)}
+              font={FONTS.Lato.SemiBold}
+              color={theme.primary}>
+              {`P${"45" ?? 0}`}
+            </Text>
+          </View>
+        </View>
+</>
+        )}
+
         {type !== "Track Details" && (
           <>
             <View style={{ marginVertical: getScaleSize(24) }}>
@@ -2129,9 +2196,9 @@ const styles = (theme: ThemeContextType['theme']) =>
     dotView: {
       // flex:1.0,
       borderStyle: 'dashed',
-      borderColor: theme.primary,
+      borderColor: theme._D9D9D9,
       borderWidth: 1,
-      marginTop: getScaleSize(8),
+      marginVertical: getScaleSize(8),
     },
     modalOverlay: {
       flex: 1,

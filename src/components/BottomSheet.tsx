@@ -203,32 +203,56 @@ export default function BottomSheet(props: BottomSheetProps) {
                     <View style={styles(theme).mainContainer}>
                         <Image source={icon} style={[styles(theme).alartIcon, { marginBottom: getScaleSize(12) }]} />
                         <Text
-                            size={getScaleSize(22)}
-                            font={FONTS.Lato.SemiBold}
+                            size={getScaleSize(14)}
+                            font={FONTS.Lato.Medium}
                             align="center"
-                            color={theme._555555}>
+                            color={theme.primaryText}>
                             {title}
                         </Text>
                         <View style={styles(theme).informationView}>
                             <Text
                                 font={FONTS.Lato.Medium}
                                 size={getScaleSize(16)}
-                                color={theme._2C6587} >
+                                color={theme._323232} >
                                 {STRING.SecurityCode}
                             </Text>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: getScaleSize(40), marginTop: getScaleSize(20) }}>
-                                {security_Code.split('').map((char: any, index: any) => (
-                                    <View key={index} style={{ marginVertical: getScaleSize(10) }} >
-                                        <Text
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: getScaleSize(6) }}>
+                                {/* {security_Code.split('').map((char: any, index: any) => ( */}
+                                {"123456789".split('').map((char: any, index: any) => (
+                                    <View key={index} style={{
+                                        marginVertical: getScaleSize(10),
+                                        borderWidth: 1,
+                                        borderColor: theme._B3B3B3,
+                                        paddingHorizontal: getScaleSize(11.11),
+                                        paddingVertical: getScaleSize(5),
+                                        borderRadius: getScaleSize(12)
+                                    }} >
+                                        {index < 6 ? <Text
                                             font={FONTS.Lato.SemiBold}
                                             size={getScaleSize(16)}
                                             align="center"
                                             color={theme._0F232F} >
                                             {char}
-                                        </Text>
+                                        </Text> :
+                                            <Text
+                                                font={FONTS.Lato.SemiBold}
+                                                size={getScaleSize(16)}
+                                                align="center"
+                                                color={theme._0F232F} >
+                                                {"*"}
+                                            </Text>
+                                        }
+
                                     </View>
                                 ))}
                             </View>
+                            <Text
+                                font={FONTS.Lato.Regular}
+                                size={getScaleSize(12)}
+                                color={theme._555555}
+                            >
+                                {"Note: Final 3 digits will be given to you on service date"}
+                            </Text>
                         </View>
                         <Text
                             size={getScaleSize(22)}
@@ -353,7 +377,6 @@ export default function BottomSheet(props: BottomSheetProps) {
 
                     </>
                 }
-
             </SafeAreaView>
         </RBSheet >
     )
@@ -406,14 +429,14 @@ const styles = (theme: ThemeContextType['theme']) =>
             paddingHorizontal: getScaleSize(20),
             paddingVertical: getScaleSize(16),
             borderWidth: 1,
-            borderColor: theme._E6E6E6,
+            borderColor: theme._D9D9D9,
         },
         locationIcon: {
             width: getScaleSize(24),
             height: getScaleSize(24),
             marginRight: getScaleSize(12),
             marginTop: getScaleSize(5),
-            tintColor:theme.primary
+            tintColor: theme.primary
         },
         addressView: {
             flexDirection: 'row',

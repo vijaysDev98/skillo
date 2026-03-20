@@ -352,10 +352,6 @@ export const SCREENS = {
     identifier: 'ProvideRequest',
     component: ProvideRequest,
   },
-  TrackDetails:{
-    identifier: 'TrackDetails',
-    component: TrackDetails,
-  }
 };
 
 export const TABS = {
