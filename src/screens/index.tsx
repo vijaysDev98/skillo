@@ -76,7 +76,7 @@ import AddAdress from './auth/AddAdress';
 import VerificationDetails from './auth/VerificationDetails';
 import HomeAddServices from './home/HomeAddServices';
 import ProvideRequest from './request/ProvideRequest';
-import TrackDetails from './request/TrackDetails';
+import RaiseDispute from './request/RaiseDispute';
 
 export const SCREENS = {
   Splash: {
@@ -352,6 +352,10 @@ export const SCREENS = {
     identifier: 'ProvideRequest',
     component: ProvideRequest,
   },
+  RaiseDispute:{
+    identifier: 'RaiseDispute',
+    component: RaiseDispute,
+  }
 };
 
 export const TABS = {

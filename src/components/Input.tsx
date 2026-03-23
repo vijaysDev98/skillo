@@ -44,6 +44,7 @@ interface InputProps {
   isDropDown?: boolean;
   onDropDownPress?: () => void;
   mainContinerStyle?: StyleProp<ViewStyle>;
+  isRightComponent?:any
 }
 
 function Input(props: InputProps & TextInputProps) {
@@ -67,8 +68,8 @@ function Input(props: InputProps & TextInputProps) {
     onPressQuantityAdd,
     isDropDown,
     onDropDownPress,
-    inputTitleSize
-
+    inputTitleSize,
+isRightComponent
   } = props;
 
   const { theme } = useContext<any>(ThemeContext);
@@ -229,8 +230,10 @@ function Input(props: InputProps & TextInputProps) {
                 />
               </Pressable>
             )}
+             {isRightComponent && isRightComponent()}
           </Pressable>
         }
+     
       </View>
       {isError && (
         <Text

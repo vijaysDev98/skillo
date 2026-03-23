@@ -29,13 +29,13 @@ const SearchComponent = (props: any) => {
   const {theme} = useContext(ThemeContext);
 
   return (
-    <View style={styles(theme).searchView}>
-      <View style={styles(theme).searchBox}>
+    <View style={[styles(theme).searchView,props.searchViewStyle]}>
+      <View style={[styles(theme).searchBox,props.searchBoxStyle]}>
         <Image style={styles(theme).searchImage} source={IMAGES.search} />
         <TextInput
-          style={styles(theme).searchInput}
-          placeholderTextColor={'#939393'}
-          placeholder={STRING.Search}
+          style={[styles(theme).searchInput,props.searchInputStyle]}
+          placeholderTextColor={props.placeholderTextColor || '#939393'}
+          placeholder={props.placeholder || STRING.Search}
           value={props.value}
           onChangeText={text => props.onChangeText(text)}
         />
@@ -50,15 +50,15 @@ const SearchComponent = (props: any) => {
           </TouchableOpacity>
         )}
       </View>
-      {/* <TouchableOpacity
-        onPress={props.onPressMicrophone}
-        style={styles(theme).microPhoneContainer}>
-        <Image
-          style={styles(theme).microPhoneImage}
-          source={IMAGES.microphone_new}
-        />
-      </TouchableOpacity> */}
-    </View>
+    //   {/* <TouchableOpacity
+    //     onPress={props.onPressMicrophone}
+    //     style={styles(theme).microPhoneContainer}>
+    //     <Image
+    //       style={styles(theme).microPhoneImage}
+    //       source={IMAGES.microphone_new}
+    //     />
+    //   </TouchableOpacity> */}
+     </View>
   );
 };
 

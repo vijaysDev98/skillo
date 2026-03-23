@@ -1,4 +1,4 @@
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import React, { useContext } from 'react'
 import { ThemeContext, ThemeContextType } from '../context/ThemeProvider';
 import RBSheet from 'react-native-raw-bottom-sheet';
@@ -17,15 +17,90 @@ interface UploadDocumentsSheetProps {
     onPressDocument?: any,
     certificate?: any
     kbisExtract?: any
-    addressProof?: any
+    addressProof?: any,
+    documents?: any;
+    uploadDocData?: any;
 }
 
 export default function UploadDocumentsSheet(props: UploadDocumentsSheetProps) {
     const { theme } = useContext<any>(ThemeContext);
     const STRING = useString();
 
-    const { bottomSheetRef, height, onPressDocument, buttonTitle, onPressButton, certificate, kbisExtract, addressProof } = props;
+    const { bottomSheetRef,
+        height, onPressDocument, buttonTitle, onPressButton, certificate, kbisExtract, addressProof, uploadDocData, documents } = props;
 
+    const UploadDocBox = ({
+        item,
+        doc,
+        onPressDocument,
+    }: {
+        item: any;
+        doc: any;
+        onPressDocument: any;
+    }) => {
+        return (
+            <>
+                <Text
+                    size={getScaleSize(17)}
+                    font={FONTS.Lato.Medium}
+                    color={theme._555555}>
+                    {item.title}
+                </Text>
+
+                {/* helper text */}
+                {item.errorText && (
+                    <Text
+                        size={getScaleSize(11)}
+                        font={FONTS.Lato.Regular}
+                        color="red">
+                        {item.errorText}
+                    </Text>
+                )}
+
+                <TouchableOpacity
+                    style={[
+                        styles(theme).uploadButton,
+                        {
+                            paddingVertical:
+                                doc?.length > 0 ? getScaleSize(12) : getScaleSize(24),
+                            borderColor: doc?.error ? 'red' : theme._818285,
+                        },
+                    ]}
+                    onPress={() => onPressDocument(item.key)}>
+
+                    {doc?.length > 0 ? (
+                        <Image
+                            source={{ uri: doc?.[0]?.uri }}
+                            style={styles(theme).imageIcon}
+                        />
+                    ) : (
+                        <>
+                            <Image
+                                style={styles(theme).attachmentIcon}
+                                source={IMAGES.upload_attachment}
+                            />
+                            <Text
+                                size={getScaleSize(12)}
+                                font={FONTS.Lato.Regular}
+                                color={theme._818285}>
+                                upload from device
+                            </Text>
+                        </>
+                    )}
+                </TouchableOpacity>
+
+                {/* error message */}
+                {doc?.error && (
+                    <Text
+                        size={getScaleSize(11)}
+                        color="red"
+                        style={{ marginBottom: getScaleSize(12) }}>
+                        {doc.error}
+                    </Text>
+                )}
+            </>
+        );
+    };
     return (
         <RBSheet
             ref={bottomSheetRef}
@@ -46,7 +121,7 @@ export default function UploadDocumentsSheet(props: UploadDocumentsSheetProps) {
             }}
             draggable={false}
             closeOnPressMask={true}>
-            <View style={styles(theme).container}>
+            <ScrollView style={styles(theme).container}>
                 <View style={styles(theme).mainContainer}>
                     <Image source={IMAGES.ic_upload_documents} style={styles(theme).alartIcon} />
                     <Text
@@ -57,7 +132,15 @@ export default function UploadDocumentsSheet(props: UploadDocumentsSheetProps) {
                         color={theme._2C6587}>
                         {STRING.upload_documents}
                     </Text>
-                    <Text
+                    {uploadDocData.map((item: any, index: number) => (
+                        <UploadDocBox
+                            key={item.id}
+                            item={item}
+                            doc={documents?.[item.key]}
+                            onPressDocument={onPressDocument}
+                        />
+                    ))}
+                    {/* <Text
                         size={getScaleSize(17)}
                         font={FONTS.Lato.Medium}
                         color={theme._555555}>
@@ -137,14 +220,14 @@ export default function UploadDocumentsSheet(props: UploadDocumentsSheetProps) {
                                 </Text>
                             </>
                         )}
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
                 <Button
                     title={buttonTitle}
                     style={{ marginTop: getScaleSize(8), marginBottom: getScaleSize(24), marginHorizontal: getScaleSize(24) }}
                     onPress={onPressButton}
                 />
-            </View>
+            </ScrollView>
         </RBSheet >
     )
 }

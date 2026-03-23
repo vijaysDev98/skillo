@@ -218,13 +218,37 @@ function RequestItem(props: any) {
     handleOnPress,
     status,
     address,
+    handleRaiseDispute,
+    handleRate,
+    handleDisputeStatus
   } = props;
 
   const { theme } = useContext(ThemeContext);
 
+  const { item, selectedFilter, isFromSearch } = props;
+
+  function getStatus(status: any) {
+    console.log("status===>>>", status)
+    if (status === 'open') {
+      return 'Open Proposal';
+    } else if (status === 'pending') {
+      return 'Responsed';
+    } else if (status === 'accepted') {
+      return 'Validation';
+    } else if (status === 'completed') {
+      return 'Completed';
+    } else if (status === 'cancelled') {
+      return 'Cancelled';
+    }
+    else if (status === 'expired') {
+      return 'Expired'
+    }
+  }
+  console.log("status", getStatus(status))
   return (
     <TouchableOpacity
       onPress={handleOnPress}
+      disabled={(item?.status?.toLowerCase() === 'expired' && status?.toLowerCase() === 'expired') ? true : false}
       style={styles(theme).container}
     >
       {/* ================= HEADER ================= */}
@@ -260,7 +284,8 @@ function RequestItem(props: any) {
             size={getScaleSize(10)}
             color={theme.primary}
           >
-            {status}
+            {/* {status} */}
+            {isFromSearch === true ? getStatus(status) : getStatus(status)}
           </Text>
         </View>
       </View>
@@ -328,7 +353,62 @@ function RequestItem(props: any) {
         >
           {address}
         </Text>
+
+
       </View>
+      {item?.status == "completed" && (
+        <>
+          {
+            item?.isDisputed == false ?
+              (
+                <View style={styles(theme).rowBtnContainer}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      handleRaiseDispute(item)
+                    }}
+                    style={[styles(theme).btnStyle, {
+                      backgroundColor: theme.white
+                    }]}
+                  >
+                    <Text
+                      size={getScaleSize(16)}
+                      font={FONTS.Lato.SemiBold}
+                      color={theme._EC613D}
+                    >{"Raise Dispute"}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      handleRate(item)
+                    }}
+                    style={styles(theme).btnStyle}
+                  >
+                    <Text
+                      size={getScaleSize(16)}
+                      font={FONTS.Lato.SemiBold}
+                      color={theme.white}
+                    >{"Rate"}</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  onPress={() => {
+                    handleDisputeStatus(item)
+                  }}
+                  style={[styles(theme).btnStyle, {
+                    width: "100%",
+                    marginTop: getScaleSize(20)
+                  }]}
+                >
+                  <Text
+                    size={getScaleSize(16)}
+                    font={FONTS.Lato.SemiBold}
+                    color={theme.white}
+                  >{"Dispute Status"}</Text>
+                </TouchableOpacity>
+              )
+          }
+        </>
+      )}
     </TouchableOpacity>
   );
 }
@@ -388,7 +468,7 @@ const styles = (theme: ThemeContextType['theme']) =>
     detailsContainer: {
       flexDirection: "row",
       alignItems: "center",
-      justifyContent:'space-between',
+      justifyContent: 'space-between',
       borderWidth: 0.5,
       borderColor: theme._D9D9D9,
       borderRadius: getScaleSize(6),
@@ -432,4 +512,19 @@ const styles = (theme: ThemeContextType['theme']) =>
       width: getScaleSize(24),
       tintColor: theme.primary,
     },
+    rowBtnContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: getScaleSize(20),
+      justifyContent: 'space-between'
+    },
+    btnStyle: {
+      paddingVertical: getScaleSize(14),
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme._EC613D,
+      borderRadius: getScaleSize(10),
+      width: "48%",
+      backgroundColor: theme.primary
+    }
   });

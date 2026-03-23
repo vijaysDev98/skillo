@@ -14,7 +14,7 @@ import { Header, ProgressView, RatingsReviewsItem, Text } from '../../components
 import { AuthContext, ThemeContext, ThemeContextType } from '../../context';
 
 //CONSTANTS
-import { getScaleSize, SHOW_TOAST, useString } from '../../constant';
+import { DummyData, getScaleSize, SHOW_TOAST, useString } from '../../constant';
 
 export default function RatingsReviews(props: any) {
 
@@ -30,9 +30,9 @@ export default function RatingsReviews(props: any) {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
 
-    useEffect(() => {
-        getRatingReviews()
-    }, [])
+    // useEffect(() => {
+    //     getRatingReviews()
+    // }, [])
 
     async function getRatingReviews() {
         try {
@@ -65,6 +65,10 @@ export default function RatingsReviews(props: any) {
             getRatingReviews();
         }
     }
+
+    useEffect(() => {
+        setRatingsReviews(DummyData.dummyRatingsReviews);
+    }, []);
 
     return (
         <View style={styles(theme).container}>

@@ -14,6 +14,7 @@ const professionalsData = [
         profileImage: IMAGES.dummyUser,
         quoteAmount: "P 300",
         currency: "P",
+        email:"bessie.cooper@example.com",
         canNegotiate: false,
     },
     {
@@ -22,6 +23,7 @@ const professionalsData = [
         profileImage: IMAGES.dummyUser,
         quoteAmount: "P 450",
         currency: "P",
+        email:"robert.fox@example.com",
         canNegotiate: true,
     },
 ];
@@ -174,7 +176,19 @@ const ProvideRequest = (props: any) => {
                                 color={theme.primaryText}
                             >{item.quoteAmount}</Text>
 
-                            <TouchableOpacity style={styles(theme).negotiateBtn}>
+                            <TouchableOpacity 
+                            onPress={()=>{
+                                props.navigation.navigate(SCREENS.NegotiationDetails.identifier, {
+                                            conversationId: item?.id,
+                                            peerUser: {
+                                              user_id: item?.id ?? '',
+                                              name: item?.name ?? '',
+                                              email: item?.email ?? '',
+                                              avatarUrl: item?.profileImage ?? '',
+                                            },
+                                          });
+                            }}
+                            style={styles(theme).negotiateBtn}>
                                 <Text
 
                                     font={FONTS.Lato.SemiBold}

@@ -92,8 +92,8 @@ const dummyAttachments = [
 export default function RequestDetails(props: any) {
   const STRING = useString();
   const { theme } = useContext<any>(ThemeContext);
-  const { item, type } = props.route.params ?? {};
-  const serviceId = props.route.params?.serviceId ?? '';
+  const { item, type, title } = props.route.params ?? {};
+  const {serviceId,isDisputed: isDisputedFromParams,serviceStatus} = props.route.params ?? '';
 
   console.log('serviceId==>', serviceId);
 
@@ -106,14 +106,17 @@ export default function RequestDetails(props: any) {
   const [serviceDetails, setServiceDetails] = useState<any>({});
   const [selectedCategory, setSelectedCategory] = useState(0);
   const [reason, setReason] = useState('');
-  const [status, setStatus] = useState<any>('');
+  const [status, setStatus] = useState<any>(serviceStatus);
   const [isStatus, setIsStatus] = useState(false);
   const [visibleTaskDetails, setVisibleTaskDetails] = useState(false);
   const [serviceAmount, setServiceAmount] = useState<any>({});
-  const [cancelServiceDetails, setCancelServiceDetails] = useState<any>(null);
+  const [cancelServiceDetails, setCancelServiceDetails] = useState<any>(serviceStatus === 'cancelled' ? item : null);
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [reviewRating, setReviewRating] = useState(false);
   const [attachments, setAttachments] = useState<any>([]);
+  const [cancelType,setCancelType] = useState("")
+
+  const [isDisputed, setIsDisputed] = useState(isDisputedFromParams || false);
 
   // const [paymentDetails, setPaymentDetails] = useState<any>({});
   // const [visibleModelWebView, setVisibleModelWebView] =
@@ -134,11 +137,11 @@ export default function RequestDetails(props: any) {
   //   }
   // }, [serviceId, item?.id, isFocused]);
 
-  // useEffect(() => {
-  //   if (cancelServiceDetails) {
-  //     cancelScheduledServicePopupRef.current.open();
-  //   }
-  // }, [cancelServiceDetails]);
+  useEffect(() => {
+    if (cancelServiceDetails) {
+      cancelScheduledServicePopupRef.current.open();
+    }
+  }, [cancelServiceDetails]);
 
   useEffect(() => {
     EventRegister.addEventListener('onPaymentCancel', (data: any) => {
@@ -546,29 +549,9 @@ export default function RequestDetails(props: any) {
     }
   }
 
-  return (
-    <View style={[styles(theme).container]}>
-      <Header
-        onBack={() => {
-          props.navigation.goBack();
-        }}
-        screenName={type ? type : STRING.ViewQuote}
-      />
-      <ScrollView
-        style={styles(theme).scrolledContainer}
-        contentContainerStyle={{
-          paddingBottom:
-            status === 'pending' || status === 'accepted'
-              ? getScaleSize(140)
-              : getScaleSize(40),
-        }}
-        showsVerticalScrollIndicator={false}>
-        <RecentSearchCard
-          image={IMAGES.furnitureAssemblyImg}
-          containerStyle={{ marginHorizontal: getScaleSize(0) }}
-          title="Furniture Assembly"
-        />
-
+  const JobDetails = ({ item }: { item?: any }) => {
+    return (
+      <>
         <Text
           font={FONTS.Lato.SemiBold}
           size={getScaleSize(16)}
@@ -620,6 +603,13 @@ export default function RequestDetails(props: any) {
           </View>
         </View>
 
+      </>
+    )
+  }
+
+  const QuoteAmount = () => {
+    return (
+      <>
         <Text
           font={FONTS.Lato.Medium}
           size={getScaleSize(16)}
@@ -643,41 +633,44 @@ export default function RequestDetails(props: any) {
             >Negotiate</Text>
           </TouchableOpacity>
         </View>
+      </>
+    )
+  }
 
-        {
-          type == "Track Details" && (
-            <View style={styles(theme).amountContainerCompleted}>
-              <Text
-                style={{ flex: 1.0 }}
-                size={getScaleSize(18)}
-                font={FONTS.Lato.Medium}
-                color={theme._323232}>
-                {STRING.SecurityCode}
-              </Text>
-              <FlatList
-                // data ={serviceDetails?.service_code?.split("")}
-                data={"123456789".split('')}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                renderItem={({ item, index }) => {
-                  return (
-                    <View
-                      style={[
-                        styles(theme).securityItemContainer,
-                        { marginLeft: index === 0 ? 0 : 6 },
-                      ]}>
-                      <Text
-                        style={{ flex: 1.0 }}
-                        size={getScaleSize(16)}
-                        font={FONTS.Lato.Medium}
-                        color={theme._323232}>
-                        {index < 6 ? item : "*"}
-                      </Text>
-                    </View>
-                  );
-                }}
-              />
-              {/* <View style={styles(theme).codeViewDirection}>
+  const SecurityCode = () => {
+    return (
+      <View style={styles(theme).amountContainerCompleted}>
+        <Text
+          style={{ flex: 1.0 }}
+          size={getScaleSize(18)}
+          font={FONTS.Lato.Medium}
+          color={theme._323232}>
+          {STRING.SecurityCode}
+        </Text>
+        <FlatList
+          // data ={serviceDetails?.service_code?.split("")}
+          data={"123456789".split('')}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item, index }) => {
+            return (
+              <View
+                style={[
+                  styles(theme).securityItemContainer,
+                  { marginLeft: index === 0 ? 0 : 6 },
+                ]}>
+                <Text
+                  style={{ flex: 1.0 }}
+                  size={getScaleSize(16)}
+                  font={FONTS.Lato.Medium}
+                  color={theme._323232}>
+                  {index < 6 ? item : "*"}
+                </Text>
+              </View>
+            );
+          }}
+        />
+        {/* <View style={styles(theme).codeViewDirection}>
               {serviceDetails?.service_code
                 ?.toString()
                 ?.split('')
@@ -697,1116 +690,65 @@ export default function RequestDetails(props: any) {
                   </View>
                 ))}
             </View> */}
-              <Text
-                style={{ flex: 1.0, marginTop: getScaleSize(12) }}
-                size={getScaleSize(11)}
-                font={FONTS.Lato.Regular}
-                color={theme._8C8C8C}>
-                {STRING.security_note}
-              </Text>
-            </View>
-          )
-        }
-
-
-        <View style={styles(theme).profileContainer}>
-          <View style={styles(theme).horizontalView}>
-            <Text
-              style={{ flex: 1.0 }}
-              size={getScaleSize(16)}
-              font={FONTS.Lato.SemiBold}
-              color={theme._8C8C8C}>
-              {STRING.Aboutprofessional}
-            </Text>
-            {/* <TouchableOpacity
-                activeOpacity={1}
-                style={styles(theme).likeIconContainer}
-                onPress={() => {
-                  if (serviceDetails?.provider?.is_favorate) {
-                    removeFavoriteProfessional();
-                  } else {
-                    addFavoriteProfessional();
-                  }
-                }}>
-                <Image
-                  style={styles(theme).likeIcon}
-                  source={
-                    serviceDetails?.provider?.is_favorate
-                      ? IMAGES.like
-                      : IMAGES.like_unfill
-                  }
-                />
-              </TouchableOpacity> */}
-          </View>
-          <View
-            style={[
-              styles(theme).horizontalView,
-              { marginTop: getScaleSize(16) },
-            ]}>
-            {serviceDetails?.provider?.profile_photo_url ? (
-              <Image
-                style={styles(theme).profilePicView}
-                resizeMode="cover"
-                source={{ uri: serviceDetails?.provider?.profile_photo_url }}
-              />
-            ) : (
-              <Image
-                style={styles(theme).profilePicView}
-                source={IMAGES.user_placeholder}
-              />
-            )}
-            <Text
-              style={{ alignSelf: 'center', marginLeft: getScaleSize(16) }}
-              size={getScaleSize(20)}
-              font={FONTS.Lato.SemiBold}
-              color={theme.primaryText}>
-              {serviceDetails?.provider?.full_name ?? 'Bessie Cooper'}
-            </Text>
-            {/* {serviceDetails?.provider?.is_verified && (
-                <Image
-                  style={{
-                    height: getScaleSize(25),
-                    width: getScaleSize(25),
-                    alignSelf: 'center',
-                    marginLeft: getScaleSize(6),
-                  }}
-                  source={IMAGES.verify}
-                />
-              )} */}
-          </View>
-          <View
-            style={[
-              styles(theme).horizontalView,
-              { marginTop: getScaleSize(16) },
-            ]}>
-            <TouchableOpacity
-              activeOpacity={1}
-              style={[
-                styles(theme).chatButton,
-                { marginRight: getScaleSize(6) },
-              ]}
-              onPress={() => {
-                const conversationId = buildThreadId(
-                  profile?.user?.id,
-                  serviceDetails?.provider?.id,
-                );
-                props.navigation.navigate(SCREENS.ChatDetails.identifier, {
-                  conversationId: conversationId,
-                  peerUser: {
-                    user_id: serviceDetails?.provider?.id,
-                    name: serviceDetails?.provider?.full_name,
-                    email: serviceDetails?.provider?.email,
-                    avatarUrl: serviceDetails?.provider?.profile_photo_url,
-                  },
-                });
-              }}>
-              <Text
-                size={getScaleSize(14)}
-                font={FONTS.Lato.Medium}
-                color={theme._EC613D}>
-                {STRING.Chat}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={1}
-              style={[styles(theme).newButton, { marginLeft: getScaleSize(6) }]}
-              onPress={() => {
-                props.navigation.navigate(
-                  SCREENS.OtherUserProfile.identifier,
-                  {
-                    item: serviceDetails?.provider,
-                  },
-                );
-              }}>
-              <Text
-                size={getScaleSize(14)}
-                font={FONTS.Lato.Medium}
-                color={theme.white}>
-                {STRING.ViewProfile}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {type == "Track Details" && (
-          <>
-          <Text
-          font={FONTS.Lato.SemiBold}
-          color={theme.primaryText}
-          size={getScaleSize(16)}
-          style={{ marginTop: getScaleSize(16) }}
-        >
-          {"Payment Breakdown"}
+        <Text
+          style={{ flex: 1.0, marginTop: getScaleSize(12) }}
+          size={getScaleSize(11)}
+          font={FONTS.Lato.Regular}
+          color={theme._8C8C8C}>
+          {STRING.security_note}
         </Text>
-        <View style={styles(theme).informationContainer}>
-          <View style={{
-      flexDirection: 'row',
-    }}>
-            <Text
-              style={{ flex: 1.0 }}
-              size={getScaleSize(14)}
-              font={FONTS.Lato.SemiBold}
-              color={theme._8C8C8C}>
-              {STRING.FinalizedQuoteAmount}
-            </Text>
-            <Text
-              size={getScaleSize(14)}
-              font={FONTS.Lato.SemiBold}
-              color={theme._404040}>
-              {`P${"350" ?? 0}`}
-            </Text>
-          </View>
-          <View style={{
-      flexDirection: 'row',
-    }}>
-            <Text
-              style={{ flex: 1.0 }}
-              size={getScaleSize(14)}
-              font={FONTS.Lato.SemiBold}
-              color={theme._8C8C8C}>
-              {`${STRING.PlatformFee} (10%)`}
-            </Text>
-            <Text
-              size={getScaleSize(14)}
-              font={FONTS.Lato.SemiBold}
-              color={theme._404040}>
-              {`P${"35"}`}
-            </Text>
-          </View>
-          <View style={styles(theme).dotView} />
-          <View style={{
-      flexDirection: 'row',
-    }}>
-            <Text
-              style={{ flex: 1.0 }}
-              size={getScaleSize(18)}
-              font={FONTS.Lato.Bold}
-              color={theme.primaryText}>
-              {STRING.Total}
-            </Text>
-            <Text
-              size={getScaleSize(20)}
-              font={FONTS.Lato.SemiBold}
-              color={theme.primary}>
-              {`P${"45" ?? 0}`}
-            </Text>
-          </View>
+      </View>
+    )
+  }
+
+  const AboutProfessional = () => {
+    return (
+      <View style={styles(theme).profileContainer}>
+        <View style={styles(theme).horizontalView}>
+          <Text
+            style={{ flex: 1.0 }}
+            size={getScaleSize(16)}
+            font={FONTS.Lato.SemiBold}
+            color={theme._8C8C8C}>
+            {STRING.Aboutprofessional}
+          </Text>
         </View>
-</>
-        )}
-
-        {type !== "Track Details" && (
-          <>
-            <View style={{ marginVertical: getScaleSize(24) }}>
-              <Text
-                font={FONTS.Lato.SemiBold}
-                size={getScaleSize(16)}
-              >Personalized short message</Text>
-              <View
-                style={{
-                  padding: getScaleSize(16),
-                  borderWidth: 1,
-                  borderColor: theme._D9D9D9,
-                  borderRadius: getScaleSize(12),
-                  marginTop: getScaleSize(16)
-                }}
-              >
-                <Text
-                  font={FONTS.Lato.Regular}
-                  size={getScaleSize(16)}
-                  color={theme._404040}
-                >{"Our skilled team will expertly assemble your furniture, ensuring every piece is put together with precision. We take pride in our attention to detail, so you can trust that your items will be ready for use in no time. Whether it's a complex wardrobe or a simple table, we handle it all with care and professionalism. Enjoy a hassle-free experience as we transform your space with our assembly services."}</Text>
-              </View>
-            </View>
-
-            <Text
-              size={getScaleSize(16)}
-              font={FONTS.Lato.SemiBold}
-              color={theme.primaryText}
-            >{"Supporting documents"}</Text>
-            <View style={[styles(theme).horizontalView, { justifyContent: 'space-between', gap: getScaleSize(18) }]}>
-              <UploadDocumentBox
-                icon={IMAGES.pdf_icon}
-                label='View Document'
-                containerStyle={{ flex: 1.0 }}
-                onPress={() => { }}
-              />
-              <UploadDocumentBox
-                icon={IMAGES.pdf_icon}
-                label='View Document'
-                containerStyle={{ flex: 1.0 }}
-                onPress={() => { }}
-              />
-            </View>
-            <Text
-              size={getScaleSize(16)}
-              font={FONTS.Lato.SemiBold}
-              color={theme.primaryText}
-            >{"Short videos"}</Text>
-            <View style={[styles(theme).horizontalView, {
-              flexWrap: "wrap", // 👈 IMPORTANT (wrap to next line)
-              justifyContent: "space-between",
-            }]}>
-              {
-                dummyAttachments.map((item: any, index: number) => {
-                  return (
-                    <View key={index} style={{
-                      width: "48%", // 👈 2 items per row
-                      marginBottom: getScaleSize(12),
-                    }}>
-                      <AttachmentItem isfromDocumant={true} item={item} key={index} />
-                    </View>
-                  )
-                })
-              }
-            </View>
-          </>)
-        }
-
-        {
-          type == "Track Details" && (
-            <>
-             {/* <View
-            style={[
-              styles(theme).profileContainer,
-              { paddingVertical: getScaleSize(26) },
-            ]}> */}
-            <TouchableOpacity
-              style={ [styles(theme).profileContainer,{flexDirection:"row"}]}
-              activeOpacity={1}
-              onPress={() => {
-                setIsStatus(!isStatus);
-              }}>
-              <Text
-                style={{ flex: 1.0 }}
-                size={getScaleSize(16)}
-                font={FONTS.Lato.Regular}
-                color={ isStatus ? theme.primaryText:theme._8C8C8C}>
-                {STRING.TaskStatus}
-              </Text>
-              <TouchableOpacity
-                style={{ height: getScaleSize(25), width: getScaleSize(24) }}
-                activeOpacity={1}
-                onPress={() => {
-                  setIsStatus(!isStatus);
-                }}>
-                <Image
-                  style={{ height: getScaleSize(25), width: getScaleSize(24) }}
-                  source={isStatus ? IMAGES.up : IMAGES.down}
-                />
-              </TouchableOpacity>
-            </TouchableOpacity>
-            
-          {/* </View> */}
-          {isStatus && (
-              <>
-                {/* <View style={styles(theme).devider}></View> */}
-                <View style={{ 
-                  marginTop: getScaleSize(8),
-                  borderWidth:1,
-                  borderRadius:getScaleSize(10),
-                  elevation:1,
-                  backgroundColor:theme.white,
-                  padding:getScaleSize(20),
-                  borderColor:theme._D9D9D9
-                   }}>
-                  {DummyData.serviceDetails?.lifecycle?.map(
-                    (item: any, index: number) => (
-                      <StatusItem
-                        key={index}
-                        item={item}
-                        index={index}
-                        securityCode={serviceDetails?.security_code ?? ''}
-                        isLast={index === serviceDetails?.lifecycle?.length - 1}
-                      />
-                    ),
-                  )}
-                </View>
-              </>
-            )}
-
-          {/* <View
-            style={[
-              styles(theme).profileContainer,
-              { paddingVertical: getScaleSize(26) },
-            ]}> */}
-            {/* <TouchableOpacity
-              style={{ flexDirection: 'row' }}
-              activeOpacity={1}
-              onPress={() => {
-                setVisibleTaskDetails(!visibleTaskDetails);
-              }}> */}
-
-                <TouchableOpacity
-              style={ [styles(theme).profileContainer,{flexDirection:"row"}]}
-              activeOpacity={1}
-              onPress={() => {
-                // setIsStatus(!isStatus);
-                 setVisibleTaskDetails(!visibleTaskDetails);
-              }}>
-                <Text
-                style={{ flex: 1.0 }}
-                size={getScaleSize(16)}
-                font={FONTS.Lato.Regular}
-                color={ isStatus ? theme.primaryText:theme._8C8C8C}>
-                {STRING.TaskDetails}
-              </Text>
-              <TouchableOpacity
-                style={{ height: getScaleSize(25), width: getScaleSize(24) }}
-                activeOpacity={1}
-                onPress={() => {
-                  setVisibleTaskDetails(!visibleTaskDetails);
-                }}>
-                <Image
-                  style={{ height: getScaleSize(25), width: getScaleSize(24) }}
-                  source={visibleTaskDetails ? IMAGES.up : IMAGES.down}
-                />
-              </TouchableOpacity>
-            </TouchableOpacity>
-            {visibleTaskDetails && (
-              <View style={{ 
-                  marginTop: getScaleSize(8),
-                  borderWidth:1,
-                  borderRadius:getScaleSize(10),
-                  elevation:1,
-                  backgroundColor:theme.white,
-                  padding:getScaleSize(20),
-                  borderColor:theme._D9D9D9
-                   }}>
-                <Text
-                  style={{ flex: 1.0 }}
-                  size={getScaleSize(16)}
-                  font={FONTS.Lato.Bold}
-                  color={theme._404040}>
-                  {STRING.Servicedescription}
-                </Text>
-                <Text
-                  style={{ flex: 1.0, marginTop: getScaleSize(16) }}
-                  size={getScaleSize(14)}
-                  font={FONTS.Lato.Medium}
-                  color={theme._404040}>
-                  {serviceDetails?.service_description ?? 'Transform your space with our expert furniture assembly services. Our skilled team will handle everything from unpacking to setup, ensuring your new pieces are perfectly assembled and ready for use. We specialize in a wide range of furniture types, including flat-pack items, complex modular systems, and custom installations. Enjoy a hassle-free experience as we take care of the details, allowing you to focus on enjoying your newly furnished area. Schedule your assembly today and let us help you create the perfect environment!'}
-                </Text>
-                <Text
-                  style={{
-                    flex: 1.0,
-                    marginTop: getScaleSize(20),
-                    marginBottom: getScaleSize(8),
-                  }}
-                  size={getScaleSize(18)}
-                  font={FONTS.Lato.SemiBold}
-                  color={'#424242'}>
-                  {STRING.Jobphotos}
-                </Text>
-                <FlatList
-                  data={dummyAttachments ?? []}
-                  numColumns={2}
-                  columnWrapperStyle={{ gap: getScaleSize(12) }}
-                  contentContainerStyle={{ gap: getScaleSize(12) }}
-                  keyExtractor={(item: any, index: number) => index.toString()}
-                  showsHorizontalScrollIndicator={false}
-                  renderItem={({ item }) => <AttachmentItem item={item} />}
-                />
-              </View>
-            )}
-          {/* </View> */}
-
-            </>
-          )
-        }
-        <View style={[styles(theme).horizontalView, {
-          marginTop: getScaleSize(100),
-          gap: getScaleSize(22),
-          marginBottom: getScaleSize(40)
-        }]}>
-          <TouchableOpacity
-            style={styles(theme).btnStyle}
-            onPress={() => {
-              cancelScheduledServicePopupRef.current.open();
-            }}
-          >
-            <Text
-              font={FONTS.Lato.SemiBold}
-              color={theme._EC613D}
-              size={getScaleSize(16)}
-            >{type == "Track Details" ? "Cancel Task" : "Reject"}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              if(type == "Track Details"){
-                
-              }else{
-                acceptRef.current.open()}
-              }}
-            style={[styles(theme).btnStyle, {
-              backgroundColor: theme.primary,
-            }]}
-          >
-            <Text
-              font={FONTS.Lato.SemiBold}
-              color={theme.white}
-              size={getScaleSize(16)}
-            >{type == "Track Details" ? "Chat" : "Accept"}</Text>
-          </TouchableOpacity>
-        </View>
-        {/* 
-        {(status === 'accepted' ||
-          status === 'completed' ||
-          status === 'cancelled') && (
-            <View style={styles(theme).amountContainerCompleted}>
-              <Text
-                style={{ flex: 1.0 }}
-                size={getScaleSize(18)}
-                font={FONTS.Lato.Medium}
-                color={theme._323232}>
-                {STRING.FinalizedQuoteAmount}
-              </Text>
-              <Text
-                style={{ flex: 1.0, marginTop: getScaleSize(8) }}
-                size={getScaleSize(27)}
-                font={FONTS.Lato.Bold}
-                color={theme._323232}>
-                {`€${serviceDetails?.total_renegotiated ?? 0}`}
-              </Text>
-            </View>
+        <View
+          style={[
+            styles(theme).horizontalView,
+            { marginTop: getScaleSize(16) },
+          ]}>
+          {serviceDetails?.provider?.profile_photo_url ? (
+            <Image
+              style={styles(theme).profilePicView}
+              resizeMode="cover"
+              source={{ uri: serviceDetails?.provider?.profile_photo_url }}
+            />
+          ) : (
+            <Image
+              style={styles(theme).profilePicView}
+              source={IMAGES.user_placeholder}
+            />
           )}
-        {status === 'accepted' && (
-          <View style={styles(theme).amountContainerCompleted}>
-            <Text
-              style={{ flex: 1.0 }}
-              size={getScaleSize(18)}
-              font={FONTS.Lato.Medium}
-              color={theme._323232}>
-              {STRING.SecurityCode}
-            </Text>
-            <FlatList
-              data={serviceDetails?.service_code?.split('')}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              renderItem={({ item, index }) => {
-                return (
-                  <View
-                    style={[
-                      styles(theme).securityItemContainer,
-                      { marginLeft: index === 0 ? 0 : 6 },
-                    ]}>
-                    <Text
-                      style={{ flex: 1.0 }}
-                      size={getScaleSize(18)}
-                      font={FONTS.Lato.Medium}
-                      color={theme._323232}>
-                      {item}
-                    </Text>
-                  </View>
-                );
-              }}
-            />
-            <View style={styles(theme).codeViewDirection}>
-              {serviceDetails?.service_code
-                ?.toString()
-                ?.split('')
-                ?.map((digit: string, index: number) => (
-                  <View
-                    key={index}
-                    style={[
-                      styles(theme).securityItemContainer,
-                      { marginLeft: index === 0 ? 0 : 3 },
-                    ]}>
-                    <Text
-                      size={getScaleSize(18)}
-                      font={FONTS.Lato.Medium}
-                      color={theme._323232}>
-                      {digit}
-                    </Text>
-                  </View>
-                ))}
-            </View>
-            <Text
-              style={{ flex: 1.0, marginTop: getScaleSize(12) }}
-              size={getScaleSize(11)}
-              font={FONTS.Lato.Regular}
-              color={'#424242'}>
-              {STRING.security_note}
-            </Text>
-          </View>
-        )}
-        {status === 'pending' && (
-          <View>
-            <Text
-              style={{ marginTop: getScaleSize(24) }}
-              size={getScaleSize(18)}
-              font={FONTS.Lato.SemiBold}
-              color={theme._323232}>
-              {STRING.QuoteAmount}
-            </Text>
-            <View style={styles(theme).amountContainerQuoteAmount}>
-              <Text
-                style={{ flex: 1.0, alignSelf: 'center' }}
-                size={getScaleSize(27)}
-                font={FONTS.Lato.Bold}
-                color={theme._323232}>
-                {`€${serviceDetails?.total_renegotiated ?? 0}`}
-              </Text>
-              <TouchableOpacity
-                style={styles(theme).negociateButton}
-                activeOpacity={1}
-                onPress={async () => {
-                  const conversationId = buildThreadId(
-                    profile?.user?.id,
-                    serviceDetails?.service_id,
-                  );
-                  const negotiationFieldData = await getNegotiationFieldData(
-                    conversationId,
-                  );
-                  if (negotiationFieldData) {
-                    props.navigation.navigate(
-                      SCREENS.NegotiationDetails.identifier,
-                      {
-                        conversationId: conversationId,
-                        peerUser: {
-                          user_id: serviceDetails?.provider?.id,
-                          name: serviceDetails?.provider?.full_name,
-                          email: serviceDetails?.provider?.email,
-                          avatarUrl:
-                            serviceDetails?.provider?.profile_photo_url,
-                        },
-                      },
-                    );
-                  } else {
-                    setNewQuoteAmount('');
-                    setNewQuoteAmountError('');
-                    setShowOfferModal(true);
-                  }
-                }}>
-                <Text
-                  size={getScaleSize(14)}
-                  font={FONTS.Lato.Medium}
-                  color={theme.white}>
-                  {STRING.Negotiate}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )} */}
-        {/* {status != 'open' && (
-          <View style={styles(theme).profileContainer}>
-            <View style={styles(theme).horizontalView}>
-              <Text
-                style={{ flex: 1.0 }}
-                size={getScaleSize(18)}
-                font={FONTS.Lato.SemiBold}
-                color={theme._323232}>
-                {STRING.Aboutprofessional}
-              </Text>
-              <TouchableOpacity
-                activeOpacity={1}
-                style={styles(theme).likeIconContainer}
-                onPress={() => {
-                  if (serviceDetails?.provider?.is_favorate) {
-                    removeFavoriteProfessional();
-                  } else {
-                    addFavoriteProfessional();
-                  }
-                }}>
-                <Image
-                  style={styles(theme).likeIcon}
-                  source={
-                    serviceDetails?.provider?.is_favorate
-                      ? IMAGES.like
-                      : IMAGES.like_unfill
-                  }
-                />
-              </TouchableOpacity>
-            </View>
-            <View
-              style={[
-                styles(theme).horizontalView,
-                { marginTop: getScaleSize(16) },
-              ]}>
-              {serviceDetails?.provider?.profile_photo_url ? (
-                <Image
-                  style={styles(theme).profilePicView}
-                  resizeMode="cover"
-                  source={{ uri: serviceDetails?.provider?.profile_photo_url }}
-                />
-              ) : (
-                <Image
-                  style={styles(theme).profilePicView}
-                  source={IMAGES.user_placeholder}
-                />
-              )}
-              <Text
-                style={{ alignSelf: 'center', marginLeft: getScaleSize(16) }}
-                size={getScaleSize(20)}
-                font={FONTS.Lato.SemiBold}
-                color={'#0F232F'}>
-                {serviceDetails?.provider?.full_name ?? ''}
-              </Text>
-              {serviceDetails?.provider?.is_verified && (
-                <Image
-                  style={{
-                    height: getScaleSize(25),
-                    width: getScaleSize(25),
-                    alignSelf: 'center',
-                    marginLeft: getScaleSize(6),
-                  }}
-                  source={IMAGES.verify}
-                />
-              )}
-            </View>
-            <View
-              style={[
-                styles(theme).horizontalView,
-                { marginTop: getScaleSize(16) },
-              ]}>
-              <TouchableOpacity
-                activeOpacity={1}
-                style={[
-                  styles(theme).newButton,
-                  { marginRight: getScaleSize(6) },
-                ]}
-                onPress={() => {
-                  const conversationId = buildThreadId(
-                    profile?.user?.id,
-                    serviceDetails?.provider?.id,
-                  );
-                  props.navigation.navigate(SCREENS.ChatDetails.identifier, {
-                    conversationId: conversationId,
-                    peerUser: {
-                      user_id: serviceDetails?.provider?.id,
-                      name: serviceDetails?.provider?.full_name,
-                      email: serviceDetails?.provider?.email,
-                      avatarUrl: serviceDetails?.provider?.profile_photo_url,
-                    },
-                  });
-                }}>
-                <Text
-                  size={getScaleSize(14)}
-                  font={FONTS.Lato.Medium}
-                  color={theme.white}>
-                  {STRING.Chat}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                activeOpacity={1}
-                style={[styles(theme).newButton, { marginLeft: getScaleSize(6) }]}
-                onPress={() => {
-                  props.navigation.navigate(
-                    SCREENS.OtherUserProfile.identifier,
-                    {
-                      item: serviceDetails?.provider,
-                    },
-                  );
-                }}>
-                <Text
-                  size={getScaleSize(14)}
-                  font={FONTS.Lato.Medium}
-                  color={theme.white}>
-                  {STRING.ViewProfile}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )} */}
-        {/* {status === 'pending' && (
-          <>
-            <Text
-              style={{ marginTop: getScaleSize(24) }}
-              size={getScaleSize(18)}
-              font={FONTS.Lato.SemiBold}
-              color={theme._323232}>
-              {STRING.Personalizedshortmessage}
-            </Text>
-            <View style={styles(theme).serviceDescriptionView}>
-              <Text
-                size={getScaleSize(18)}
-                font={FONTS.Lato.Regular}
-                color={theme._555555}>
-                {serviceDetails?.personilized_short_message ?? '-'}
-              </Text>
-            </View>
-            <Text
-              style={{ marginTop: getScaleSize(24) }}
-              size={getScaleSize(18)}
-              font={FONTS.Lato.SemiBold}
-              color={theme._323232}>
-              {STRING.Supportingdocuments}
-            </Text>
-            <FlatList
-              data={serviceDetails?.media?.supporting_docs ?? []}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{
-                gap: getScaleSize(16),
-                marginTop: getScaleSize(12),
-              }}
-              renderItem={({ item, index }) => {
-                return (
-                  <TouchableOpacity
-                    style={[styles(theme).uploadButton]}
-                    activeOpacity={1}
-                    onPress={() => {
-                      props.navigation.navigate(
-                        SCREENS.WebViewScreen.identifier,
-                        {
-                          url: item,
-                        },
-                      );
-                    }}>
-                    <Image
-                      style={styles(theme).attachmentIcon}
-                      source={IMAGES.pdf_icon}
-                    />
-                    <Text
-                      style={{ marginTop: getScaleSize(8) }}
-                      size={getScaleSize(15)}
-                      font={FONTS.Lato.Regular}
-                      color={theme._818285}>
-                      {STRING.ViewDocument}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              }}
-            />
-            <Text
-              style={{
-                marginTop: getScaleSize(24),
-                marginBottom: getScaleSize(12),
-              }}
-              size={getScaleSize(18)}
-              font={FONTS.Lato.SemiBold}
-              color={theme._323232}>
-              {STRING.Shortvideos}
-            </Text>
-            <FlatList
-              data={attachments ?? []}
-              numColumns={2}
-              columnWrapperStyle={{ gap: getScaleSize(12) }}
-              contentContainerStyle={{ gap: getScaleSize(12) }}
-              keyExtractor={(item: any, index: number) => index.toString()}
-              showsHorizontalScrollIndicator={false}
-              renderItem={({ item }) => (
-                <AttachmentItem isfromDocumant={true} item={item} />
-              )}
-            />
-          </>
-        )}
-        {status !== 'pending' && (
-          <View
-            style={[
-              styles(theme).profileContainer,
-              { paddingVertical: getScaleSize(26) },
-            ]}>
-            <TouchableOpacity
-              style={{ flexDirection: 'row' }}
-              activeOpacity={1}
-              onPress={() => {
-                setIsStatus(!isStatus);
-              }}>
-              <Text
-                style={{ flex: 1.0 }}
-                size={getScaleSize(18)}
-                font={FONTS.Lato.Medium}
-                color={theme._323232}>
-                {STRING.CheckStatus}
-              </Text>
-              <TouchableOpacity
-                style={{ height: getScaleSize(25), width: getScaleSize(24) }}
-                activeOpacity={1}
-                onPress={() => {
-                  setIsStatus(!isStatus);
-                }}>
-                <Image
-                  style={{ height: getScaleSize(25), width: getScaleSize(24) }}
-                  source={isStatus ? IMAGES.up : IMAGES.down}
-                />
-              </TouchableOpacity>
-            </TouchableOpacity>
-            {isStatus && (
-              <>
-                <View style={styles(theme).devider}></View>
-                <View style={{ marginTop: getScaleSize(32) }}>
-                  {serviceDetails?.lifecycle?.map(
-                    (item: any, index: number) => (
-                      <StatusItem
-                        key={index}
-                        item={item}
-                        index={index}
-                        securityCode={serviceDetails?.security_code ?? ''}
-                        isLast={index === serviceDetails?.lifecycle?.length - 1}
-                      />
-                    ),
-                  )}
-                </View>
-              </>
-            )}
-          </View>
-        )}
-        {status !== 'pending' && (
-          <View
-            style={[
-              styles(theme).profileContainer,
-              { paddingVertical: getScaleSize(26) },
-            ]}>
-            <TouchableOpacity
-              style={{ flexDirection: 'row' }}
-              activeOpacity={1}
-              onPress={() => {
-                setVisibleTaskDetails(!visibleTaskDetails);
-              }}>
-              <Text
-                style={{ flex: 1.0 }}
-                size={getScaleSize(18)}
-                font={FONTS.Lato.SemiBold}
-                color={theme._323232}>
-                {STRING.TaskDetails}
-              </Text>
-              <TouchableOpacity
-                style={{ height: getScaleSize(25), width: getScaleSize(24) }}
-                activeOpacity={1}
-                onPress={() => {
-                  setVisibleTaskDetails(!visibleTaskDetails);
-                }}>
-                <Image
-                  style={{ height: getScaleSize(25), width: getScaleSize(24) }}
-                  source={visibleTaskDetails ? IMAGES.up : IMAGES.down}
-                />
-              </TouchableOpacity>
-            </TouchableOpacity>
-            {visibleTaskDetails && (
-              <>
-                <View style={styles(theme).devider}></View>
-                <Text
-                  style={{ flex: 1.0, marginTop: getScaleSize(20) }}
-                  size={getScaleSize(18)}
-                  font={FONTS.Lato.SemiBold}
-                  color={'#424242'}>
-                  {STRING.Servicedescription}
-                </Text>
-                <Text
-                  style={{ flex: 1.0, marginTop: getScaleSize(16) }}
-                  size={getScaleSize(14)}
-                  font={FONTS.Lato.Medium}
-                  color={theme._939393}>
-                  {serviceDetails?.service_description ?? '-'}
-                </Text>
-                <Text
-                  style={{
-                    flex: 1.0,
-                    marginTop: getScaleSize(20),
-                    marginBottom: getScaleSize(8),
-                  }}
-                  size={getScaleSize(18)}
-                  font={FONTS.Lato.SemiBold}
-                  color={'#424242'}>
-                  {STRING.Jobphotos}
-                </Text>
-                <FlatList
-                  data={attachments ?? []}
-                  numColumns={2}
-                  columnWrapperStyle={{ gap: getScaleSize(12) }}
-                  contentContainerStyle={{ gap: getScaleSize(12) }}
-                  keyExtractor={(item: any, index: number) => index.toString()}
-                  showsHorizontalScrollIndicator={false}
-                  renderItem={({ item }) => <AttachmentItem item={item} />}
-                />
-              </>
-            )}
-          </View>
-        )}
-        {(status === 'accepted' ||
-          status === 'completed' ||
-          status === 'cancelled') && (
-            <View style={styles(theme).informationContainer}>
-              <Text
-                size={getScaleSize(18)}
-                font={FONTS.Lato.SemiBold}
-                color={theme._323232}>
-                {STRING.FinalPaymentBreakdown}
-              </Text>
-              <View style={styles(theme).newHorizontalView}>
-                <Text
-                  style={{ flex: 1.0 }}
-                  size={getScaleSize(14)}
-                  font={FONTS.Lato.SemiBold}
-                  color={'#595959'}>
-                  {STRING.FinalizedQuoteAmount}
-                </Text>
-                <Text
-                  size={getScaleSize(14)}
-                  font={FONTS.Lato.SemiBold}
-                  color={'#595959'}>
-                  {`€${serviceDetails?.payment_breakdown?.finalize_quote_amount ?? 0
-                    }`}
-                </Text>
-              </View>
-              <View style={styles(theme).newHorizontalView}>
-                <Text
-                  style={{ flex: 1.0 }}
-                  size={getScaleSize(14)}
-                  font={FONTS.Lato.SemiBold}
-                  color={'#595959'}>
-                  {STRING.PlatformFee}
-                </Text>
-                <Text
-                  size={getScaleSize(14)}
-                  font={FONTS.Lato.SemiBold}
-                  color={'#595959'}>
-                  {`€${serviceDetails?.payment_breakdown?.platform_fees ?? 0}`}
-                </Text>
-              </View>
-              <View style={styles(theme).newHorizontalView}>
-                <Text
-                  style={{ flex: 1.0 }}
-                  size={getScaleSize(14)}
-                  font={FONTS.Lato.SemiBold}
-                  color={'#595959'}>
-                  {STRING.Taxes}
-                </Text>
-                <Text
-                  size={getScaleSize(14)}
-                  font={FONTS.Lato.SemiBold}
-                  color={'#595959'}>
-                  {`€${serviceDetails?.payment_breakdown?.tax ?? 0}`}
-                </Text>
-              </View>
-              <View style={styles(theme).dotView} />
-              <View style={styles(theme).newHorizontalView}>
-                <Text
-                  style={{ flex: 1.0 }}
-                  size={getScaleSize(20)}
-                  font={FONTS.Lato.SemiBold}
-                  color={'#0F232F'}>
-                  {STRING.Total}
-                </Text>
-                <Text
-                  size={getScaleSize(20)}
-                  font={FONTS.Lato.SemiBold}
-                  color={theme.primary}>
-                  {`€${serviceDetails?.payment_breakdown?.total_renegotiated ?? 0
-                    }`}
-                </Text>
-              </View>
-            </View>
-          )} */}
-        {/* <View style={{ height: getScaleSize(50) }} /> */}
-      </ScrollView>
-      {/* {status === 'pending' && (
-        <View style={styles(theme).buttonContainer}>
-          <TouchableOpacity
-            style={styles(theme).backButtonContainer}
-            activeOpacity={1}
-            onPress={() => {
-              rejectRef.current.open();
-            }}>
-            <Text
-              size={getScaleSize(19)}
-              font={FONTS.Lato.Bold}
-              color={theme.primary}
-              style={{ alignSelf: 'center' }}>
-              {STRING.Reject}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles(theme).nextButtonContainer}
-            activeOpacity={1}
-            onPress={() => {
-              acceptRef.current.open();
-            }}>
-            <Text
-              size={getScaleSize(19)}
-              font={FONTS.Lato.Bold}
-              color={theme.white}
-              style={{ alignSelf: 'center' }}>
-              {STRING.Accept}
-            </Text>
-          </TouchableOpacity>
+          <Text
+            style={{ alignSelf: 'center', marginLeft: getScaleSize(16) }}
+            size={getScaleSize(20)}
+            font={FONTS.Lato.SemiBold}
+            color={theme.primaryText}>
+            {serviceDetails?.provider?.full_name ?? 'Bessie Cooper'}
+          </Text>
         </View>
-      )}
-      {status === 'pending' && (
-        <RejectBottomPopup
-          rejectRef={rejectRef}
-          selectedCategory={selectedCategory}
-          reason={reason}
-          setSelectedCategory={setSelectedCategory}
-          setReason={setReason}
-          onClose={() => {
-            rejectRef.current.close();
-          }}
-          onReject={() => {
-            onRejectReason();
-          }}
-        />
-      )}
-      {status === 'pending' && (
-        <AcceptBottomPopup
-          onRef={acceptRef}
-          title={`You are about to confirm a service at the rate of ${serviceDetails?.total_renegotiated?.[0]
-            ? serviceDetails?.total_renegotiated?.[0] === 'Barter Product'
-              ? 'Barter Product'
-              : `€${serviceDetails?.total_renegotiated?.[0]}`
-            : ''
-            } with the Provider ${serviceDetails?.provider?.full_name ?? ''
-            }, Are you sure you want to continue? `}
-          onClose={() => {
-            console.log('serviceDetails?.total_renegotiated?.[0]', serviceDetails?.total_renegotiated?.[0]);
-            acceptRef.current.close();
-          }}
-          onNavigate={() => {
-            getServiceAmount();
-          }}
-        />
-      )}
-      {status === 'pending' && (
-        <PaymentBottomPopup
-          onRef={paymentRef}
-          serviceAmount={serviceAmount}
-          onClose={() => {
-            paymentRef.current.close();
-          }}
-          proceedToPay={() => {
-            onAcceptService();
-          }}
-        />
-      )}
-      {status === 'completed' && (
-        <>
-          {reviewRating &&
-            <Button
-              title={STRING.WriteaReview}
-              style={{
-                marginHorizontal: getScaleSize(22),
-                marginVertical: getScaleSize(24),
-              }}
-              onPress={() => {
-                props.navigation.navigate(SCREENS.WriteReview.identifier, {
-                  serviceId: serviceDetails?.service_id,
-                  professionalName: serviceDetails?.provider ?? '',
-                });
-              }}
-            />
-          }
-        </>
-      )}
-      {status === 'accepted' && (
-        <View style={styles(theme).buttonContainer}>
+        <View
+          style={[
+            styles(theme).horizontalView,
+            { marginTop: getScaleSize(16) },
+          ]}>
           <TouchableOpacity
-            style={styles(theme).backButtonContainer}
-            activeOpacity={0.9}
-            onPress={() => {
-              getCancelServiceDetails();
-            }}>
-            <Text
-              size={getScaleSize(19)}
-              font={FONTS.Lato.Bold}
-              color={theme.primary}
-              style={{ alignSelf: 'center' }}>
-              {STRING.Cancel}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles(theme).nextButtonContainer}
             activeOpacity={1}
+            style={[
+              styles(theme).chatButton,
+              { marginRight: getScaleSize(6) },
+            ]}
             onPress={() => {
               const conversationId = buildThreadId(
                 profile?.user?.id,
@@ -1823,18 +765,473 @@ export default function RequestDetails(props: any) {
               });
             }}>
             <Text
-              size={getScaleSize(19)}
-              font={FONTS.Lato.Bold}
-              color={theme.white}
-              style={{ alignSelf: 'center' }}>
+              size={getScaleSize(14)}
+              font={FONTS.Lato.Medium}
+              color={theme._EC613D}>
               {STRING.Chat}
             </Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={1}
+            style={[styles(theme).newButton, { marginLeft: getScaleSize(6) }]}
+            onPress={() => {
+              props.navigation.navigate(
+                SCREENS.OtherUserProfile.identifier,
+                {
+                  item: serviceDetails?.provider,
+                },
+              );
+            }}>
+            <Text
+              size={getScaleSize(14)}
+              font={FONTS.Lato.Medium}
+              color={theme.white}>
+              {STRING.ViewProfile}
+            </Text>
+          </TouchableOpacity>
         </View>
-      )} */}
+      </View>
+    )
+  }
+
+  const PaymentBreakDown = () => {
+    return (
+      <>
+        <Text
+          font={FONTS.Lato.SemiBold}
+          color={theme.primaryText}
+          size={getScaleSize(16)}
+          style={{ marginTop: getScaleSize(16) }}
+        >
+          {"Payment Breakdown"}
+        </Text>
+        <View style={styles(theme).informationContainer}>
+          <View style={{
+            flexDirection: 'row',
+          }}>
+            <Text
+              style={{ flex: 1.0 }}
+              size={getScaleSize(14)}
+              font={FONTS.Lato.SemiBold}
+              color={theme._8C8C8C}>
+              {STRING.FinalizedQuoteAmount}
+            </Text>
+            <Text
+              size={getScaleSize(14)}
+              font={FONTS.Lato.SemiBold}
+              color={theme._404040}>
+              {`P${"350" ?? 0}`}
+            </Text>
+          </View>
+          <View style={{
+            flexDirection: 'row',
+          }}>
+            <Text
+              style={{ flex: 1.0 }}
+              size={getScaleSize(14)}
+              font={FONTS.Lato.SemiBold}
+              color={theme._8C8C8C}>
+              {`${STRING.PlatformFee} (10%)`}
+            </Text>
+            <Text
+              size={getScaleSize(14)}
+              font={FONTS.Lato.SemiBold}
+              color={theme._404040}>
+              {`P${"35"}`}
+            </Text>
+          </View>
+          <View style={styles(theme).dotView} />
+          <View style={{
+            flexDirection: 'row',
+          }}>
+            <Text
+              style={{ flex: 1.0 }}
+              size={getScaleSize(18)}
+              font={FONTS.Lato.Bold}
+              color={theme.primaryText}>
+              {STRING.Total}
+            </Text>
+            <Text
+              size={getScaleSize(20)}
+              font={FONTS.Lato.SemiBold}
+              color={theme.primary}>
+              {`P${"45" ?? 0}`}
+            </Text>
+          </View>
+        </View>
+      </>
+    )
+  }
+
+  const PersonalizedShortMessage = () => {
+    return (
+      <>
+        <View style={{ marginVertical: getScaleSize(24) }}>
+          <Text
+            font={FONTS.Lato.SemiBold}
+            size={getScaleSize(16)}
+          >Personalized short message</Text>
+          <View
+            style={{
+              padding: getScaleSize(16),
+              borderWidth: 1,
+              borderColor: theme._D9D9D9,
+              borderRadius: getScaleSize(12),
+              marginTop: getScaleSize(16)
+            }}
+          >
+            <Text
+              font={FONTS.Lato.Regular}
+              size={getScaleSize(16)}
+              color={theme._404040}
+            >{"Our skilled team will expertly assemble your furniture, ensuring every piece is put together with precision. We take pride in our attention to detail, so you can trust that your items will be ready for use in no time. Whether it's a complex wardrobe or a simple table, we handle it all with care and professionalism. Enjoy a hassle-free experience as we transform your space with our assembly services."}</Text>
+          </View>
+        </View>
+
+        <Text
+          size={getScaleSize(16)}
+          font={FONTS.Lato.SemiBold}
+          color={theme.primaryText}
+        >{"Supporting documents"}</Text>
+        <View style={[styles(theme).horizontalView, { justifyContent: 'space-between', gap: getScaleSize(18) }]}>
+          <UploadDocumentBox
+            icon={IMAGES.pdf_icon}
+            label='View Document'
+            containerStyle={{ flex: 1.0 }}
+            onPress={() => { }}
+          />
+          <UploadDocumentBox
+            icon={IMAGES.pdf_icon}
+            label='View Document'
+            containerStyle={{ flex: 1.0 }}
+            onPress={() => { }}
+          />
+        </View>
+        <Text
+          size={getScaleSize(16)}
+          font={FONTS.Lato.SemiBold}
+          color={theme.primaryText}
+        >{"Short videos"}</Text>
+        <View style={[styles(theme).horizontalView, {
+          flexWrap: "wrap", // 👈 IMPORTANT (wrap to next line)
+          justifyContent: "space-between",
+        }]}>
+          {
+            dummyAttachments.map((item: any, index: number) => {
+              return (
+                <View key={index} style={{
+                  width: "48%", // 👈 2 items per row
+                  marginBottom: getScaleSize(12),
+                }}>
+                  <AttachmentItem isfromDocumant={true} item={item} key={index} />
+                </View>
+              )
+            })
+          }
+        </View>
+      </>
+    )
+  }
+
+  return (
+    <View style={[styles(theme).container]}>
+      <Header
+        onBack={() => {
+          props.navigation.goBack();
+        }}
+        screenName={type ? type : title ? title : STRING.ViewQuote}
+      />
+      <ScrollView
+        style={styles(theme).scrolledContainer}
+        contentContainerStyle={{
+          paddingBottom:
+            status === 'pending' || status === 'accepted'
+              ? getScaleSize(140)
+              : getScaleSize(40),
+        }}
+        showsVerticalScrollIndicator={false}>
+        <RecentSearchCard
+          image={IMAGES.furnitureAssemblyImg}
+          containerStyle={{ marginHorizontal: getScaleSize(0) }}
+          title="Furniture Assembly"
+        />
+        <JobDetails />
+        <QuoteAmount />
+        {
+          type == "Track Details" && (
+            <SecurityCode />
+          )
+        }
+        <AboutProfessional />
+
+        {type == "Track Details" && (
+          <PaymentBreakDown />
+        )}
+
+        {(type !== "Track Details" && status !== "completed") && (
+          <PersonalizedShortMessage />
+        )
+        }
+        {
+          (type == "Track Details" || status == "completed") && (
+            <>
+
+              <TouchableOpacity
+                style={[styles(theme).profileContainer, { flexDirection: "row" }]}
+                activeOpacity={1}
+                onPress={() => {
+                  setIsStatus(!isStatus);
+                }}>
+                <Text
+                  style={{ flex: 1.0 }}
+                  size={getScaleSize(16)}
+                  font={FONTS.Lato.Regular}
+                  color={isStatus ? theme.primaryText : theme._8C8C8C}>
+                  {STRING.TaskStatus}
+                </Text>
+                <TouchableOpacity
+                  style={{ height: getScaleSize(25), width: getScaleSize(24) }}
+                  activeOpacity={1}
+                  onPress={() => {
+                    setIsStatus(!isStatus);
+                  }}>
+                  <Image
+                    style={{ height: getScaleSize(25), width: getScaleSize(24) }}
+                    source={isStatus ? IMAGES.up : IMAGES.down}
+                  />
+                </TouchableOpacity>
+              </TouchableOpacity>
+
+              {isStatus && (
+                <>
+                  <View style={{
+                    marginTop: getScaleSize(8),
+                    borderWidth: 1,
+                    borderRadius: getScaleSize(10),
+                    elevation: 1,
+                    backgroundColor: theme.white,
+                    padding: getScaleSize(20),
+                    borderColor: theme._D9D9D9
+                  }}>
+                    {DummyData.serviceDetails?.lifecycle?.map(
+                      (item: any, index: number) => (
+                        <StatusItem
+                          key={index}
+                          item={item}
+                          index={index}
+                          securityCode={serviceDetails?.security_code ?? ''}
+                          isLast={index === serviceDetails?.lifecycle?.length - 1}
+                        />
+                      ),
+                    )}
+                  </View>
+                </>
+              )}
+
+
+              <TouchableOpacity
+                style={[styles(theme).profileContainer, { flexDirection: "row" }]}
+                activeOpacity={1}
+                onPress={() => {
+                  // setIsStatus(!isStatus);
+                  setVisibleTaskDetails(!visibleTaskDetails);
+                }}>
+                <Text
+                  style={{ flex: 1.0 }}
+                  size={getScaleSize(16)}
+                  font={FONTS.Lato.Regular}
+                  color={isStatus ? theme.primaryText : theme._8C8C8C}>
+                  {STRING.TaskDetails}
+                </Text>
+                <TouchableOpacity
+                  style={{ height: getScaleSize(25), width: getScaleSize(24) }}
+                  activeOpacity={1}
+                  onPress={() => {
+                    setVisibleTaskDetails(!visibleTaskDetails);
+                  }}>
+                  <Image
+                    style={{ height: getScaleSize(25), width: getScaleSize(24) }}
+                    source={visibleTaskDetails ? IMAGES.up : IMAGES.down}
+                  />
+                </TouchableOpacity>
+              </TouchableOpacity>
+              {visibleTaskDetails && (
+                <View style={{
+                  marginTop: getScaleSize(8),
+                  borderWidth: 1,
+                  borderRadius: getScaleSize(10),
+                  elevation: 1,
+                  backgroundColor: theme.white,
+                  padding: getScaleSize(20),
+                  borderColor: theme._D9D9D9
+                }}>
+                  <Text
+                    style={{ flex: 1.0 }}
+                    size={getScaleSize(16)}
+                    font={FONTS.Lato.Bold}
+                    color={theme._404040}>
+                    {STRING.Servicedescription}
+                  </Text>
+                  <Text
+                    style={{ flex: 1.0, marginTop: getScaleSize(16) }}
+                    size={getScaleSize(14)}
+                    font={FONTS.Lato.Medium}
+                    color={theme._404040}>
+                    {serviceDetails?.service_description ?? 'Transform your space with our expert furniture assembly services. Our skilled team will handle everything from unpacking to setup, ensuring your new pieces are perfectly assembled and ready for use. We specialize in a wide range of furniture types, including flat-pack items, complex modular systems, and custom installations. Enjoy a hassle-free experience as we take care of the details, allowing you to focus on enjoying your newly furnished area. Schedule your assembly today and let us help you create the perfect environment!'}
+                  </Text>
+                  <Text
+                    style={{
+                      flex: 1.0,
+                      marginTop: getScaleSize(20),
+                      marginBottom: getScaleSize(8),
+                    }}
+                    size={getScaleSize(18)}
+                    font={FONTS.Lato.SemiBold}
+                    color={'#424242'}>
+                    {STRING.Jobphotos}
+                  </Text>
+                  <FlatList
+                    data={dummyAttachments ?? []}
+                    numColumns={2}
+                    columnWrapperStyle={{ gap: getScaleSize(12) }}
+                    contentContainerStyle={{ gap: getScaleSize(12) }}
+                    keyExtractor={(item: any, index: number) => index.toString()}
+                    showsHorizontalScrollIndicator={false}
+                    renderItem={({ item }) => <AttachmentItem item={item} />}
+                  />
+                </View>
+              )}
+              {/* </View> */}
+
+            </>
+          )
+        }
+
+        {(status == "completed") && (
+          <PaymentBreakDown />
+        )}
+        {(status !== 'completed' && status !== 'cancelled') &&
+          <View style={[styles(theme).horizontalView, {
+            marginTop: getScaleSize(100),
+            gap: getScaleSize(22),
+            marginBottom: getScaleSize(40)
+          }]}>
+            <TouchableOpacity
+              style={styles(theme).btnStyle}
+              onPress={() => {
+                setCancelType("Reject Reason")
+                cancelScheduledServicePopupRef.current.open();
+              }}
+            >
+              <Text
+                font={FONTS.Lato.SemiBold}
+                color={theme._EC613D}
+                size={getScaleSize(16)}
+              >{type == "Track Details" ? "Cancel Task" : "Reject"}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                if (type == "Track Details") {
+
+                } else {
+                  acceptRef.current.open()
+                }
+              }}
+              style={[styles(theme).btnStyle, {
+                backgroundColor: theme.primary,
+              }]}
+            >
+              <Text
+                font={FONTS.Lato.SemiBold}
+                color={theme.white}
+                size={getScaleSize(16)}
+              >{type == "Track Details" ? "Chat" : "Accept"}</Text>
+            </TouchableOpacity>
+          </View>
+        }
+
+        {status === 'completed' && (
+          <>
+            {reviewRating &&
+              <Button
+                title={STRING.WriteaReview}
+                style={{
+                  marginVertical: getScaleSize(24),
+                }}
+                onPress={() => {
+                  props.navigation.navigate(SCREENS.WriteReview.identifier, {
+                    serviceId: serviceDetails?.service_id,
+                    professionalName: serviceDetails?.provider ?? '',
+                  });
+                }}
+              />
+            }
+            <>
+            {
+              isDisputed == false && (
+                <View style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginTop: getScaleSize(20),
+                  justifyContent: 'space-between'
+                }}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      props.navigation.navigate(SCREENS.RaiseDispute.identifier)
+                    }}
+                    style={styles(theme).btnStyle}
+                  >
+                    <Text
+                      size={getScaleSize(16)}
+                      font={FONTS.Lato.SemiBold}
+                      color={theme._EC613D}
+                    >{"Raise Dispute"}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      // handleRate(item)
+                    }}
+                    style={[styles(theme).btnStyle, {
+                      backgroundColor: theme.primary
+                    }
+                    ]}
+                  >
+                    <Text
+                      size={getScaleSize(16)}
+                      font={FONTS.Lato.SemiBold}
+                      color={theme.white}
+                    >{"Rate"}</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              {
+              isDisputed == true && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      props.navigation.navigate(SCREENS.RaiseDispute.identifier,{
+                        isDisputed: true
+                      })
+                    }}
+                    style={styles(theme).disputeBtn}
+                  >
+                    <Text
+                      size={getScaleSize(16)}
+                      font={FONTS.Lato.SemiBold}
+                      color={theme.white}
+                    >{"Dispute Status"}</Text>
+                  </TouchableOpacity>
+              )
+            
+            }
+            </>
+          </>
+        )}
+
+      </ScrollView>
+
       <CancelScheduledServicePopup
         onRef={cancelScheduledServicePopupRef}
-        height={getScaleSize(530)}
+        height={cancelType === "Reject Reason" ? getScaleSize(400) :getScaleSize(530)}
         cancelServiceDetails={cancelServiceDetails}
         onClose={() => {
           cancelScheduledServicePopupRef.current.close();
@@ -1842,10 +1239,16 @@ export default function RequestDetails(props: any) {
             setCancelServiceDetails(null);
           }, 200);
         }}
+        cancelType={cancelType}
         onCancel={(item: any) => {
           console.log('item==>', item);
           if (item) {
-            onCancelService(item);
+            // onCancelService(item);
+            props?.navigation.navigate(SCREENS.ServiceCancelled.identifier, {
+          // item: result?.data,
+          item:{},
+          serviceItem: serviceDetails,
+        });
           }
         }}
       />
@@ -1878,9 +1281,10 @@ export default function RequestDetails(props: any) {
         }}
         proceedToPay={() => {
           // onAcceptService();
-          props.navigation.navigate(SCREENS.ServiceConfirmed.identifier, {
+          props.navigation.navigate(SCREENS.PaymentMethod.identifier, {
             // serviceId: serviceDetails?.service_id,
-            serviceId: 12
+            serviceId: 12,
+            from:"requestDetails"
           });
         }}
       />
@@ -2302,5 +1706,14 @@ const styles = (theme: ThemeContextType['theme']) =>
       borderColor: theme._EC613D,
       alignItems: 'center',
       paddingVertical: getScaleSize(10)
-    }
+    },
+    disputeBtn:{
+                      backgroundColor:theme.primary,
+                      marginTop:getScaleSize(60),
+                      marginHorizontal:getScaleSize(20),
+                      marginBottom:getScaleSize(20),
+                      borderRadius:getScaleSize(10),
+                      paddingVertical:getScaleSize(14),
+                      alignItems:'center'
+                    }
   });

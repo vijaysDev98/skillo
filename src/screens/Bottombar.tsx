@@ -1,14 +1,14 @@
-import React, {useContext, useEffect, useRef} from 'react';
-import {Alert, Linking, PermissionsAndroid, Platform, View} from 'react-native';
+import React, { useContext, useEffect, useRef } from 'react';
+import { Alert, Linking, PermissionsAndroid, Platform, View } from 'react-native';
 
 //COMPONENTS
-import {Tabbar} from '../components';
+import { Tabbar } from '../components';
 
 //SCREENS
 import { SCREENS, TABS } from '.';
 
 //CONTEXT
-import {AuthContext} from '../context';
+import { AuthContext } from '../context';
 
 //PACKAGES
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -234,7 +234,7 @@ function BottomBar(props: any) {
           'Notification was declined.',
           'Go to your settings and enable notifications always.',
           [
-            {text: 'No', style: 'cancel'},
+            { text: 'No', style: 'cancel' },
             {
               text: 'Open Settings',
               onPress: () => {

@@ -4,6 +4,7 @@ import {
     StyleSheet,
     ScrollView,
     Image,
+    Pressable,
 } from 'react-native';
 
 //ASSETS
@@ -24,6 +25,7 @@ import {
 } from '../../components';
 import { API } from '../../api';
 import moment from 'moment';
+import { RecentSearchCard } from '../home/Search';
 
 export const arrayIcons = {
     pets: IMAGES.pets,
@@ -75,9 +77,9 @@ export default function ServiceCancelled(props: any) {
                 screenName={STRING.service_cancelled}
             />
             <ScrollView
-                style={styles(theme).scrolledContainer}
+                contentContainerStyle={styles(theme).scrolledContainer}
                 showsVerticalScrollIndicator={false}>
-                <Image style={styles(theme).doneIcon} source={IMAGES.serviceCancelledIcon} />
+                {/* <Image style={styles(theme).doneIcon} source={IMAGES.serviceCancelledIcon} />
                 <Text
                     style={{ marginTop: getScaleSize(24) }}
                     size={getScaleSize(19)}
@@ -85,8 +87,17 @@ export default function ServiceCancelled(props: any) {
                     font={FONTS.Lato.Medium}
                     color={theme._424242}>
                     {STRING.service_cancelled_message}
-                </Text>
-                <View style={styles(theme).informationContainer}>
+                </Text> */}
+                 <Image style={styles(theme).doneIcon} source={IMAGES.confirmed_icon} />
+                        <Text
+                          style={{ marginVertical: getScaleSize(24) }}
+                          size={getScaleSize(16)}
+                          align="center"
+                          font={FONTS.Lato.Medium}
+                          color={theme._404040}>
+                         {STRING.service_cancelled_message}
+                        </Text>
+                {/* <View style={styles(theme).informationContainer}>
                     <Text
                         style={{}}
                         size={getScaleSize(16)}
@@ -187,75 +198,222 @@ export default function ServiceCancelled(props: any) {
                             </View>
                         </View>
                     </View>
-                </View>
-                <View style={styles(theme).informationContainer}>
-                    <Text
-                        size={getScaleSize(18)}
-                        font={FONTS.Lato.SemiBold}
-                        color={theme._323232}>
-                        {STRING.payment_breakdown}
-                    </Text>
-                    <View style={styles(theme).newhorizontalView}>
+                </View> */}
+
+                 {/* ================= TITLE ================= */}
                         <Text
-                            style={{ flex: 1.0 }}
-                            size={getScaleSize(14)}
-                            font={FONTS.Lato.SemiBold}
-                            color={'#595959'}>
-                            {STRING.FinalizedQuoteAmount}
-                        </Text>
-                        <Text
-                            size={getScaleSize(14)}
-                            font={FONTS.Lato.SemiBold}
-                            color={'#595959'}>
-                            {`€${item?.payment_breakdown?.total_amount ?? '0'}`}
-                        </Text>
-                    </View>
-                    <View style={styles(theme).newhorizontalView}>
-                        <Text
-                            style={{ flex: 1.0 }}
-                            size={getScaleSize(14)}
-                            font={FONTS.Lato.SemiBold}
-                            color={'#595959'}>
-                            {STRING.service_fee_cancelled + ` (${item?.payment_breakdown?.deduction_percentage ?? '0'}%)`}
-                        </Text>
-                        <Text
-                            size={getScaleSize(14)}
-                            font={FONTS.Lato.SemiBold}
-                            color={'#595959'}>
-                            {`€${item?.payment_breakdown?.service_fee ?? '0'}`}
-                        </Text>
-                    </View>
-                    <View style={styles(theme).dotView} />
-                    <View style={styles(theme).newhorizontalView}>
-                        <Text
-                            style={{ flex: 1.0 }}
-                            size={getScaleSize(20)}
-                            font={FONTS.Lato.SemiBold}
-                            color={'#0F232F'}>
-                            {STRING.Total}
+                          font={FONTS.Lato.Bold}
+                          size={getScaleSize(20)}
+                          color={theme.primaryText}
+                        >DIY Service</Text>
+                
+                        <RecentSearchCard
+                          image={IMAGES.furnitureAssemblyImg}
+                          title="Furniture Assembly"
+                          containerStyle={styles(theme).recentCard}
+                        />
+
+
+                      {/* ================= DETAILS ================= */}
                             <Text
-                                size={getScaleSize(11)}
-                                font={FONTS.Lato.Regular}
-                                color={theme._424242}>
-                                {'  (final amount you will get)'}
-                            </Text>
-                        </Text>
-                        <Text
-                            size={getScaleSize(20)}
-                            font={FONTS.Lato.SemiBold}
-                            color={theme.primary}>
-                            {`€${item?.payment_breakdown?.total_refund ?? '0'}`}
-                        </Text>
-                    </View>
-                </View>
-                <Text
+                              font={FONTS.Lato.Bold}
+                              size={getScaleSize(16)}
+                              color={theme.primaryText}
+                              style={styles(theme).sectionTitle}>Job Details</Text>
+                    
+                            <View style={styles(theme).detailsContainer}>
+                              <View style={styles(theme).detailItem}>
+                                <Text
+                                  font={FONTS.Lato.SemiBold}
+                                  color={theme._8C8C8C}
+                                  size={getScaleSize(14)}
+                                >Budget</Text>
+                                <Text
+                                  font={FONTS.Lato.Bold}
+                                  color={theme.primary}
+                                  size={getScaleSize(16)}
+                                >P200 to P500</Text>
+                              </View>
+                    
+                              <View style={styles(theme).verticalDivider} />
+                    
+                              <View style={styles(theme).detailItem}>
+                                <Text
+                                  font={FONTS.Lato.SemiBold}
+                                  color={theme._8C8C8C}
+                                  size={getScaleSize(14)}
+                                >Job Date</Text>
+                                <Text
+                                  font={FONTS.Lato.Bold}
+                                  color={theme.primary}
+                                  size={getScaleSize(16)}
+                                >14 Dec</Text>
+                              </View>
+                    
+                              <View style={styles(theme).verticalDivider} />
+                    
+                              <View style={styles(theme).detailItem}>
+                                <Text
+                                  font={FONTS.Lato.SemiBold}
+                                  color={theme._8C8C8C}
+                                  size={getScaleSize(14)}
+                                >Job Time</Text>
+                                <Text
+                                  font={FONTS.Lato.Bold}
+                                  color={theme.primary}
+                                  size={getScaleSize(16)}
+                                >18:00 Pm</Text>
+                              </View>
+                            </View>
+
+                             <Text
+                                      font={FONTS.Lato.SemiBold}
+                                      color={theme.primaryText}
+                                      size={getScaleSize(16)}
+                                      style={{ marginTop: getScaleSize(16) }}
+                                    >
+                                      {"Payment Breakdown"}
+                                    </Text>
+                                    <View style={styles(theme).informationContainer}>
+                                      <View style={styles(theme).newhorizontalView}>
+                                        <Text
+                                          style={{ flex: 1.0 }}
+                                          size={getScaleSize(14)}
+                                          font={FONTS.Lato.SemiBold}
+                                          color={theme._8C8C8C}>
+                                          {STRING.FinalizedQuoteAmount}
+                                        </Text>
+                                        <Text
+                                          size={getScaleSize(14)}
+                                          font={FONTS.Lato.SemiBold}
+                                          color={theme._404040}>
+                                          {/* {`P${paymentDetails?.finalize_quote_amount ?? 0}`} */}
+                                          {`P${item?.payment_breakdown?.total_amount ?? '0'}`}
+                                        </Text>
+                                      </View>
+                                      <View style={styles(theme).newhorizontalView}>
+                                        <Text
+                                          style={{ flex: 1.0 }}
+                                          size={getScaleSize(14)}
+                                          font={FONTS.Lato.SemiBold}
+                                          color={theme._8C8C8C}>
+                                          {`${STRING.PlatformFee} (10%)`}
+                                        </Text>
+                                        <Text
+                                          size={getScaleSize(14)}
+                                          font={FONTS.Lato.SemiBold}
+                                          color={theme._404040}>
+                                          {`P${item?.payment_breakdown?.service_fee ?? '0'}`}
+                                        </Text>
+                                      </View>
+                                      {/* <View style={styles(theme).newhorizontalView}>
+                                        <Text
+                                          style={{ flex: 1.0 }}
+                                          size={getScaleSize(14)}
+                                          font={FONTS.Lato.SemiBold}
+                                          color={'#595959'}>
+                                          {STRING.Taxes}
+                                        </Text>
+                                        <Text
+                                          size={getScaleSize(14)}
+                                          font={FONTS.Lato.SemiBold}
+                                          color={'#595959'}>
+                                          {`€${paymentDetails?.tax ?? 0}`}
+                                        </Text>
+                                      </View> */}
+                                      <View style={styles(theme).dotView} />
+                                      <View style={styles(theme).newhorizontalView}>
+                                        <Text
+                                          style={{ flex: 1.0 }}
+                                          size={getScaleSize(18)}
+                                          font={FONTS.Lato.Bold}
+                                          color={theme.primaryText}>
+                                          {STRING.Total}
+                                        </Text>
+                                        <Text
+                                          size={getScaleSize(20)}
+                                          font={FONTS.Lato.SemiBold}
+                                          color={theme.primary}>
+                                          {`P${item?.payment_breakdown?.total_refund ?? '0'}`}
+                                        </Text>
+                                      </View>
+                                    </View>
+
+               <View style={styles(theme).aboutContainer}>
+                         <Text
+                           style={{}}
+                           size={getScaleSize(16)}
+                           font={FONTS.Lato.SemiBold}
+                           color={theme._8C8C8C}>
+                           {STRING.Aboutprofessional}
+                         </Text>
+                         <View
+                           style={[
+                             styles(theme).horizontalView,
+                           ]}>
+                           {/* {paymentDetails?.provider_profile_url ? */}
+                             <Image
+                               style={styles(theme).profilePicView}
+                            //    source={{ uri: paymentDetails?.provider_profile_url }}
+                            source={IMAGES.dummyProfile}
+                             />
+                             {/* :
+                             <Image
+                               style={styles(theme).profilePicView}
+                               source={IMAGES.user_placeholder}
+                             />
+                           } */}
+                           <View style={{ flex: 1.0, }}>
+                             <View style={[styles(theme).flexRow, { flex: 1.0, maxWidth: '85%' }]}>
+                               <Text
+                                 style={{ alignSelf: 'center', }}
+                                 size={getScaleSize(18)}
+                                 numberOfLines={1}
+                                 font={FONTS.Lato.SemiBold}
+                                 color={theme.primaryText}>
+                                 {
+                                //  paymentDetails?.provider_name ?? 
+                                 'Wade Warren'
+                                 }
+                               </Text>
+                               
+                             </View>
+                             <View style={[styles(theme).flexRow, { marginTop: getScaleSize(4) }]}>
+                               <Image source={IMAGES.ic_phone} style={styles(theme).phoneIcon} />
+                               <Text
+                                 style={{}}
+                                 size={getScaleSize(12)}
+                                 font={FONTS.Lato.SemiBold}
+                                 color={theme._8C8C8C}>
+                                 {
+                                //  paymentDetails?.provider_phone ?? 
+                                 '+91751111111'
+                                 }
+                               </Text>
+                             </View>
+                           </View>
+                           <Pressable
+                             style={[styles(theme).newButton, { marginLeft: getScaleSize(6) }]}
+                             onPress={() => {
+                               props.navigation.goBack();
+                             }}>
+                             <Text
+                               size={getScaleSize(12)}
+                               font={FONTS.Lato.Medium}
+                               color={theme.white}>
+                               {STRING.ViewProfile}
+                             </Text>
+                           </Pressable>
+                         </View>
+                       </View>
+                {/* <Text
                     style={{ marginTop: getScaleSize(20) }}
                     size={getScaleSize(12)}
                     font={FONTS.Lato.Regular}
                     color={theme._555555}>
                     {STRING.cancelled_message + ` ${item?.payment_breakdown?.deduction_percentage ?? '0'}% ` + STRING.cancellation_message_2}
                 </Text>
-                <View style={{ height: getScaleSize(32) }}></View>
+                <View style={{ height: getScaleSize(32) }}></View> */}
 
             </ScrollView>
             {isLoading && <ProgressView />}
@@ -269,6 +427,7 @@ const styles = (theme: ThemeContextType['theme']) =>
         scrolledContainer: {
             marginTop: getScaleSize(19),
             marginHorizontal: getScaleSize(24),
+            paddingBottom:getScaleSize(50)
         },
         doneIcon: {
             height: getScaleSize(60),
@@ -307,18 +466,13 @@ const styles = (theme: ThemeContextType['theme']) =>
         dotView: {
             // flex:1.0,
             borderStyle: 'dashed',
-            borderColor: theme.primary,
+            borderColor: theme._8C8C8C,
             borderWidth: 1,
             marginTop: getScaleSize(8),
         },
         newhorizontalView: {
             flexDirection: 'row',
             marginTop: getScaleSize(16),
-        },
-        profilePicView: {
-            height: getScaleSize(56),
-            width: getScaleSize(56),
-            borderRadius: getScaleSize(28),
         },
         newButton: {
             // flex: 1.0,
@@ -333,10 +487,56 @@ const styles = (theme: ThemeContextType['theme']) =>
             flexDirection: 'row',
             alignItems: 'center',
         },
-        phoneIcon: {
-            height: getScaleSize(20),
-            width: getScaleSize(20),
-            marginRight: getScaleSize(6),
-        }
+        recentCard: {
+            marginHorizontal: 0,
+            marginTop: getScaleSize(16),
+        },
+        sectionTitle: {
+      marginTop: getScaleSize(24),
+    },
+    /* DETAILS */
+    detailsContainer: {
+      flexDirection: "row",
+      justifyContent: 'space-between',
+      borderWidth: 0.5,
+      borderColor: theme._D9D9D9,
+      borderRadius: getScaleSize(6),
+      paddingHorizontal: getScaleSize(16),
+      paddingVertical: getScaleSize(21),
+      marginTop: getScaleSize(16),
+      backgroundColor: theme.white,
+      elevation: 1,
+    },
+
+    detailItem: {
+      alignItems: "center",
+      gap: getScaleSize(6),
+    },
+
+    verticalDivider: {
+      width: getScaleSize(1),
+      backgroundColor: theme._D6D6D6,
+    },
+     aboutContainer: {
+      paddingHorizontal: getScaleSize(16),
+      paddingVertical: getScaleSize(13),
+      backgroundColor: theme.white,
+      borderRadius: getScaleSize(16),
+      marginTop: getScaleSize(16),
+      borderWidth: 1,
+      borderColor: theme._D9D9D9,
+      gap: getScaleSize(16)
+    },
+    profilePicView: {
+      height: getScaleSize(56),
+      width: getScaleSize(56),
+      borderRadius: getScaleSize(28),
+      marginRight: getScaleSize(12)
+    },
+     phoneIcon: {
+      height: getScaleSize(20),
+      width: getScaleSize(20),
+      marginRight: getScaleSize(6),
+    },
     });
 

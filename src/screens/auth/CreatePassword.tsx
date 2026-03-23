@@ -122,6 +122,7 @@ export default function CreatePassword(props: any) {
                         style={{ marginBottom: getScaleSize(20) }}>
                         {STRING.createPassWord.subTitle}
                     </Text>
+                    <View style={{gap:getScaleSize(16)}}>
                     <Input
                         placeholder={STRING.placeHolders.enter_new_password}
                         placeholderTextColor={theme._939393}
@@ -166,6 +167,7 @@ export default function CreatePassword(props: any) {
                         }}
                         isError={confirmPasswordError}
                     />
+                    </View>
                 </View>
             </ScrollView>
             <Button

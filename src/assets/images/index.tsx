@@ -152,5 +152,13 @@ export const IMAGES = {
   electricalImg: require('./electricalImg.png'),
   eventSupportImg:require('./eventSupportImg.png'),
   networkImg:require('./networkImg.png'),
-  dummyUser:require('./dummyUser.png')
+  dummyUser:require('./dummyUser.png'),
+  radiouncheck:require('./radioUncheck.png'),
+  radiocheck:require('./radioCheck.png'),
+  planeVerifyIcon :require('./planeVerifyIcon.png'),
+  mobileMoneyIcon: require('./mobileMoneyIcon.png'),
+
+  congratulationIcon: require('./congratulationIcon.png'),
+  creditCardIcon: require('./creditCardIcon.png'),
+  appyCouponIcon : require('./applyCouponIcon.png')
 };

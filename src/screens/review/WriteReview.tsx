@@ -147,6 +147,37 @@ export default function WriteReview(props: any) {
   }
 
 
+  const ratingQuestingData = [
+    {
+      id:1,
+      label:STRING.OverallService,
+      value:overallRatting
+    },
+    {
+      id:2,
+      label:STRING.Reliability,
+      value:reliabilityRatting
+    },
+    {
+      id:3,
+      label:STRING.Punctuality,
+      value:punctualityRatting
+    },
+    {
+      id:4,
+      label:STRING.Solution,
+      value:solutionRatting
+    },
+    {
+      id:5,
+      label:STRING.Payout,
+      value:payoutRatting
+    }
+  ]
+
+
+  const isReview= overallRatting && reliabilityRatting && punctualityRatting && solutionRatting && payoutRatting && review
+
   return (
     <View style={styles(theme).container}>
       <Header
@@ -158,124 +189,64 @@ export default function WriteReview(props: any) {
       <ScrollView style={{ flex: 1.0 }}>
         <View style={styles(theme).serviceProviderCotainer}>
           <Text
-            size={getScaleSize(22)}
+            size={getScaleSize(20)}
             font={FONTS.Lato.SemiBold}
-            color={theme.primary}>
+            color={theme.primaryText}>
             {STRING.reviewMessage}
           </Text>
           <Text
             style={{ marginTop: getScaleSize(8) }}
             size={getScaleSize(16)}
             font={FONTS.Lato.Medium}
-            color={'#424242'}>
+            color={theme._8C8C8C}>
             {STRING.reviewQuestion}
           </Text>
-          <View style={styles(theme).ratingContainer}>
-            <Text
-              size={getScaleSize(18)}
-              font={FONTS.Lato.Medium}
-              color={'#424242'}>
-              {STRING.OverallService}
-            </Text>
-            {!isLoadingRating &&
-              <View style={{ height: 40, justifyContent: 'center' }}>
-                <Rating
-                  type="custom"
-                  ratingBackgroundColor="#EDEFF0"
-                  // style={{ marginHorizontal: getScaleSize(20) }}
-                  tintColor={theme.white}
-                  ratingCount={5}
-                  ratingColor='#F0B52C'// grey color
-                  startingValue={overallRatting}
-                  imageSize={30}
-                  // ratingImage={IMAGES.ic_star}
-                  // fractions={0}
-                  onFinishRating={(value: any) => setOverallRatting(value)}
-                />
-              </View>
+            {
+              ratingQuestingData?.map((item,index)=>{
+                return(
+                  <View style={styles(theme).ratingContainer}>
+                    <Text
+                      size={getScaleSize(18)}
+                      font={FONTS.Lato.Medium}
+                      color={theme._404}>
+                      {item.label}
+                    </Text>
+                    {!isLoadingRating &&
+                      <Rating
+                        type="custom"
+                        ratingBackgroundColor="#B3B3B3"
+                        tintColor="#fff" // background color, useful for layout
+                        ratingCount={5}
+                        ratingColor={'#F0B52C'} // grey color
+                        startingValue={item.value}
+                        imageSize={30}
+                        onFinishRating={(value: any) => {
+                          // Update the corresponding rating state based on the question
+                          switch(item.id) {
+                            case 1:
+                              setOverallRatting(value);
+                              break;
+                            case 2:
+                              setReliabilityRatting(value);
+                              break;
+                            case 3:
+                              setPunctualityRatting(value);
+                              break;
+                            case 4:
+                              setSolutionRatting(value);
+                              break;
+                            case 5:
+                              setPayoutRatting(value);
+                              break;
+                          }
+                        }}
+                      />
+                    }
+                  </View>
+                )
+              })
             }
-          </View>
-          <View style={styles(theme).ratingContainer}>
-            <Text
-              size={getScaleSize(18)}
-              font={FONTS.Lato.Medium}
-              color={'#424242'}>
-              {STRING.Reliability}
-            </Text>
-            {!isLoadingRating &&
-              <Rating
-                type="custom"
-                ratingBackgroundColor="#EDEFF0"
-                tintColor="#fff" // background color, useful for layout
-                ratingCount={5}
-                ratingColor={'#F0B52C'} // grey color
-                startingValue={reliabilityRatting}
-                imageSize={30}
-                onFinishRating={(value: any) => setReliabilityRatting(value)}
-              />
-            }
-          </View>
-          <View style={styles(theme).ratingContainer}>
-            <Text
-              size={getScaleSize(18)}
-              font={FONTS.Lato.Medium}
-              color={'#424242'}>
-              {STRING.Punctuality}
-            </Text>
-            {!isLoadingRating &&
-              <Rating
-                type="custom"
-                ratingBackgroundColor="#EDEFF0"
-                tintColor="#fff" // background color, useful for layout
-                ratingCount={5}
-                ratingColor={'#F0B52C'} // grey color
-                startingValue={punctualityRatting}
-                imageSize={30}
-                onFinishRating={(value: any) => setPunctualityRatting(value)}
-              />
-            }
-          </View>
-          <View style={styles(theme).ratingContainer}>
-            <Text
-              size={getScaleSize(18)}
-              font={FONTS.Lato.Medium}
-              color={'#424242'}>
-              {STRING.Solution}
-            </Text>
-            {!isLoadingRating &&
-              <Rating
-                type="custom"
-                ratingBackgroundColor="#EDEFF0"
-                tintColor="#fff" // background color, useful for layout
-                ratingCount={5}
-                ratingColor={'#F0B52C'} // grey color
-                startingValue={solutionRatting}
-                imageSize={30}
-                onFinishRating={(value: any) => setSolutionRatting(value)}
-              />
-            }
-          </View>
-          <View style={styles(theme).ratingContainer}>
-            <Text
-              size={getScaleSize(18)}
-              font={FONTS.Lato.Medium}
-              color={'#424242'}>
-              {STRING.Payout}
-            </Text>
 
-            {!isLoadingRating &&
-              <Rating
-                type="custom"
-                ratingBackgroundColor="#EDEFF0"
-                tintColor="#fff" // background color, useful for layout
-                ratingCount={5}
-                ratingColor={'#F0B52C'} // grey color
-                startingValue={payoutRatting}
-                imageSize={30}
-                onFinishRating={(value: any) => setPayoutRatting(value)}
-              />
-            }
-          </View>
           <Text
             style={{ marginTop: getScaleSize(20) }}
             size={getScaleSize(18)}
@@ -298,17 +269,20 @@ export default function WriteReview(props: any) {
           </View>
         </View>
       </ScrollView >
-      <Button
-        title={STRING.Submit}
+      {
+        isReview && (
+        <Button
+        title={STRING.submit_review}
         style={{
           marginHorizontal: getScaleSize(22),
           marginBottom: getScaleSize(16),
         }}
         onPress={() => {
           Keyboard.dismiss();
-          onWriteReview();
+          // onWriteReview();
+          successBottomSheetRef.current?.open();
         }}
-      />
+      />)}
       <BottomSheet
         bottomSheetRef={successBottomSheetRef}
         height={330}

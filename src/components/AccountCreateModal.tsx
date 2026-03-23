@@ -12,7 +12,8 @@ import { FONTS, IMAGES } from "../assets";
 import { ThemeContext, ThemeContextType } from "../context";
 import Text from "./Text";
 
-const AccountCreatedModal = ({ visible, onPressHome,discription,title, isGoToHome = false }: any) => {
+const AccountCreatedModal = ({ 
+  visible, onPressHome,discription,title, isGoToHome = false,titleSize,titleFont,titleColor,discriptionSize,discriptionFont,discriptionColor }: any) => {
   const { theme } = useContext(ThemeContext)
   return (
     <Modal
@@ -30,18 +31,19 @@ const AccountCreatedModal = ({ visible, onPressHome,discription,title, isGoToHom
           />
 
         {title &&   <Text
-            size={getScaleSize(20)}
-            font={FONTS.Lato.Bold}
-            color={theme.secondaryText}
+            size={titleSize ? titleSize : getScaleSize(20)}
+            font={titleFont ? titleFont : FONTS.Lato.Bold}
+            color={titleColor ? titleColor : theme.secondaryText}
             style={{ marginBottom: getScaleSize(12) }}
           >
            {title ? title: "Account Created Successfully!" }
           </Text>
 }
           <Text
-            size={getScaleSize(14)}
-            font={FONTS.Lato.Medium}
-            color={theme.secondaryText}
+            size={
+              discriptionSize ? discriptionSize : getScaleSize(14)}
+            font={discriptionFont ? discriptionFont : FONTS.Lato.Medium}
+            color={discriptionColor ? discriptionColor : theme.secondaryText}
             align={"center"}
           >
             {discription ? discription: "Your account is under verification. Please wait while we complete the review process."}

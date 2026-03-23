@@ -30,20 +30,20 @@ export default function SubscriptionSuccessful(props: any) {
 
 
 
-    useEffect(() => {
-        setLoading(true);
-        setTimeout(() => {
-            fetchProfile().then(() => {
-                setLoading(false);
-            });
-        }, 2000);
-    }, []);
+    // useEffect(() => {
+    //     setLoading(true);
+    //     setTimeout(() => {
+    //         fetchProfile().then(() => {
+    //             setLoading(false);
+    //         });
+    //     }, 2000);
+    // }, []);
 
-    useEffect(() => {
-        if (subscriptionId) {
-            getSubscriptionData();
-        }
-    }, [subscriptionId]);
+    // useEffect(() => {
+    //     if (subscriptionId) {
+    //         getSubscriptionData();
+    //     }
+    // }, [subscriptionId]);
 
     async function getSubscriptionData() {
         try {

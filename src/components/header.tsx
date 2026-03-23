@@ -22,7 +22,8 @@ interface HeaderProps {
     },
     onPress?: () => void,
     icon?: any,
-    isFromRequest?: boolean
+    isFromRequest?: boolean,
+    rightIconContainerStyle?: any
 }
 
 const Header = (props: HeaderProps) => {
@@ -49,12 +50,12 @@ const Header = (props: HeaderProps) => {
                                 size={getScaleSize(24)}
                                 style={{ flex: 1.0 }}
                                 font={FONTS.Lato.Bold}
-                                color={theme._2C6587}>
+                                color={theme.primaryText}>
                                 {props.screenName}
                             </Text>
                         }
                         {props.rightIcon &&
-                            <TouchableOpacity style={styles(theme).flexRow} onPress={props.onPress}>
+                            <TouchableOpacity style={[styles(theme).flexRow,props.rightIconContainerStyle]} onPress={props.onPress}>
                                 <Image
                                     source={props.rightIcon.icon}
                                     style={[styles(theme).rightIcon, { tintColor: userType === 'service_provider' ? theme._F0B52C : theme._D32F2F }]} />
@@ -100,12 +101,12 @@ const Header = (props: HeaderProps) => {
                             </TouchableOpacity>
                         }
                         {props.rightIcon &&
-                            <TouchableOpacity style={styles(theme).flexRow} onPress={props.onPress}>
+                            <TouchableOpacity style={[styles(theme).flexRow,props.rightIconContainerStyle]} onPress={props.onPress}>
                                 <Image source={props.rightIcon.icon} style={styles(theme).rightIcon} />
                                 <Text
-                                    size={getScaleSize(16)}
-                                    font={FONTS.Lato.SemiBold}
-                                    color={theme._D32F2F}>
+                                    size={getScaleSize(12)}
+                                    font={FONTS.Lato.Bold}
+                                    color={theme._EF4444}>
                                     {props.rightIcon.title}
                                 </Text>
                             </TouchableOpacity>

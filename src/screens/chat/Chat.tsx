@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -9,32 +9,33 @@ import {
 } from 'react-native';
 
 //ASSETS
-import {FONTS, IMAGES} from '../../assets';
+import { FONTS, IMAGES } from '../../assets';
 
 //CONTEXT
-import {ThemeContext, ThemeContextType, AuthContext} from '../../context';
+import { ThemeContext, ThemeContextType, AuthContext } from '../../context';
 
 //CONSTANT
-import {getScaleSize, useString} from '../../constant';
+import { DummyData, getScaleSize, useString } from '../../constant';
 
 //COMPONENT
-import {Header, SearchComponent, Text} from '../../components';
+import { Header, SearchComponent, Text } from '../../components';
 
 //SERVICES
-import {listenToThreads} from '../../services/chat';
+import { listenToThreads } from '../../services/chat';
 
-import {SCREENS} from '..';
+import { SCREENS } from '..';
 import {
   listenToNegotiationThreads,
   removeDocument,
   removeThread,
 } from '../../services/negotiationchat';
 import RBSheet from 'react-native-raw-bottom-sheet';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Chat(props: any) {
   const STRING = useString();
-  const {theme} = useContext<any>(ThemeContext);
-  const {profile} = useContext<any>(AuthContext);
+  const { theme } = useContext<any>(ThemeContext);
+  const { profile } = useContext<any>(AuthContext);
   const mediaPickerSheetRef = useRef<any>(null);
 
   // const [threads, setThreads] = useState<ChatThread[]>([]);
@@ -86,7 +87,7 @@ export default function Chat(props: any) {
     mediaPickerSheetRef.current?.close();
   };
 
-  const ItemView = ({item}: {item: any}) => {
+  const ItemView = ({ item }: { item: any }) => {
     console.log('item', item);
     return (
       <TouchableOpacity
@@ -105,20 +106,22 @@ export default function Chat(props: any) {
         }}>
         <Image
           style={styles(theme).userImage}
-          source={
-            item?.user?.recipientPhoto
-              ? {uri: item?.user?.recipientPhoto}
-              : IMAGES.user_placeholder
-          }
+          // source={
+          //   item?.user?.recipientPhoto
+          //     ? {uri: item?.user?.recipientPhoto}
+          //     : IMAGES.user_placeholder
+          // }
+          source={item?.profile ? { uri: item?.profile } : IMAGES.user_placeholder}
         />
         <View style={styles(theme).threadContent}>
           <Text
             size={getScaleSize(16)}
             font={FONTS.Lato.Medium}
             color={theme._2B2B2B}>
-            {item?.user?.name}
+            {/* {item?.user?.name} */}
+            {item?.name}
           </Text>
-          <View style={{marginTop: getScaleSize(5)}} />
+          <View style={{ marginTop: getScaleSize(5) }} />
           <Text
             size={getScaleSize(12)}
             font={FONTS.Lato.Regular}
@@ -126,21 +129,22 @@ export default function Chat(props: any) {
             {item.message}
           </Text>
         </View>
-        {item?.readCount > 0 && (
-          <View style={styles(theme).messageContainer}>
-            <Text
-              size={getScaleSize(12)}
-              font={FONTS.Lato.Medium}
-              color={theme.white}>
-              {`${item?.readCount}`}
-            </Text>
-          </View>
-        )}
+        {
+          item?.readCount > 0 && (
+            <View style={styles(theme).messageContainer}>
+              <Text
+                size={getScaleSize(12)}
+                font={FONTS.Lato.Medium}
+                color={theme.white}>
+                {`${item?.readCount}`}
+              </Text>
+            </View>
+          )}
       </TouchableOpacity>
     );
   };
 
-  const ItemViewNegotiation = ({item}: {item: any}) => {
+  const ItemViewNegotiation = ({ item }: { item: any }) => {
     return (
       <TouchableOpacity
         style={styles(theme).itemNegotiationContainer}
@@ -160,7 +164,7 @@ export default function Chat(props: any) {
           style={styles(theme).serviceImage}
           source={
             item?.user?.servicePhoto
-              ? {uri: item?.user?.servicePhoto}
+              ? { uri: item?.user?.servicePhoto }
               : IMAGES.user_placeholder
           }
         />
@@ -171,14 +175,14 @@ export default function Chat(props: any) {
             color={theme._2B2B2B}>
             {item?.user?.serviceName}
           </Text>
-          <View style={{marginTop: getScaleSize(5)}} />
+          <View style={{ marginTop: getScaleSize(5) }} />
           <Text
             size={getScaleSize(12)}
             font={FONTS.Lato.Regular}
             color={theme._ACADAD}>
             {item?.message}
           </Text>
-          <View style={{marginTop: getScaleSize(5)}} />
+          <View style={{ marginTop: getScaleSize(5) }} />
           <View
             style={{
               flexDirection: 'row',
@@ -193,7 +197,7 @@ export default function Chat(props: any) {
               }}
               source={
                 item?.user?.recipientPhoto
-                  ? {uri: item?.user?.recipientPhoto}
+                  ? { uri: item?.user?.recipientPhoto }
                   : IMAGES.user_placeholder
               }
             />
@@ -259,17 +263,36 @@ export default function Chat(props: any) {
     }
   };
 
+  const insets = useSafeAreaInsets()
+
   return (
-    <View style={styles(theme).container}>
-      <Header type="profile" screenName={STRING.Chat} />
+    <View style={[styles(theme).container, { paddingTop: insets.top }]}>
+      <Text
+        size={getScaleSize(24)}
+        font={FONTS.Lato.Bold}
+        color={theme.primaryText}
+        style={{ marginHorizontal: getScaleSize(26) }}
+      >{"Chat"}</Text>
       <View style={styles(theme).searchContainer}>
         <SearchComponent
+          placeholder="Search for Services"
+          placeholderTextColor={theme._404040}
           value={searchQuery}
           onChangeText={(text: string) => searchFilterFunction(text)}
-          onPressMicrophone={() => {}}
+          onPressMicrophone={() => { }}
+          searchInputStyle={{
+            color: theme._404040,
+            fontSize: getScaleSize(16),
+            fontFamily: FONTS.Lato.Regular
+          }}
         />
+        <TouchableOpacity
+          style={styles(theme).filterButton}
+        >
+          <Image source={IMAGES.filterIcon} style={styles(theme).filterIcon} />
+        </TouchableOpacity>
       </View>
-      <View
+      {/* <View
         style={{
           flexDirection: 'row',
           justifyContent: 'space-between',
@@ -315,8 +338,8 @@ export default function Chat(props: any) {
             {'Negotiation'}
           </Text>
         </TouchableOpacity>
-      </View>
-      {selectedTab === 'chat' ? (
+      </View> */}
+      {/* {selectedTab === 'chat' ? (
         <View>
           <View style={{marginTop: getScaleSize(8)}} />
           <FlatList
@@ -334,7 +357,17 @@ export default function Chat(props: any) {
             renderItem={ItemViewNegotiation}
           />
         </View>
-      )}
+      )} */}
+
+      <View>
+
+        <FlatList
+          data={DummyData.chatListData}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={ItemView}
+          contentContainerStyle={styles(theme).contentContainerStyle}
+        />
+      </View>
 
       <RBSheet
         ref={mediaPickerSheetRef}
@@ -347,7 +380,7 @@ export default function Chat(props: any) {
         }}>
         <Image
           source={IMAGES.ic_alart}
-          style={[styles(theme).alartIcon, {marginBottom: getScaleSize(24)}]}
+          style={[styles(theme).alartIcon, { marginBottom: getScaleSize(24) }]}
         />
 
         <Text
@@ -396,10 +429,15 @@ export default function Chat(props: any) {
 
 const styles = (theme: ThemeContextType['theme']) =>
   StyleSheet.create({
-    container: {flex: 1, backgroundColor: theme.white},
+    container: { flex: 1, backgroundColor: theme._fafafa },
     scrolledContainer: {
       marginHorizontal: getScaleSize(22),
       flex: 1.0,
+    },
+    contentContainerStyle: {
+      paddingTop: getScaleSize(24),
+      gap: getScaleSize(14),
+      paddingHorizontal: getScaleSize(24)
     },
     buttonContainer: {
       gap: getScaleSize(16),
@@ -408,8 +446,23 @@ const styles = (theme: ThemeContextType['theme']) =>
       marginBottom: getScaleSize(8),
     },
     searchContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
       marginHorizontal: getScaleSize(22),
-      marginVertical: getScaleSize(24),
+      marginTop: getScaleSize(7),
+      // marginBottom: getScaleSize(24),
+      gap: getScaleSize(10)
+    },
+    filterButton: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.white,
+      borderRadius: getScaleSize(10),
+      padding: getScaleSize(13)
+    },
+    filterIcon: {
+      height: getScaleSize(24),
+      width: getScaleSize(24)
     },
     userImage: {
       height: getScaleSize(60),
@@ -422,11 +475,12 @@ const styles = (theme: ThemeContextType['theme']) =>
       borderRadius: getScaleSize(12),
     },
     itemContainer: {
-      marginBottom: getScaleSize(24),
+      // marginBottom: getScaleSize(24),
       flexDirection: 'row',
-      padding: getScaleSize(10),
+      paddingVertical: getScaleSize(10),
       borderRadius: getScaleSize(10),
-      marginHorizontal: getScaleSize(20),
+      // marginHorizontal: getScaleSize(20),
+      justifyContent: 'space-between'
     },
     itemNegotiationContainer: {
       marginBottom: getScaleSize(24),
@@ -450,7 +504,7 @@ const styles = (theme: ThemeContextType['theme']) =>
       width: getScaleSize(24),
       borderRadius: getScaleSize(12),
       alignSelf: 'center',
-      backgroundColor: theme._F0B52C,
+      backgroundColor: theme.primary,
       justifyContent: 'center',
       alignItems: 'center',
       marginRight: getScaleSize(2),

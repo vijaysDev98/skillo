@@ -21,11 +21,11 @@ export default function ManageSubscription(props: any) {
     const [subscriptionPlanDetails, setSubscriptionPlanDetails] = useState<any>({});
     const [isLoading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (profile?.has_purchased) {
-            getSubscriptionPlanDetails();
-        }
-    }, []);
+    // useEffect(() => {
+    //     if (profile?.has_purchased) {
+    //         getSubscriptionPlanDetails();
+    //     }
+    // }, []);
 
     async function getSubscriptionPlanDetails() {
         try {
@@ -46,113 +46,158 @@ export default function ManageSubscription(props: any) {
     }
 
     const renderSubscriptionPlanDetails = () => {
-        if (profile?.has_purchased) {
-            if (isLoading) {
-                return (
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                        <ActivityIndicator size="large" color={theme.primary} />
-                    </View>
-                )
-            } else {
-                return (
-                    <ScrollView showsVerticalScrollIndicator={false}>
-                        <View style={styles(theme).mainContainer}>
-                            <Text
-                                size={getScaleSize(19)}
+        // if (profile?.has_purchased) {
+        //     if (isLoading) {
+        //         return (
+        //             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        //                 <ActivityIndicator size="large" color={theme.primary} />
+        //             </View>
+        //         )
+        //     } else {
+        return (
+            <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={styles(theme).mainContainer}>
+                    <Text
+                        size={getScaleSize(16)}
+                        font={FONTS.Lato.SemiBold}
+                        color={theme.primaryText}>
+                        {STRING.active_Plan}
+                    </Text>
+                    <View style={styles(theme).planContainer}>
+                        <View>
+                            <Text size={getScaleSize(18)}
                                 font={FONTS.Lato.Bold}
-                                color={theme._214C65}>
-                                {STRING.active_Plan}
+                                color={theme.primaryText}
+                                style={{ marginBottom: getScaleSize(12) }}>
+                                {/* {subscriptionPlanDetails?.plan?.name ?? ''} */}
+                                {"Monthly"}
                             </Text>
-                            <View style={styles(theme).planContainer}>
-                                <Text size={getScaleSize(19)}
-                                    font={FONTS.Lato.Bold}
-                                    color={theme._214C65}
-                                    style={{ marginBottom: getScaleSize(12) }}>
-                                    {subscriptionPlanDetails?.plan?.name ?? ''}
-                                </Text>
-                                <Text size={getScaleSize(27)}
-                                    font={FONTS.Lato.ExtraBold}
-                                    color={theme._214C65}>
-                                    {`€${subscriptionPlanDetails?.plan?.price ?? '0.00'} `}
-                                    <Text size={getScaleSize(16)}
+                            <Text size={getScaleSize(27)}
+                                font={FONTS.Lato.Bold}
+                                color={theme.mainText}>
+                                {`P ${subscriptionPlanDetails?.plan?.price ?? '0.00'} `}
+                                {/* <Text size={getScaleSize(16)}
                                         font={FONTS.Lato.Medium}
                                         color={theme._214C65}>
                                         {STRING.monthly}
-                                    </Text>
-                                </Text>
-                            </View>
-                            <Text
-                                size={getScaleSize(14)}
-                                font={FONTS.Lato.Medium}
-                                color={theme._555555}>
-                                {'Enjoy exclusive benefits with your Premium Membership. From enhanced features to priority support, this plan unlocks the full experience tailored just for you.'}
+                                    </Text> */}
                             </Text>
-                            <View style={styles(theme).planDetailsContainer} >
-                                <Image source={IMAGES.ic_calander} style={styles(theme).calanderIcon} />
-                                <Text size={getScaleSize(16)}
-                                    font={FONTS.Lato.SemiBold}
-                                    align="center"
-                                    style={{ marginTop: getScaleSize(16), marginBottom: getScaleSize(8) }}
-                                    color={theme.primary}>
-                                    {`Your plan will end on ${subscriptionPlanDetails?.subscription_expires_at ? moment.utc(subscriptionPlanDetails?.subscription_expires_at).local().format('MMMM DD, YYYY') : ''}\nat ${subscriptionPlanDetails?.subscription_expires_at ? moment.utc(subscriptionPlanDetails?.subscription_expires_at).local().format('hh:mm A') : ''}`}
-                                </Text>
-                                <Text size={getScaleSize(14)}
-                                    font={FONTS.Lato.Medium}
-                                    align="center"
-                                    color={theme._424242}>
-                                    {`After that, you will be automatically billed €${subscriptionPlanDetails?.plan?.price ?? '0.00'}`}
-                                </Text>
-                            </View>
-                            <View style={styles(theme).flexView}>
-                                <Text size={getScaleSize(14)}
-                                    font={FONTS.Lato.Medium}
-                                    color={theme._555555}>
-                                    {STRING.next_payment}
-                                </Text>
-                                <Text size={getScaleSize(14)}
-                                    font={FONTS.Lato.SemiBold}
-                                    color={theme._0F232F}>
-                                    {subscriptionPlanDetails?.subscription_expires_at ? moment.utc(subscriptionPlanDetails?.subscription_expires_at).local().format('MMMM DD, YYYY') : ''}
-                                </Text>
-                            </View>
-                            {/* <View style={styles(theme).flexView}>
+                        </View>
+                        <Image source={IMAGES.radioCheck} style={{ width: getScaleSize(24), height: getScaleSize(24) }} />
+                    </View>
+                    <Text
+                        size={getScaleSize(12)}
+                        font={FONTS.Lato.Regular}
+                        color={theme._404040}>
+                        {'Enjoy exclusive benefits with your Premium Membership. From enhanced features to priority support, this plan unlocks the full experience tailored just for you.'}
+                    </Text>
+                    <View style={styles(theme).planDetailsContainer} >
+                        <Image source={IMAGES.ic_calander} style={styles(theme).calanderIcon} />
+                        <Text size={getScaleSize(18)}
+                            font={FONTS.Lato.SemiBold}
+                            align="center"
+                            style={{ marginTop: getScaleSize(16), marginBottom: getScaleSize(8) }}
+                            color={theme.primaryText}>
+                            {/* {`Your plan will end on ${subscriptionPlanDetails?.subscription_expires_at ? moment.utc(subscriptionPlanDetails?.subscription_expires_at).local().format('MMMM DD, YYYY') : ''}\nat ${subscriptionPlanDetails?.subscription_expires_at ? moment.utc(subscriptionPlanDetails?.subscription_expires_at).local().format('hh:mm A') : ''}`} */}
+                            {"Your plan will end on September 1, 2024 at 12:00 AM"}
+                        </Text>
+                        <Text size={getScaleSize(12)}
+                            font={FONTS.Lato.Regular}
+                            align="center"
+                            color={theme._404040}>
+                            {/* {`After that, you will be automatically billed P${subscriptionPlanDetails?.plan?.price ?? '0.00'}`} */}
+                            {"After that, you will be automatically billed $30"}
+                        </Text>
+                    </View>
+                    <View style={styles(theme).flexView}>
                         <Text size={getScaleSize(14)}
                             font={FONTS.Lato.Medium}
-                            color={theme._555555}>
+                            color={theme._404040}>
+                            {STRING.next_payment}
+                        </Text>
+                        <Text size={getScaleSize(14)}
+                            font={FONTS.Lato.SemiBold}
+                            color={theme.primaryText}>
+                            {/* {subscriptionPlanDetails?.subscription_expires_at ? moment.utc(subscriptionPlanDetails?.subscription_expires_at).local().format('MMMM DD, YYYY') : ''} */}
+                            {"September 1, 2024"}
+                        </Text>
+                    </View>
+                    <View style={styles(theme).flexView}>
+                        <Text size={getScaleSize(14)}
+                            font={FONTS.Lato.Medium}
+                            color={theme._404040}>
                             {STRING.payment_method}
                         </Text>
                         <Image source={IMAGES.ic_card} style={styles(theme).cardIcon} />
-                    </View> */}
-                            <View style={styles(theme).flexView}>
-                                <Text size={getScaleSize(14)}
-                                    font={FONTS.Lato.Medium}
-                                    color={theme._555555}>
-                                    {STRING.Total}
-                                </Text>
-                                <Text size={getScaleSize(14)}
-                                    font={FONTS.Lato.SemiBold}
-                                    color={theme._0F232F}>
-                                    {`€${subscriptionPlanDetails?.plan?.price ?? '0.00'}`}
-                                </Text>
-                            </View>
-                        </View>
-                    </ScrollView>
-                )
-            }
-        }
-        else {
-            return (
-                <EmptyView
-                    title={STRING.you_have_not_subscribed_to_any_plan}
-                    style={styles(theme).emptyView}
-                    onPressButton={() => {
-                        props.navigation.navigate(SCREENS.ChooseYourSubscription.identifier, {
-                            isFromSubscriptionButton: true,
-                        });
-                    }}
-                />
-            )
-        }
+                    </View>
+                    <View style={styles(theme).flexView}>
+                        <Text size={getScaleSize(14)}
+                            font={FONTS.Lato.Medium}
+                            color={theme._404040}>
+                            {STRING.Total}
+                        </Text>
+                        <Text size={getScaleSize(14)}
+                            font={FONTS.Lato.SemiBold}
+                            color={theme.primaryText}>
+                            {`P ${subscriptionPlanDetails?.plan?.price ?? '0.00'}`}
+                        </Text>
+                    </View>
+                </View>
+                <View style={{
+                    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: getScaleSize(24),
+                    marginTop: getScaleSize(100)
+                }}>
+                    <TouchableOpacity
+                        style={{
+                            backgroundColor: theme.white,
+                            borderColor: theme.primary,
+                            width: "48%",
+                            alignItems: 'center',
+                            borderWidth: 1,
+                            paddingVertical: getScaleSize(12),
+                            borderRadius: getScaleSize(10)
+                        }}
+                    >
+                        <Text
+                            size={getScaleSize(18)}
+                            font={FONTS.Lato.SemiBold}
+                            color={theme.primary}
+                        >{"Cancel"}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() =>
+                            props.navigation.navigate(SCREENS.ChooseYourSubscription.identifier, {
+                                isFromSubscriptionButton: true,
+                            })}
+                        style={{
+                            backgroundColor: theme.primary, borderColor: theme.primary, width: "48%", borderWidth: 1, paddingVertical: getScaleSize(12),
+                            borderRadius: getScaleSize(10), alignItems: 'center'
+                        }}
+                    >
+                        <Text
+                            size={getScaleSize(18)}
+                            font={FONTS.Lato.SemiBold}
+                            color={theme.white}
+                        >{"Manage Plan"}</Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
+        )
+        //     }
+        // }
+        // else {
+        //     return (
+        //         <EmptyView
+        //             title={STRING.you_have_not_subscribed_to_any_plan}
+        //             style={styles(theme).emptyView}
+        //             onPressButton={() => {
+        //                 props.navigation.navigate(SCREENS.ChooseYourSubscription.identifier, {
+        //                     isFromSubscriptionButton: true,
+        //                 });
+        //             }}
+        //         />
+        //     )
+        // }
     }
 
     return (
@@ -206,17 +251,19 @@ const styles = (theme: ThemeContextType['theme']) => StyleSheet.create({
         marginHorizontal: getScaleSize(24),
     },
     planContainer: {
-        backgroundColor: theme._FEF8EA,
+        backgroundColor: theme.white,
         borderRadius: getScaleSize(12),
         paddingVertical: getScaleSize(20),
         paddingHorizontal: getScaleSize(24),
         marginTop: getScaleSize(12),
         marginBottom: getScaleSize(18),
         borderWidth: 0.25,
-        borderColor: theme._BECFDA,
+        borderColor: theme._D9D9D9,
+        flexDirection: 'row',
+        justifyContent: 'space-between'
     },
     planDetailsContainer: {
-        backgroundColor: theme._EAF0F3,
+        backgroundColor: theme._FDEFEC,
         borderRadius: getScaleSize(12),
         paddingVertical: getScaleSize(24),
         paddingHorizontal: getScaleSize(36),

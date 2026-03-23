@@ -84,12 +84,16 @@ const VerificationDetails = (props: any) => {
 
     if (userType === userRoles.Service_Seeker_business) {
 
-      props.navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: SCREENS.Login.identifier }]
-        })
-      );
+      // props.navigation.dispatch(
+      //   CommonActions.reset({
+      //     index: 0,
+      //     routes: [{ name: SCREENS.Login.identifier }]
+      //   })
+      // );
+
+        props.navigation.navigate(SCREENS.ChooseYourSubscription.identifier, {
+                                  id: ""
+                              });
 
       return;
     }

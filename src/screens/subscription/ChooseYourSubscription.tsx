@@ -6,7 +6,7 @@ import { AuthContext, ThemeContext, ThemeContextType } from '../../context';
 
 //CONSTANT & ASSETS
 import { FONTS, IMAGES } from '../../assets';
-import { getScaleSize, useString, SHOW_TOAST } from '../../constant';
+import { getScaleSize, useString, SHOW_TOAST, DummyData } from '../../constant';
 
 //SCREENS
 import { SCREENS } from '..';
@@ -15,6 +15,8 @@ import { SCREENS } from '..';
 import { Header, Input, Text, Button } from '../../components';
 import { API } from '../../api';
 import { CommonActions } from '@react-navigation/native';
+
+
 
 export default function ChooseYourSubscription(props: any) {
 
@@ -27,9 +29,13 @@ export default function ChooseYourSubscription(props: any) {
     const [allPlans, setAllPlans] = useState([]);
     const [isLoading, setLoading] = useState(false);
 
+    // useEffect(() => {
+    //     getAllPlans();
+    // }, []);
+
     useEffect(() => {
-        getAllPlans();
-    }, []);
+        setAllPlans(DummyData.subscriptionPlansData)
+    }, [])
 
     useEffect(() => {
         const unsubscribe = props.navigation.addListener('beforeRemove', (e: any) => {
@@ -90,14 +96,14 @@ export default function ChooseYourSubscription(props: any) {
                         );
                     }
                 }}
-                screenName={STRING.choose_your_subscription}
+                screenName={"Select Plan"}
             />
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles(theme).mainContainer}>
                     <View style={styles(theme).subscriptionContainer}>
                         <Text size={getScaleSize(18)}
-                            font={FONTS.Lato.SemiBold}
-                            color={theme._939393}
+                            font={FONTS.Lato.Bold}
+                            color={theme.secondaryText}
                             style={{ marginBottom: getScaleSize(16) }}>
                             {STRING.select_the_plan_that_fits_your_activity_You_can_change_it_later_in_your_profile}
                         </Text>
@@ -116,77 +122,130 @@ export default function ChooseYourSubscription(props: any) {
                                         setSelectedPlan(item);
                                     }}
                                     style={styles(theme).subscriptionItem}>
-                                    <View style={[styles(theme).flexView, { marginBottom: getScaleSize(16) }]}>
-                                        <Text
-                                            size={getScaleSize(19)}
-                                            font={FONTS.Lato.Bold}
-                                            color={theme._214C65}>
-                                            {item.name ?? ''}
-                                        </Text>
-                                        <View>
-                                            {selectedPlan?.type === item?.type ?
-                                                <Image source={IMAGES.ic_check} style={styles(theme).selectedView} />
-                                                :
-                                                <View style={styles(theme).selectedView} />
+
+                                    <View
+                                        style={{
+                                            flexDirection: 'row',
+                                            gap: getScaleSize(16),
+                                        }}
+                                    >
+                                        <Image
+                                            source={selectedPlan?.id === item?.id ? IMAGES.radioCheck : IMAGES.radioUncheck}
+                                            style={styles(theme).radioIcon}
+                                        />
+                                        <View
+                                            style={{
+                                                flex: 1.0,
+                                            }}
+                                        >
+
+                                            <Text
+                                                size={getScaleSize(18)}
+                                                font={FONTS.Lato.Bold}
+                                            >{item?.label}</Text>
+                                            <Text
+                                                size={getScaleSize(24)}
+                                                font={FONTS.Lato.Bold}
+                                                color={theme.primary}
+                                            >{`P${item?.price}`}</Text>
+                                            <Text
+                                                size={getScaleSize(10)}
+                                                font={FONTS.Lato.Regular}
+                                                color={theme._404040}
+                                            >{"*Billed & recurring monthly cancel anytime"}</Text>
+
+                                            {
+                                                selectedPlan?.id === item?.id && (
+                                                    <View
+                                                        style={{}}
+                                                    >
+                                                        <View style={styles(theme).divider} />
+                                                        {item?.features.map((item: string, index: number) => {
+                                                            return (
+                                                                <View
+                                                                    style={styles(theme).featureContainer}
+                                                                >
+                                                                    <Image
+                                                                        source={IMAGES.planeVerifyIcon}
+                                                                        style={styles(theme).planeVerifyIcon}
+                                                                    />
+                                                                    <Text
+                                                                        size={getScaleSize(14)}
+                                                                        font={FONTS.Lato.SemiBold}
+                                                                        color={theme._404040}
+                                                                    >{item}</Text>
+                                                                </View>
+                                                            )
+                                                        })}
+                                                    </View>
+                                                )
                                             }
                                         </View>
+                                        <Image
+                                            source={selectedPlan?.id === item?.id ? IMAGES.up : IMAGES.down}
+                                            style={styles(theme).dropDownIcon}
+                                        />
                                     </View>
-                                    <Text
-                                        size={getScaleSize(18)}
-                                        font={FONTS.Lato.Medium}
-                                        color={theme._214C65}>
-                                        {item?.duration ?? ''}
-                                    </Text>
-                                    <Text
-                                        size={getScaleSize(19)}
-                                        font={FONTS.Lato.Bold}
-                                        color={theme._214C65}
-                                        style={{ marginVertical: getScaleSize(8) }}>
-                                        {`€${item?.price ?? '0.00'}`}
-                                    </Text>
-                                    <Text
-                                        size={getScaleSize(12)}
-                                        font={FONTS.Lato.Regular}
-                                        color={theme._214C65}>
-                                        {STRING.billed_recurring_monthly_cancel_anytime}
-                                    </Text>
                                 </TouchableOpacity>
                             )
                         })}
-                        <Text
-                            size={getScaleSize(11)}
-                            font={FONTS.Lato.Regular}
-                            color={theme._2C6587}
-                            lineHeight={getScaleSize(16)}>
-                            {STRING.subscribe_text}
-                        </Text>
                     </View>
                 </View>
             </ScrollView>
-            <TouchableOpacity
-                onPress={() => {
-                    props.navigation.dispatch(
-                        CommonActions.reset({
-                            index: 0,
-                            routes: [{
-                                name: SCREENS.BottomBar.identifier,
-                                params: { skipSubscription: true }
-                            }],
-                        }),
-                    );
-                }}>
-                <Text
-                    size={getScaleSize(14)}
-                    font={FONTS.Lato.SemiBold}
-                    color={theme._2C6587}
-                    align="center"
-                    style={{ marginBottom: getScaleSize(16) }}>
-                    {STRING.skip}
-                </Text>
-            </TouchableOpacity>
-            <Button
-                title={STRING.subscribe}
-                style={{ marginBottom: getScaleSize(24), marginHorizontal: getScaleSize(24) }}
+            <View
+                style={styles(theme).btnContainer}
+            >
+                <TouchableOpacity
+                    style={styles(theme).btnStyle}
+                    onPress={() => {
+                        props.navigation.dispatch(
+                            CommonActions.reset({
+                                index: 0,
+                                routes: [{
+                                    name: SCREENS.BottomBar.identifier,
+                                    params: { skipSubscription: true }
+                                }],
+                            }),
+                        );
+                    }}>
+                    <Text
+                        size={getScaleSize(14)}
+                        font={FONTS.Lato.SemiBold}
+                        color={theme._EC613D}
+                        align="center"
+                    >
+                        {STRING.skip}
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles(theme).btnStyle, { backgroundColor: theme.primary }]}
+                    onPress={() => {
+                        if (!selectedPlan) {
+                            SHOW_TOAST(STRING.please_select_a_plan, 'error');
+                        } else {
+                            // props.navigation.navigate(SCREENS.PaymentMethod.identifier, {
+                            //     plan: selectedPlan,
+                            //     isFromSubscriptionButton: isFromSubscriptionButton
+                            // });
+
+                            props.navigation.navigate(SCREENS.PaymentMethod.identifier, {
+                                planDetails: selectedPlan,
+                                isFromSubscriptionButton: isFromSubscriptionButton
+                            });
+                        }
+                    }}>
+                    <Text
+                        size={getScaleSize(14)}
+                        font={FONTS.Lato.SemiBold}
+                        color={theme.white}
+                        align="center"
+                    >
+                        {STRING.continue_to_pay}
+                    </Text>
+                </TouchableOpacity>
+                {/* <Button
+                title={STRING.continue_to_pay}
+                style={{width:'48%' }}
                 onPress={() => {
                     if (!selectedPlan) {
                         SHOW_TOAST(STRING.please_select_a_plan, 'error');
@@ -197,7 +256,8 @@ export default function ChooseYourSubscription(props: any) {
                         });
                     }
                 }}
-            />
+            /> */}
+            </View>
         </View>
     );
 }
@@ -241,16 +301,44 @@ const styles = (theme: ThemeContextType['theme']) =>
             paddingHorizontal: getScaleSize(20),
             marginBottom: getScaleSize(20)
         },
-        flexView: {
+        btnContainer: {
             flexDirection: 'row',
+            alignItems: 'center',
             justifyContent: 'space-between',
-            alignItems: 'center'
+            paddingHorizontal: getScaleSize(24),
+            paddingBottom: getScaleSize(20)
         },
-        selectedView: {
-            width: getScaleSize(24),
-            height: getScaleSize(24),
-            borderRadius: getScaleSize(24),
+
+        btnStyle: {
+            width: '48%',
+            paddingVertical: getScaleSize(14),
+            borderRadius: getScaleSize(10),
             borderWidth: 1,
-            borderColor: theme._2C6587
+            borderColor: theme._EC613D
+        },
+        featureContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: getScaleSize(16),
+            marginBottom: getScaleSize(14)
+        },
+        dropDownIcon: {
+            height: getScaleSize(24),
+            width: getScaleSize(24),
+            tintColor: theme._8C8C8C
+        },
+        divider: {
+            marginVertical: getScaleSize(20),
+            height: getScaleSize(1),
+            backgroundColor: "#CCCCCC73",
+            width: '100%'
+        },
+        planeVerifyIcon: {
+            width: getScaleSize(20),
+            height: getScaleSize(20)
+        },
+        radioIcon: {
+            height: getScaleSize(24),
+            width: getScaleSize(24)
         }
     });

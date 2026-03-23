@@ -25,7 +25,10 @@ export default function Otp(props: any) {
     const isFromSignup = props?.route?.params?.isFromSignup || false;
     // const isPhoneNumber = props?.route?.params?.isPhoneNumber || false;
     // const countryCode = props?.route?.params?.countryCode || '+91';
-    const email = props?.route?.params?.email || '';
+    const { email, type } = props?.route?.params || {};
+
+    console.log("email", email);
+    console.log("type", type);
 
     const { theme } = useContext<any>(ThemeContext);
     const otpInput = useRef<OTPTextInput>(null);
@@ -55,23 +58,28 @@ export default function Otp(props: any) {
 
 
     async function onOtp() {
+        if (type == "emailChange") {
+            console.log("ajbcdbabjskbbkj")
+            props.navigation.goBack();
+            return;
+        }
         // props.navigation.navigate(SCREENS.CreatePassword.identifier, {
         //                         email: email,
         //                     })
         if (isFromSignup) {
             // onSignup()
-             props.navigation.navigate(SCREENS.CreatePassword.identifier, {
-                        email: email,
-                        // isPhoneNumber: isPhoneNumber,
-                        // countryCode: countryCode,
-                    });
+            props.navigation.navigate(SCREENS.CreatePassword.identifier, {
+                email: email,
+                // isPhoneNumber: isPhoneNumber,
+                // countryCode: countryCode,
+            });
         } else {
             // onNewPassword();
-             props.navigation.navigate(SCREENS.NewPassword.identifier, {
-                        email: email,
-                        // isPhoneNumber: isPhoneNumber,
-                        // countryCode: countryCode,
-                    });
+            props.navigation.navigate(SCREENS.NewPassword.identifier, {
+                email: email,
+                // isPhoneNumber: isPhoneNumber,
+                // countryCode: countryCode,
+            });
         }
     }
 
@@ -221,57 +229,71 @@ export default function Otp(props: any) {
                 onBack={() => {
                     props.navigation.goBack();
                 }}
-                screenName={STRING.otp.title}
+                screenName={type == "emailChange" ? "Email Verification" : STRING.otp.title}
             />
             {/* <KeyboardAvoidingView
             style={{flex:1}}
             > */}
             {/* <ScrollView showsVerticalScrollIndicator={false}> */}
-                <View style={styles(theme).mainContainer}>
+            <View style={styles(theme).mainContainer}>
+                <Text
+                    size={getScaleSize(16)}
+                    font={FONTS.Lato.SemiBold}
+                    color={theme.secondaryText}
+                    style={{ marginBottom: getScaleSize(32) }}
+                >
+                    {type === "emailChange" ? (
+                        <>
+                            Enter the 6-digit code we sent to your email{" "}
+                            <Text
+                                size={getScaleSize(16)}
+                                font={FONTS.Lato.SemiBold} // 👈 optional highlight
+                                color={theme._111111}
+                            >
+                                {email}
+                            </Text>{" "}
+                            to change the email
+                        </>
+                    ) : (
+                        STRING.otp.subTitle
+                    )}
+                </Text>
+                <View style={styles(theme).inputContainer}>
                     <Text
                         size={getScaleSize(16)}
-                        font={FONTS.Lato.SemiBold}
-                        color={theme.secondaryText}
-                        style={{ marginBottom: getScaleSize(32) }}
-                    >
-                        {STRING.otp.subTitle}
+                        font={FONTS.Lato.Medium}
+                        color={theme.primaryText}
+                        style={{ marginBottom: getScaleSize(8) }}>
+                        {STRING.otp.code}
                     </Text>
-                    <View style={styles(theme).inputContainer}>
-                        <Text
-                            size={getScaleSize(16)}
-                            font={FONTS.Lato.Medium}
-                            color={theme.primaryText}
-                            style={{ marginBottom: getScaleSize(8) }}>
-                            {STRING.otp.code}
-                        </Text>
-                       
-                        <OTPTextInput
-                            ref={otpInput}
-                            inputCount={6}
-                            handleTextChange={(val: string) => {
-                                setOtp(val);
-                                setOtpError('');
-                            }}
-                            tintColor={theme.primary} // active border
-                            offTintColor={theme._BFBFBF} // inactive border
-                            textInputStyle={
-                                styles(theme).textInput
-                            }
-                        />
-                        {otpError &&
-                            <Text
-                                style={{ marginTop: getScaleSize(8) }}
-                                size={getScaleSize(16)}
-                                font={FONTS.Lato.Regular}
-                                color={theme.mainText}
-                                align="center"
-                                >
-                                {otpError}
-                            </Text>
+
+                    <OTPTextInput
+                        ref={otpInput}
+                        inputCount={6}
+                        handleTextChange={(val: string) => {
+                            setOtp(val);
+                            setOtpError('');
+                        }}
+                        tintColor={theme.primary} // active border
+                        offTintColor={theme._BFBFBF} // inactive border
+                        textInputStyle={
+                            styles(theme).textInput
                         }
-                    </View>
+                    />
+                    {otpError &&
+                        <Text
+                            style={{ marginTop: getScaleSize(8) }}
+                            size={getScaleSize(16)}
+                            font={FONTS.Lato.Regular}
+                            color={theme.mainText}
+                            align="center"
+                        >
+                            {otpError}
+                        </Text>
+                    }
                 </View>
-            
+            </View>
+
             <View style={styles(theme).resendOtpView}>
                 {isResendDisabled ? (
                     <Text
@@ -279,13 +301,13 @@ export default function Otp(props: any) {
                         color={theme.mainText}
                         size={getScaleSize(16)}
                         align="center">
-                        Resend - 
+                        Resend -
                         <Text
-                        font={FONTS.Lato.SemiBold}
-                        color={theme._8C8C8C}
-                        size={getScaleSize(16)}
-                        align="center">
-                             {` 00:${timer} Sec`}
+                            font={FONTS.Lato.SemiBold}
+                            color={theme._8C8C8C}
+                            size={getScaleSize(16)}
+                            align="center">
+                            {` 00:${timer} Sec`}
                         </Text>
                     </Text>
                 ) : (
@@ -310,7 +332,7 @@ export default function Otp(props: any) {
                 // disabled={!otp}
                 style={{ marginBottom: getScaleSize(24), marginHorizontal: getScaleSize(24) }}
                 onPress={() => {
-                    onOtp();
+                        onOtp()
                 }}
             />
         </View>

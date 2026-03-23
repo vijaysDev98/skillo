@@ -85,11 +85,12 @@ export default function BottomSheet(props: BottomSheetProps) {
                     <View style={styles(theme).statusContainer}>
                         <Image source={IMAGES.ic_file_sucess} style={[styles(theme).alartIcon, { marginBottom: getScaleSize(24) }]} />
                         <Text
-                            size={getScaleSize(22)}
-                            font={FONTS.Lato.SemiBold}
+                            size={getScaleSize(16)}
+                            font={FONTS.Lato.Bold}
                             align="center"
-                            color={theme._555555}
-                            style={{ lineHeight: getScaleSize(30) }}>
+                            color={theme.primaryText}
+                            // style={{ lineHeight: getScaleSize(30) }}
+                            >
                             {title}
                         </Text>
                     </View>
@@ -131,18 +132,18 @@ export default function BottomSheet(props: BottomSheetProps) {
                     <View style={styles(theme).statusContainer}>
                         <Image source={IMAGES.ic_review} style={[styles(theme).alartIcon, { marginBottom: getScaleSize(16) }]} />
                         <Text
-                            size={getScaleSize(24)}
-                            font={FONTS.Lato.SemiBold}
+                            size={getScaleSize(16)}
+                            font={FONTS.Lato.Bold}
                             align="center"
-                            color={theme._323232}>
+                            color={theme.primaryText}>
                             {title}
                         </Text>
                         <Text
-                            size={getScaleSize(19)}
+                            size={getScaleSize(14)}
                             style={{ marginTop: getScaleSize(16) }}
                             font={FONTS.Lato.Medium}
                             align="center"
-                            color={theme._424242}>
+                            color={theme._404040}>
                             {description}
                         </Text>
                     </View>
@@ -155,7 +156,7 @@ export default function BottomSheet(props: BottomSheetProps) {
                             size={getScaleSize(22)}
                             font={FONTS.Lato.SemiBold}
                             align="center"
-                            color={theme._2C6587}>
+                            color={theme.primaryText}>
                             {title}
                         </Text>
                         <Text

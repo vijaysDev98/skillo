@@ -13,13 +13,13 @@ export default function TransactionItem(props: any) {
 
     function getStatus(status: any) {
         if (status === 'SUCCESS') {
-            return theme._00B500;
+            return theme.successText;
         } else if (status === 'FAILED') {
-            return theme._D32F2F;
+            return theme._EF4444;
         } else if (status === 'PENDING') {
-            return theme._FFBB4E;
+            return theme._F0B52C;
         } else {
-            return theme._FFBB4E;
+            return theme._F0B52C;
         }
     }
     return (
@@ -30,22 +30,23 @@ export default function TransactionItem(props: any) {
                 <View style={[styles(theme).transactionItemImage, { backgroundColor: theme._D5D5D5 }]} />
             )}
             <View style={styles(theme).transactionItemDetails}>
-                <Text size={getScaleSize(19)} font={FONTS.Lato.Medium} color={theme._2B2B2B}>
+                <Text size={getScaleSize(14)} font={FONTS.Lato.Medium} color={theme.primaryText}>
                     {item?.user?.name ?? ''}
                 </Text>
-                <Text size={getScaleSize(16)} font={FONTS.Lato.SemiBold} color={theme._818285}>
-                    {item?.date ? moment.utc(item?.date).local().format('DD MMM YYYY, hh:mm A') : ''}
+                <Text size={getScaleSize(10)} font={FONTS.Lato.Medium} color={theme._404040}>
+                    {item?.date ? moment.utc(item?.date).local().format('DD MMM, HH:MM') : ''}
                 </Text>
             </View>
             <View style={styles(theme).transactionStatusContainer}>
-                <Text size={getScaleSize(16)} font={FONTS.Lato.SemiBold} color={theme._787878}>
-                    {item?.amount ? `€${parseFloat(item?.amount).toFixed(2)}` : '€0'}
+                <Text size={getScaleSize(16)} font={FONTS.Lato.SemiBold} color={theme._8C8C8C}>
+                    {item?.amount ? `P${parseFloat(item?.amount).toFixed(2)}` : 'P0'}
                 </Text>
                 <Text
-                    size={getScaleSize(16)}
+                    size={getScaleSize(14)}
                     font={FONTS.Lato.SemiBold}
                     color={getStatus(item?.status)}>
-                    {item?.status ?? ''}
+                    {/* {item?.status ?? ''} */}
+                    {item?.status?.charAt(0).toUpperCase() + item?.status?.slice(1).toLowerCase()}
                 </Text>
             </View>
         </View>

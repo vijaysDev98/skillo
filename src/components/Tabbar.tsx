@@ -254,23 +254,23 @@ function Tabbar(props: any) {
   if (userType === 'service_provider') {
     return (
       // <SafeAreaView style={{ backgroundColor: 'transparent' }}>
-        <View style={[styles(theme).mainContainer]}>
-          {renderView()}
-        </View>
+      <View style={[styles(theme).mainContainer]}>
+        {renderView()}
+      </View>
       // </SafeAreaView>
     )
   }
   else {
     return (
-        <ImageBackground style={[styles(theme).mainView,
-        { height: TABBAR_HEIGHT  }
-        ]}
-          resizeMode='cover'
-          source={IMAGES.ic_tab_bar}>
-          {/* <SafeAreaView edges={['bottom']}> */}
-            {renderView()}
-          {/* </SafeAreaView> */}
-        </ImageBackground>
+      <ImageBackground style={[styles(theme).mainView,
+      { height: TABBAR_HEIGHT }
+      ]}
+        resizeMode='cover'
+        source={IMAGES.ic_tab_bar}>
+        {/* <SafeAreaView edges={['bottom']}> */}
+        {renderView()}
+        {/* </SafeAreaView> */}
+      </ImageBackground>
     )
   }
   // return (
@@ -395,8 +395,8 @@ const Item = (props: any) => {
             zIndex: 10,
           }}>
           <Image
-            style={{ height: getScaleSize(55), width: getScaleSize(55), }}
-            resizeMode="contain"
+            style={{ height: getScaleSize(55), width: getScaleSize(55) }}
+            resizeMode="cover"
             source={IMAGES.plus}
           />
         </TouchableOpacity>
@@ -421,7 +421,7 @@ const Item = (props: any) => {
                   source={images[props.index]}
                 />
                 <Text
-                  style={{ marginTop: getScaleSize(8) }}
+                  style={{ marginTop: getScaleSize(4) }}
                   size={getScaleSize(14)}
                   font={FONTS.Lato.Bold}
                   color={theme.primary}
@@ -469,7 +469,7 @@ const styles = (theme: ThemeContextType['theme']) =>
       width: SCREEN_WIDTH,
       // backgroundColor: theme.white,
       // position: 'absolute',
-      // bottom: 0,
+      // bottom: 10,
       // left: 0,
       // right: 0,
     },
@@ -488,7 +488,7 @@ const styles = (theme: ThemeContextType['theme']) =>
       flex: 1,
       justifyContent: 'flex-start',
       alignItems: 'center',
-      paddingTop: getScaleSize(10),
+      // paddingTop: getScaleSize(10),
     },
     itemImageSelected: {
       height: getScaleSize(24),
@@ -500,7 +500,7 @@ const styles = (theme: ThemeContextType['theme']) =>
       height: getScaleSize(24),
       width: getScaleSize(24),
       alignSelf: 'center',
-      tintColor:theme._8C8C8C
+      tintColor: theme._8C8C8C
       // marginTop: getScaleSize(45)
     },
     tabText: {

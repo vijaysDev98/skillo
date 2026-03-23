@@ -195,94 +195,13 @@ export default function Request(props: any) {
       </View>
     );
   }
+  console.log("selectedFilter", requestData?.selectedFilter)
 
-  // function renderFlatList() {
-  //   console.log('requestData?.isLoading', requestData?.isLoading);
-  //   // if (requestData?.allRequests?.length > 0) {
-  //     return (
-  //       <FlatList
-  //         // data={requestData?.allRequests || []}
-  //         data={[]}
-  //         contentContainerStyle={{paddingBottom: getScaleSize(50)}}
-  //         showsVerticalScrollIndicator={false}
-  //         keyExtractor={(item: any, index: number) => index.toString()}
-  //         onEndReached={loadMore}
-  //         onEndReachedThreshold={0.1}
-  //         ListEmptyComponent={listEmptyComponent}
-  //         ListFooterComponent={
-  //           requestData?.isMoreLoading ? (
-  //             <ActivityIndicator
-  //               size="large"
-  //               color={theme.primary}
-  //               style={{margin: 20}}
-  //             />
-  //           ) : null
-  //         }
-  //         renderItem={({item}) => (
-  //           <RequestItem
-  //             selectedFilter={requestData?.selectedFilter}
-  //             onPress={() => {
-  //               if(item?.status?.toLowerCase() === 'expired') {
-
-  //               } else {
-  //               props.navigation.navigate(SCREENS.RequestDetails.identifier, {
-  //                   item: item
-  //                 })
-  //               }
-  //             }}
-  //             item={item}
-  //           />
-  //         )}
-
-  //       />
-  //     );
-  //   // } 
-  //   // else if (requestData?.isLoading) {
-  //   //   return (
-  //   //     <View style={styles(theme).emptyView}>
-  //   //       <ActivityIndicator
-  //   //         size="large"
-  //   //         color={theme.primary}
-  //   //         style={{margin: 20}}
-  //   //       />
-  //   //     </View>
-  //   //   );
-  //   // } 
-  //   // else {
-  //   //   return (
-  //   //     <View style={styles(theme).emptyView}>
-  //   //       <Image style={styles(theme).emptyImage} source={IMAGES.empty} />
-  //   //       <Text
-  //   //         size={getScaleSize(16)}
-  //   //         font={FONTS.Lato.SemiBold}
-  //   //         align="center"
-  //   //         color={theme._939393}
-  //   //         style={{
-  //   //           marginTop: getScaleSize(42),
-  //   //           textAlign: 'center',
-  //   //           alignSelf: 'center',
-  //   //         }}>
-  //   //         {STRING.Youhavenotcreatedanyrequest}
-  //   //       </Text>
-  //   //       <TouchableOpacity
-  //   //         style={styles(theme).btnRequestService}
-  //   //         activeOpacity={1}
-  //   //         onPress={() => {
-  //   //           props.navigation.navigate(SCREENS.CreateRequest.identifier);
-  //   //         }}>
-  //   //         <Text
-  //   //           size={getScaleSize(19)}
-  //   //           font={FONTS.Lato.Bold}
-  //   //           color={theme.white}>
-  //   //           {STRING.Requestaservice}
-  //   //         </Text>
-  //   //       </TouchableOpacity>
-  //   //     </View>
-  //   //   );
-  //   // }
-  // }
-
-
+  const listdata = requestData?.selectedFilter?.filter == "all" ?
+    DummyData.requestData?.allRequests :
+    requestData?.selectedFilter?.filter == "completed" ?
+      DummyData.requestData?.completedRequests :
+      DummyData.requestData?.cancelRequest
 
   return (
     <View style={[styles(theme).container, { paddingTop: insets.top }]}>
@@ -298,13 +217,13 @@ export default function Request(props: any) {
         }}>
         <SearchComponent
           value={requestData?.searchValue}
-        // onChangeText={(text: string) => {
-        //   setRequestData((prev: any) => ({
-        //     ...prev,
-        //     searchValue: text,
-        //   }));
+        onChangeText={(text: string) => {
+          setRequestData((prev: any) => ({
+            ...prev,
+            searchValue: text,
+          }));
         //   debouncedSearch(text);
-        // }}
+        }}
         />
       </View>
       <View style={{ marginVertical: getScaleSize(18) }}>
@@ -365,7 +284,7 @@ export default function Request(props: any) {
       </View>
       <FlatList
         // data={requestData?.allRequests || []}
-        data={DummyData.requestData?.allRequests}
+        data={listdata}
         contentContainerStyle={{ paddingBottom: getScaleSize(50), paddingHorizontal: getScaleSize(24), gap: getScaleSize(20) }}
         showsVerticalScrollIndicator={false}
         keyExtractor={(item: any, index: number) => index.toString()}
@@ -386,11 +305,21 @@ export default function Request(props: any) {
             <RequestItem
               serviceImag={{ uri: item?.image }}
               serviceName={item?.title}
+              item={item}
               serviceSubTitle={item?.subTitle}
               handleOnPress={() => {
                 if (item?.status?.toLowerCase() === 'expired') {
 
-                } else {
+                }
+                else if(item?.status?.toLowerCase() === 'cancelled'){
+ props.navigation.navigate(SCREENS.RequestDetails.identifier, {
+                  item: item,
+                  title: "Task Details",
+                  isCanceled:true,
+                  serviceStatus:item?.status
+                })
+                }
+                else {
                   props.navigation.navigate(SCREENS.ProvideRequest.identifier, {
                     item: item
                   })
@@ -401,6 +330,29 @@ export default function Request(props: any) {
               jobDate={item?.jobDate}
               jobTime={item?.jobTime}
               address={`${item?.address?.banglo} ${item?.address?.city}, ${item?.address?.state}, ${item?.address?.country}`}
+              handleRaiseDispute={() => {
+                props.navigation.navigate(SCREENS.RequestDetails.identifier, {
+                  item: item,
+                  title: "Task Details",
+                  isDisputed: false,
+                  serviceStatus:item?.status
+                })
+              }}
+              handleRate={() => {
+                props.navigation.navigate(SCREENS.RequestDetails.identifier, {
+                  item: item,
+                  title: "Task Details",
+                  isDisputed: false,
+                  serviceStatus:item?.status
+                })
+              }}
+              handleDisputeStatus={() => {
+                props.navigation.navigate(SCREENS.RequestDetails.identifier, {
+                  title: "Task Details",
+                  isDisputed: true,
+                  serviceStatus:item?.status
+                })
+              }}
             // selectedFilter={requestData?.selectedFilter}
             // onPress={() => {
             //   if (item?.status?.toLowerCase() === 'expired') {

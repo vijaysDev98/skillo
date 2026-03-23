@@ -49,6 +49,15 @@
 		<string>Lato-Regular.ttf</string>
 		<string>Lato-Thin.ttf</string>
 		<string>Lato-ThinItalic.ttf</string>
+		<string>manrope-semibold.otf</string>
+		<string>manrope-medium.otf</string>
+		<string>manrope-bold.otf</string>
+		<string>manrope-light.otf</string>
+		<string>manrope-thin.otf</string>
+		<string>manrope-extrabold.otf</string>
+		<string>manrope-regular.otf</string>
+		<string>Lato-SemiBold.ttf</string>
+		<string>Lato-Medium.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

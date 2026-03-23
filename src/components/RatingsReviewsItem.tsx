@@ -36,8 +36,13 @@ export default function RatingsReviewsItem(props: any) {
     return (
         <View style={[styles(theme).itemContainer, itemContainer]}>
             <View style={styles(theme).flexView}>
-                {item?.profile_photo_url ?
+                {/* {item?.profile_photo_url ?
                     <Image source={{ uri: item?.profile_photo_url }} style={styles(theme).profileIcon} />
+                    :
+                    <Image source={IMAGES.user_placeholder} style={styles(theme).profileIcon} />
+                } */}
+                {item?.user_profile_photo_url ?
+                    <Image source={{ uri: item?.user_profile_photo_url }} style={styles(theme).profileIcon} />
                     :
                     <Image source={IMAGES.user_placeholder} style={styles(theme).profileIcon} />
                 }
@@ -46,14 +51,16 @@ export default function RatingsReviewsItem(props: any) {
                         size={getScaleSize(16)}
                         font={FONTS.Lato.SemiBold}
                         color={theme._2B2B2B}>
-                        {item?.name ? item?.name : item?.full_name ?? ''}
+                        {/* {item?.name ? item?.name : item?.full_name ?? ''} */}
+                        {item?.user_name ? item?.user_name : item?.full_name ?? ''}
                     </Text>
                     <Text
                         size={getScaleSize(14)}
                         font={FONTS.Lato.Medium}
                         color={theme._6D6D6D}
                     >
-                        {formatDaysAgo(item?.days_ago)}
+                        {/* {formatDaysAgo(item?.days_ago)} */}
+                       { moment(item.days_ago).fromNow()}
                     </Text>
 
                 </View>

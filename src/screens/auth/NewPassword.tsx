@@ -138,6 +138,7 @@ export default function NewPassword(props: any) {
                         style={{ marginBottom: getScaleSize(20) }}>
                         {STRING.Your_new_password_must_be_different_from_previously_used_passwords}
                     </Text>
+                    <View style={{ gap: getScaleSize(16) }}>
                     <Input
                         placeholder={STRING.enter_new_password}
                         placeholderTextColor={theme._939393}
@@ -177,6 +178,7 @@ export default function NewPassword(props: any) {
                         }}
                         isError={confirmPasswordError}
                     />
+                    </View>
                 </View>
             </ScrollView>
             <Button

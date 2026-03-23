@@ -256,7 +256,7 @@ export default function TransactionsElder(props: any) {
 
                 {/* STATUS */}
                 <View style={styles(theme).filterView}>
-                    <Text size={14} font={FONTS.Lato.Medium} color={theme._2B2B2B}>
+                    <Text size={12} font={FONTS.Lato.SemiBold} color={theme._8C8C8C}>
                         {requestData.selectedStatus.title === 'All'
                             ? 'Status'
                             : requestData.selectedStatus.title}
@@ -302,10 +302,20 @@ export default function TransactionsElder(props: any) {
                         </TouchableOpacity>
                     </Tooltip>
                 </View>
+                 {/* Payment Method */}
+                <View style={styles(theme).filterView}>
+                    <Text size={12} font={FONTS.Lato.SemiBold} color={theme._8C8C8C}>
+                        {"Payment Method"}
+                    </Text>
+
+                    <TouchableOpacity onPress={() => setOpen(true)}>
+                        <Image source={IMAGES.ic_down} style={styles(theme).downIcon} />
+                    </TouchableOpacity>
+                </View>
 
                 {/* DATE */}
                 <View style={styles(theme).filterView}>
-                    <Text size={14} font={FONTS.Lato.Medium} color={theme._2B2B2B}>
+                    <Text size={12} font={FONTS.Lato.SemiBold} color={theme._8C8C8C}>
                         {`${requestData.startDate
                             ? new Date(requestData.startDate).toLocaleDateString()
                             : 'date'}${requestData.endDate
@@ -329,15 +339,15 @@ export default function TransactionsElder(props: any) {
                 renderSectionHeader={({ section }: any) => (
                     <View style={styles(theme).sectionHeaderContainer}>
                         <View style={{ flex: 1 }}>
-                            <Text size={16} font={FONTS.Lato.Medium} color={theme._2C6587}>
+                            <Text size={16} font={FONTS.Lato.Medium} color={theme.mainText}>
                                 {section.title.year}
                             </Text>
-                            <Text size={24} font={FONTS.Lato.Bold} color={theme._2C6587}>
+                            <Text size={20} font={FONTS.Lato.Bold} color={theme.mainText}>
                                 {section.title.month}
                             </Text>
                         </View>
-                        <Text size={24} font={FONTS.Lato.Bold} color={theme._2C6587}>
-                            {`€${section.title.total.toFixed(2)}`}
+                        <Text size={24} font={FONTS.Lato.Bold} color={theme.mainText}>
+                            {`P${section.title.total.toFixed(2)}`}
                         </Text>
                     </View>
                 )}
@@ -397,11 +407,12 @@ const styles = (theme: ThemeContextType['theme']) => StyleSheet.create({
         width: getScaleSize(18),
         height: getScaleSize(18),
         marginLeft: getScaleSize(10),
+        tintColor: theme._8C8C8C,
     },
     sectionHeaderContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: theme._EAF0F3,
+        backgroundColor: theme._FDEFEC,
         paddingVertical: getScaleSize(13),
         paddingHorizontal: getScaleSize(22),
         marginTop: getScaleSize(20),

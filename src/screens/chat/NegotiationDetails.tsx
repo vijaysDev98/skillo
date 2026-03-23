@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useMemo, useRef, useState} from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   StatusBar,
@@ -18,19 +18,19 @@ import {
 } from 'react-native';
 
 //ASSETS
-import {FONTS, IMAGES} from '../../assets';
+import { FONTS, IMAGES } from '../../assets';
 
 //CONTEXT
-import {ThemeContext, ThemeContextType, AuthContext} from '../../context';
+import { ThemeContext, ThemeContextType, AuthContext } from '../../context';
 
 //CONSTANT
-import {getScaleSize, SHOW_TOAST, useString} from '../../constant';
+import { DummyData, getScaleSize, SHOW_TOAST, useString } from '../../constant';
 
 //COMPONENT
-import {Text} from '../../components';
+import { PaymentBottomPopup, Text } from '../../components';
 
 //PACKAGES
-import {useFocusEffect} from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   acceptNegotiation,
   messagesListThread,
@@ -38,19 +38,31 @@ import {
   removeThread,
   userNegotiationMessage,
 } from '../../services/negotiationchat';
-import {API} from '../../api';
+import { API } from '../../api';
 import RBSheet from 'react-native-raw-bottom-sheet';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SCREENS } from '..';
+
+export const paymentDummyData = {
+  serviceAmount: {
+    finalize_quote_amount: 300,   // Finalized Quote
+    platform_fees: 30,            // Platform Fee (10%)
+    total_renegotiated: 337,      // Total Amount
+  },
+};
 
 export default function NegotiationDetails(props: any) {
   const STRING = useString();
-  const {theme} = useContext<any>(ThemeContext);
-  const {profile} = useContext<any>(AuthContext);
-  const peerUser = props?.route?.params?.peerUser;
+  const { theme } = useContext<any>(ThemeContext);
+  const { profile } = useContext<any>(AuthContext);
+  // const peerUser = props?.route?.params?.peerUser;
+  const peerUser = DummyData.NegotiationScreenData.peerUser;
   // const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<any[]>([]);
+  const [msg, setMsg] = useState('');
   const [loadingMessages, setLoadingMessages] = useState(true);
   const [loading, setLoading] = useState(false);
-  // const [isSending, setIsSending] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const mediaPickerSheetRef = useRef<any>(null);
 
   const [buttonDisabled, setButtonDisabled] = useState(false);
@@ -64,6 +76,9 @@ export default function NegotiationDetails(props: any) {
     props?.route?.params?.conversationId || '',
   );
 
+  const insets = useSafeAreaInsets();
+  const paymentRef = useRef<any>(null);
+
   const peerUserId = peerUser?.user_id;
   const peerUserName = peerUser?.name;
   const peerUserAvatar = peerUser?.avatarUrl;
@@ -76,6 +91,11 @@ export default function NegotiationDetails(props: any) {
     [],
   );
 
+  useEffect(() => {
+    setMessages(DummyData.NegotiationScreenData?.dummyNegotiationMessages);
+    setLoadingMessages(false);
+  }, []);
+
   useFocusEffect(
     React.useCallback(() => {
       if (Platform.OS === 'android') {
@@ -85,28 +105,28 @@ export default function NegotiationDetails(props: any) {
     }, [theme.white]),
   );
 
-  useEffect(() => {
-    // chat found, so we need to get the messages
-    setCommanId(props.route.params.conversationId);
-    const unsubscribe = messagesListThread(
-      props.route.params.conversationId,
-    ).onSnapshot(querySnapshot => {
-      const formattedMessages = querySnapshot.docs.map((doc: any) => {
-        return {
-          _id: doc.id,
-          text: '',
-          createdAt: new Date().getTime(),
-          ...doc.data(),
-        };
-      });
-      setLoadingMessages(false);
-      setMessages(formattedMessages.reverse());
-    });
+  // useEffect(() => {
+  //   // chat found, so we need to get the messages
+  //   setCommanId(props.route.params.conversationId);
+  //   const unsubscribe = messagesListThread(
+  //     props.route.params.conversationId,
+  //   ).onSnapshot(querySnapshot => {
+  //     const formattedMessages = querySnapshot.docs.map((doc: any) => {
+  //       return {
+  //         _id: doc.id,
+  //         text: '',
+  //         createdAt: new Date().getTime(),
+  //         ...doc.data(),
+  //       };
+  //     });
+  //     setLoadingMessages(false);
+  //     setMessages(formattedMessages.reverse());
+  //   });
 
-    return () => {
-      unsubscribe();
-    };
-  }, []);
+  //   return () => {
+  //     unsubscribe();
+  //   };
+  // }, []);
 
   const closeSheet = () => {
     mediaPickerSheetRef.current?.close();
@@ -149,10 +169,11 @@ export default function NegotiationDetails(props: any) {
       setLoading(false);
     }
   }
-  const renderMessage = ({item}: {item: any}) => {
+  const renderMessage = ({ item }: { item: any }) => {
     switch (item.type) {
       case 'NEGOTIATION':
-        const isMe = item.senderId === profile?.user?.id;
+        // const isMe = item.senderId === profile?.user?.id;
+        const isMe = item?.senderId === peerUser?.user_id
 
         const latestNegotiationMessage = messages
           ?.filter(msg => msg.type === 'NEGOTIATION')
@@ -177,7 +198,7 @@ export default function NegotiationDetails(props: any) {
                 <View style={styles(theme).pricingRow}>
                   {offer.label === 'ORIGINAL_VALUATION' ? (
                     <Text
-                      style={{flex: 1}}
+                      style={{ flex: 1 }}
                       size={getScaleSize(14)}
                       font={FONTS.Lato.Medium}
                       color={theme._6D6D6D}>
@@ -185,7 +206,7 @@ export default function NegotiationDetails(props: any) {
                     </Text>
                   ) : offer.label === 'PROVIDER_QUOTE' ? (
                     <Text
-                      style={{flex: 1}}
+                      style={{ flex: 1 }}
                       size={getScaleSize(14)}
                       font={FONTS.Lato.Medium}
                       color={theme._6D6D6D}>
@@ -193,7 +214,7 @@ export default function NegotiationDetails(props: any) {
                     </Text>
                   ) : (
                     <Text
-                      style={{flex: 1}}
+                      style={{ flex: 1 }}
                       size={getScaleSize(14)}
                       font={FONTS.Lato.Medium}
                       color={theme._6D6D6D}>
@@ -207,7 +228,7 @@ export default function NegotiationDetails(props: any) {
                     size={getScaleSize(16)}
                     font={FONTS.Lato.Bold}
                     color={theme._424242}>
-                    €{offer.amount}
+                    P{offer.amount}
                   </Text>
                 </View>
               );
@@ -307,7 +328,7 @@ export default function NegotiationDetails(props: any) {
                             Submit
                           </Text>
                         </TouchableOpacity>
-                        <View style={{width: getScaleSize(12)}} />
+                        <View style={{ width: getScaleSize(12) }} />
                         <TouchableOpacity
                           style={styles(theme).actionButtonSecondary}
                           onPress={() => {
@@ -335,7 +356,7 @@ export default function NegotiationDetails(props: any) {
                           setEditingForMessageId(true);
                         }}>
                         <Text
-                          size={getScaleSize(14)}
+                          size={getScaleSize(12)}
                           font={FONTS.Lato.SemiBold}
                           color={theme.primary}>
                           Counter Offer
@@ -351,7 +372,7 @@ export default function NegotiationDetails(props: any) {
                           size={getScaleSize(14)}
                           font={FONTS.Lato.SemiBold}
                           color={theme.white}>
-                          Accept Offer
+                          Accept
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -363,7 +384,7 @@ export default function NegotiationDetails(props: any) {
                           size={getScaleSize(16)}
                           font={FONTS.Lato.Medium}
                           color={theme._424242}>
-                          €
+                          P
                         </Text>
                         <TextInput
                           value={offerInputValue}
@@ -432,7 +453,7 @@ export default function NegotiationDetails(props: any) {
                             Submit
                           </Text>
                         </TouchableOpacity>
-                        <View style={{width: getScaleSize(12)}} />
+                        <View style={{ width: getScaleSize(12) }} />
                         <TouchableOpacity
                           style={styles(theme).actionButtonSecondary}
                           onPress={() => {
@@ -470,7 +491,7 @@ export default function NegotiationDetails(props: any) {
                 <View style={styles(theme).pricingRow}>
                   {offer.label === 'ORIGINAL_VALUATION' ? (
                     <Text
-                      style={{flex: 1}}
+                      style={{ flex: 1 }}
                       size={getScaleSize(14)}
                       font={FONTS.Lato.Medium}
                       color={theme._6D6D6D}>
@@ -478,7 +499,7 @@ export default function NegotiationDetails(props: any) {
                     </Text>
                   ) : offer.label === 'PROVIDER_QUOTE' ? (
                     <Text
-                      style={{flex: 1}}
+                      style={{ flex: 1 }}
                       size={getScaleSize(14)}
                       font={FONTS.Lato.Medium}
                       color={theme._6D6D6D}>
@@ -486,7 +507,7 @@ export default function NegotiationDetails(props: any) {
                     </Text>
                   ) : (
                     <Text
-                      style={{flex: 1}}
+                      style={{ flex: 1 }}
                       size={getScaleSize(14)}
                       font={FONTS.Lato.Medium}
                       color={theme._6D6D6D}>
@@ -505,6 +526,35 @@ export default function NegotiationDetails(props: any) {
                 </View>
               );
             })}
+          </View>
+        );
+      case 'TEXT':
+        const isMeText = item.senderId === profile?.user?.id;
+
+        return (
+          <View
+            style={[
+              styles(theme).messageRow,
+              isMeText
+                ? styles(theme).messageRowRight
+                : styles(theme).messageRowLeft,
+            ]}
+          >
+            <View
+              style={[
+                styles(theme).messageContainer,
+                isMeText
+                  ? styles(theme).selfBubble
+                  : styles(theme).peerBubble,
+              ]}
+            >
+              <Text
+                size={getScaleSize(14)}
+                color={isMeText ? theme.white : theme.black}
+              >
+                {item.text}
+              </Text>
+            </View>
           </View>
         );
       default:
@@ -564,19 +614,37 @@ export default function NegotiationDetails(props: any) {
 
   // const isMe = negotiationMessages[0]?.senderId === profile?.user?.id;
 
+ 
+
+  const handleSendMessage = () => {
+    if (!msg.trim()) return;
+
+    const newMessage = {
+      _id: Date.now().toString(),
+      id: Date.now().toString(),
+      type: "TEXT",
+      senderId: profile?.user?.id,
+      text: msg,
+      createdAt: Date.now(),
+    };
+
+    setMessages(prev => [...prev, newMessage]);
+    setMsg("");
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles(theme).container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <StatusBar
             barStyle="dark-content"
             backgroundColor={theme.white}
             translucent={false}
           />
-          <SafeAreaView style={styles(theme).hearderContainer}>
+          <SafeAreaView style={[styles(theme).hearderContainer, { paddingTop: insets.top }]}>
             <TouchableOpacity
               style={styles(theme).backImage}
               activeOpacity={1}
@@ -591,7 +659,8 @@ export default function NegotiationDetails(props: any) {
             <Image
               style={styles(theme).userImage}
               source={
-                peerUserAvatar ? {uri: peerUserAvatar} : IMAGES.user_placeholder
+                // peerUserAvatar ? {uri: peerUserAvatar} : IMAGES.user_placeholder
+                IMAGES.dummyProfile
               }
             />
             <View style={styles(theme).headerDetails}>
@@ -611,48 +680,45 @@ export default function NegotiationDetails(props: any) {
             </View>
           </SafeAreaView>
           <View style={styles(theme).messagesWrapper}>
-            {loadingMessages ? (
+            {/* {loadingMessages ? (
               <View style={styles(theme).loaderContainer}>
                 <ActivityIndicator size="small" color={theme.primary} />
               </View>
-            ) : (
-              // <ScrollView showsVerticalScrollIndicator={false}>
-              <FlatList
-                data={messages}
-                renderItem={renderMessage}
-                keyExtractor={item => item.id}
-                removeClippedSubviews={false}
-                contentContainerStyle={messageListContentStyle}
-                showsVerticalScrollIndicator={false}
-              />
-
-              // </ScrollView>
-            )}
+            ) : ( */}
+            <FlatList
+              data={messages}
+              renderItem={renderMessage}
+              keyExtractor={item => item.id}
+              removeClippedSubviews={false}
+              contentContainerStyle={messageListContentStyle}
+              showsVerticalScrollIndicator={false}
+            />
+            {/* )} */}
           </View>
-          {/* <View style={styles(theme).sendMessageContainer}>
-        <Image style={styles(theme).microphoneImage} source={IMAGES.mic} />
-        <TextInput
-          style={styles(theme).searchInput}
-          placeholderTextColor={'#939393'}
-          placeholder={STRING.Sendamessagehere}
-          value={message}
-          onChangeText={setMessage}
-          multiline
-        />
-        <TouchableOpacity
-          style={styles(theme).sendButtonWrapper}
-          // activeOpacity={0.7}
-          // disabled={isSending || !message.trim()}
-          onPress={handleSendMessage}>
-          <Image
-            style={[
-              styles(theme).microphoneImage,
-              (isSending || !message.trim()) && styles(theme).disabledSendIcon,
-            ]}
-            source={IMAGES.message_send}
-          />
-        </TouchableOpacity>
-      </View> */}
+          <View style={styles(theme).sendMessageContainer}>
+            <Image style={styles(theme).microphoneImage} source={IMAGES.mic} />
+            <TextInput
+              style={styles(theme).searchInput}
+              placeholderTextColor={'#939393'}
+              placeholder={STRING.Sendamessagehere}
+              value={msg}
+              onChangeText={setMsg}
+              multiline
+            />
+            <TouchableOpacity
+              style={styles(theme).sendButtonWrapper}
+              activeOpacity={0.7}
+              disabled={isSending || !msg.trim()}
+              onPress={handleSendMessage}>
+              <Image
+                style={[
+                  styles(theme).microphoneImage,
+                  (isSending || !msg.trim()) && styles(theme).disabledSendIcon,
+                ]}
+                source={IMAGES.message_send}
+              />
+            </TouchableOpacity>
+          </View>
           <RBSheet
             ref={mediaPickerSheetRef}
             closeOnPressMask
@@ -663,58 +729,88 @@ export default function NegotiationDetails(props: any) {
               },
             }}>
             <Image
-              source={IMAGES.ic_alart}
+              source={IMAGES.accept_icon}
               style={[
                 styles(theme).alartIcon,
-                {marginBottom: getScaleSize(24)},
+                { marginBottom: getScaleSize(24) },
               ]}
             />
 
             <Text
               align="center"
               font={FONTS.Lato.Bold}
-              size={getScaleSize(24)}
-              color={theme._31302F}
+              size={getScaleSize(16)}
+              color={theme.primaryText}
               style={styles(theme).sheetTitle}>
-              {'Are you sure you want to accept this negotiation?'}
+              {'Confirm Service request ?'}
+            </Text>
+             <Text
+              align="center"
+              font={FONTS.Lato.Medium}
+              size={getScaleSize(12)}
+              color={theme.secondaryText}
+              style={styles(theme).sheetTitle}>
+              {'You are about to confirm a service at the rate of $400 with the Provider Wade Warren, Are you sure you want to continue? '}
             </Text>
             <View style={styles(theme).buttonContainer}>
               <TouchableOpacity
                 onPress={() => {
                   closeSheet();
                 }}
-                style={styles(theme).btnStyle}>
+                style={[styles(theme).btnStyle,{
+                  borderWidth:1,
+                  borderColor:theme.primary,
+                  backgroundColor:theme.white
+                }]}>
                 <Text
                   size={getScaleSize(19)}
                   font={FONTS.Lato.Bold}
                   align="center"
-                  color={theme._214C65}>
-                  {'cancel'}
+                  color={theme.mainText}>
+                  {'No'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
-                  createNegotiationMessage(
-                    selectedNegotiation.serviceId,
-                    selectedNegotiation.quoteId,
-                    Number(selectedNegotiation.negotiation.currentAmount),
-                    selectedNegotiation._id,
-                  );
+                  // createNegotiationMessage(
+                  //   selectedNegotiation.serviceId,
+                  //   selectedNegotiation.quoteId,
+                  //   Number(selectedNegotiation.negotiation.currentAmount),
+                  //   selectedNegotiation._id,
+                  // );
+                   paymentRef.current.open();
                   setEditingForMessageId(false);
                   setOfferInputValue('');
                   closeSheet();
                 }}
                 style={styles(theme).btnStyle}>
                 <Text
-                  size={getScaleSize(19)}
-                  font={FONTS.Lato.Bold}
+                  size={getScaleSize(18)}
+                  font={FONTS.Lato.SemiBold}
                   align="center"
-                  color={theme._214C65}>
-                  {'Accept'}
+                  color={theme.white}>
+                  {'Yes'}
                 </Text>
               </TouchableOpacity>
             </View>
           </RBSheet>
+
+ <PaymentBottomPopup
+        onRef={paymentRef}
+        serviceAmount={paymentDummyData.serviceAmount}
+        onClose={() => {
+          paymentRef.current.close();
+        }}
+        proceedToPay={() => {
+          // onAcceptService();
+          props.navigation.navigate(SCREENS.ServiceConfirmed.identifier, {
+            // serviceId: serviceDetails?.service_id,
+            serviceId: 12,
+            from:"requestDetails"
+          });
+        }}
+      />
+
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
@@ -722,7 +818,7 @@ export default function NegotiationDetails(props: any) {
 }
 const styles = (theme: ThemeContextType['theme']) =>
   StyleSheet.create({
-    container: {flex: 1, backgroundColor: theme.white},
+    container: { flex: 1, backgroundColor: theme.white },
     hearderContainer: {
       paddingVertical: getScaleSize(12),
       flexDirection: 'row',
@@ -914,6 +1010,7 @@ const styles = (theme: ThemeContextType['theme']) =>
       flexDirection: 'row',
       justifyContent: 'flex-end',
       marginTop: getScaleSize(10),
+
     },
     actionButtonPrimary: {
       paddingHorizontal: getScaleSize(16),
@@ -955,12 +1052,11 @@ const styles = (theme: ThemeContextType['theme']) =>
       marginBottom: getScaleSize(8),
     },
     btnStyle: {
-      borderWidth: 1,
-      borderColor: theme._214C65,
-      borderRadius: getScaleSize(12),
-      paddingVertical: getScaleSize(18),
+      borderRadius: getScaleSize(10),
+      paddingVertical: getScaleSize(10),
       alignItems: 'center',
       justifyContent: 'center',
       flex: 1.0,
+      backgroundColor:theme.primary
     },
   });

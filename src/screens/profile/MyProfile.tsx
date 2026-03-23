@@ -7,6 +7,7 @@ import {
     ScrollView,
     SafeAreaView,
     Platform,
+    Pressable,
 } from 'react-native';
 
 //CONTEXT
@@ -14,10 +15,10 @@ import { AuthContext, ThemeContext, ThemeContextType } from '../../context';
 
 //CONSTANT & ASSETS
 import { FONTS, IMAGES } from '../../assets';
-import { getScaleSize, SHOW_SUCCESS_TOAST, SHOW_TOAST, useString } from '../../constant';
+import { getScaleSize, REGEX, SHOW_SUCCESS_TOAST, SHOW_TOAST, useString } from '../../constant';
 
 //COMPONENTS
-import { Text, Header, Input, Button, BottomSheet, SelectCountrySheet } from '../../components';
+import { Text, Header, Input, Button, BottomSheet, SelectCountrySheet, KeyBoardAware } from '../../components';
 
 //API
 import { API } from '../../api';
@@ -52,6 +53,8 @@ export default function MyProfile(props: any) {
     const [profileImage, setProfileImage] = useState<any>(null);
     const [addressHeight, setAddressHeight] = useState(inputHeight);
     const [visibleCountry, setVisibleCountry] = useState(false);
+
+    const [isEmailVerified,setIsEmailVerified] = useState(false)
 
     const fullPhone = profile?.user?.phone_number ?? '';
 
@@ -289,17 +292,22 @@ export default function MyProfile(props: any) {
         }
     }
 
+    const isEmailChange = email !== profile?.user?.email;
+
+
+
     return (
         <View style={styles(theme).container}>
             <View style={{ marginTop: getScaleSize(10) }}>
                 <Header
                     rightIcon={{ icon: IMAGES.ic_delete_profile, title: STRING.delete_profile }}
+                    rightIconContainerStyle={{ backgroundColor: theme.white, padding: getScaleSize(8), borderRadius: getScaleSize(6) }}
                     onPress={() => { bottomSheetRef.current.open() }}
                     onBack={() => { props.navigation.goBack() }}
                     screenName={STRING.my_profile}
                 />
             </View>
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <KeyBoardAware showsVerticalScrollIndicator={false}>
                 <View style={styles(theme).mainContainer}>
                     {profile?.user?.profile_photo_url ? (
                         <Image source={{ uri: profile?.user?.profile_photo_url }} resizeMode='cover' style={styles(theme).profileContainer} />
@@ -322,7 +330,7 @@ export default function MyProfile(props: any) {
                             size={getScaleSize(16)}
                             font={FONTS.Lato.SemiBold}
                             align="center"
-                            color={theme._2C6587}>
+                            color={theme._EC613D}>
                             {STRING.edit_picture_or_avatar}
                         </Text>
                     </TouchableOpacity>
@@ -333,71 +341,146 @@ export default function MyProfile(props: any) {
                         color={theme._2B2B2B}>
                         {STRING.personal_information}
                     </Text>
-                    <Input
-                        placeholder={STRING.enter_name}
-                        placeholderTextColor={theme._939393}
-                        inputTitle={STRING.full_name}
-                        inputColor={true}
-                        maxLength={50}
-                        value={name}
-                        continerStyle={{ marginBottom: getScaleSize(20) }}
-                        onChangeText={text => {
-                            // Remove invalid characters
-                            let cleaned = text.replace(/[^A-Za-z\s]/g, '');
+                    <View style={{ gap: getScaleSize(16) }}>
+                        <Input
+                            placeholder={STRING.enter_name}
+                            placeholderTextColor={theme._939393}
+                            inputTitle={STRING.name}
+                            inputColor={true}
+                            maxLength={50}
+                            value={name}
+                            continerStyle={{ marginBottom: getScaleSize(20) }}
+                            onChangeText={text => {
+                                // Remove invalid characters
+                                let cleaned = text.replace(/[^A-Za-z\s]/g, '');
 
-                            // Remove leading spaces
-                            cleaned = cleaned.replace(/^\s+/, '');
+                                // Remove leading spaces
+                                cleaned = cleaned.replace(/^\s+/, '');
 
-                            // Replace multiple spaces with single space
-                            cleaned = cleaned.replace(/\s{2,}/g, ' ');
+                                // Replace multiple spaces with single space
+                                cleaned = cleaned.replace(/\s{2,}/g, ' ');
 
-                            setName(cleaned);
-                            setNameError('');
-                        }}
-                        isError={nameError}
-                    />
-                    <Input
-                        placeholder={STRING.enter_email}
-                        placeholderTextColor={theme._939393}
-                        inputTitle={STRING.e_mail_id}
-                        inputColor={true}
-                        containerStyle={{
-                            paddingHorizontal: 0,
-                            marginBottom: getScaleSize(20)
-                        }}
-                        value={email}
-                        inputContainer={{
-                            backgroundColor: theme._F0EFF0,
-                            opacity: 0.7,
-                        }}
-                        editable={false}
-                        onChangeText={text => {
-                            setEmail(text);
-                            setEmailError('');
-                        }}
-                        isError={emailError}
-                    />
-                    <Input
-                        placeholder={STRING.enter_mobile_number}
-                        placeholderTextColor={theme._939393}
-                        inputTitle={STRING.mobile_number}
-                        inputColor={true}
-                        keyboardType="numeric"
-                        continerStyle={{ marginBottom: getScaleSize(20) }}
-                        value={mobileNumber}
-                        maxLength={10}
-                        countryCode={`${countryFlag} ${countryCode}`}
-                        onPressCountryCode={() => {
-                            setVisibleCountry(true);
-                        }}
-                        onChangeText={text => {
-                            const cleaned = text.replace(/[^0-9]/g, '');
-                            setMobileNumber(cleaned);
-                            setMobileNumberError('');
-                        }}
-                        isError={mobileNumberError}
-                    />
-                    <Input
+                                setName(cleaned);
+                                setNameError('');
+                            }}
+                            isError={nameError}
+                        />
+
+                        <Input
+                            placeholder={STRING.enter_mobile_number}
+                            placeholderTextColor={theme._939393}
+                            inputTitle={STRING.mobile_number}
+                            inputColor={true}
+                            keyboardType="numeric"
+                            continerStyle={{ marginBottom: getScaleSize(20) }}
+                            value={mobileNumber}
+                            maxLength={10}
+                            // countryCode={`${countryFlag} ${countryCode}`}
+                            // onPressCountryCode={() => {
+                            //     setVisibleCountry(true);
+                            // }}
+                            onChangeText={text => {
+                                const cleaned = text.replace(/[^0-9]/g, '');
+                                setMobileNumber(cleaned);
+                                setMobileNumberError('');
+                            }}
+                            isError={mobileNumberError}
+                        />
+                        <Input
+                            // placeholder={STRING.enter_email}
+                            // placeholderTextColor={theme._939393}
+                            // value={email}
+                            inputTitle={STRING.e_mail_id}
+                            inputColor={true}
+                            containerStyle={{
+                                paddingHorizontal: 0,
+                                marginBottom: getScaleSize(20)
+                            }}
+                            value={email}
+                            inputContainer={{
+                                // backgroundColor: theme._F0EFF0,
+                                fontSize: getScaleSize(14),
+                                opacity: 0.7,
+                                color: theme.primaryTextColor,
+                                paddingHorizontal: getScaleSize(10)
+                            }}
+                            // editable={false}
+                            onChangeText={text => {
+                                setEmail(text);
+                                setEmailError('');
+                            }}
+                            isError={emailError}
+                            // isRightComponent={isEmailChange && (() => 
+                            //     {!isEmailVerified ?
+                            //         (
+                            //     <Pressable
+                            //         onPress={() => {
+                            //             if (!REGEX.email.test(email.trim())) {
+                            //                 setEmailError(STRING.errorText.please_enter_valid_email);
+                            //             } else {
+                            //                 props.navigation.navigate(SCREENS.Otp.identifier, {
+                            //                     type: "emailChange",
+                            //                     email: email
+                            //                 });
+                            //                 setIsEmailVerified(true)
+                            //             }
+
+                            //         }}
+                            //         style={styles(theme).changeEmailBtn}>
+                            //         <Text
+                            //             size={getScaleSize(12)}
+                            //             color={theme.white}
+                            //         >{"Change Email"}</Text>
+                            //     </Pressable>)
+                            //     :
+                            // <Text
+                            // size={getScaleSize(16)}
+                            // color={theme.success}
+                            // font={FONTS.Lato.SemiBold}
+                            // >{"Verified"}</Text>    
+                            // }
+                            // )}
+
+                            isRightComponent={
+  isEmailChange &&
+  (() => {
+    if (!isEmailVerified) {
+      return (
+        <Pressable
+          onPress={() => {
+            if (!REGEX.email.test(email.trim())) {
+              setEmailError(STRING.errorText.please_enter_valid_email);
+            } else {
+              props.navigation.navigate(SCREENS.Otp.identifier, {
+                type: "emailChange",
+                email: email,
+              });
+              setIsEmailVerified(true);
+            }
+          }}
+          style={styles(theme).changeEmailBtn}
+        >
+          <Text size={getScaleSize(12)} color={theme.white}>
+            {"Change Email"}
+          </Text>
+        </Pressable>
+      );
+    }
+
+    return (
+      <Text
+        size={getScaleSize(16)}
+        color={theme.successText}
+        font={FONTS.Lato.SemiBold}
+        style={{ marginRight: getScaleSize(20) }}
+      >
+        {"Verified"}
+      </Text>
+    );
+  })
+}
+                        />
+                        {/* <Input
                         placeholder={STRING.enter_address}
                         placeholderTextColor={theme._939393}
                         inputTitle={STRING.address}
@@ -428,9 +511,10 @@ export default function MyProfile(props: any) {
                             setAddressError('');
                         }}
                         isError={addressError}
-                    />
+                    /> */}
+                    </View>
                 </View>
-            </ScrollView>
+            </KeyBoardAware>
             <Button
                 title={STRING.update}
                 style={{ marginVertical: getScaleSize(24), marginHorizontal: getScaleSize(24) }}
@@ -443,7 +527,8 @@ export default function MyProfile(props: any) {
                 height={getScaleSize(360)}
                 isInfo={true}
                 title={STRING.are_you_sure_you_want_to_delete_your_account}
-                description={STRING.delete_account_message}
+                // description={STRING.delete_account_message}
+                description={'Once deleted, your account and all associated data are permanently erased. No refunds will be issued.'}
                 buttonTitle={STRING.delete_profile}
                 secondButtonTitle={STRING.cancel}
                 onPressSecondButton={() => {
@@ -499,4 +584,11 @@ const styles = (theme: ThemeContextType['theme']) =>
             justifyContent: 'center',
             marginBottom: getScaleSize(12),
         },
+        changeEmailBtn: {
+            borderRadius: getScaleSize(10),
+            backgroundColor: theme.primary,
+            paddingVertical: getScaleSize(10),
+            paddingHorizontal: getScaleSize(24),
+            marginRight: getScaleSize(16)
+        }
     });

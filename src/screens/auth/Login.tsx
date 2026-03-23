@@ -1,4 +1,4 @@
-import { Dimensions, Image, ScrollView, StyleSheet, View } from 'react-native';
+import { Dimensions, Image, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
 
 //CONTEXT
@@ -43,6 +43,8 @@ export default function Login(props: any) {
   const [emailError, setEmailError] = useState('');
   const [isLoading, setLoading] = useState(false);
   const [visibleCountry, setVisibleCountry] = useState(false);
+
+  const [showRoleModal,setShowRoleModal] = useState(false);
 
   console.log('profile==>', profile);
   // const [countryCode, setCountryCode] = useState('+91');
@@ -128,7 +130,7 @@ export default function Login(props: any) {
       const result = await API.Instance.post(API.API_ROUTES.login, params);
       if (result.status) {
         Storage.save(Storage.USER_DETAILS, JSON.stringify(result?.data?.data));
-        setUser(result?.data?.data);
+        // setUser(result?.data?.data);
         setUserType(result?.data?.data?.user_data?.role);
         getProfileData();
       } else {
@@ -193,16 +195,17 @@ export default function Login(props: any) {
           console.log('❌ Failed to save user to Firebase:', firebaseError);
         }
 
-        props.navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [
-              {
-                name: SCREENS.BottomBar.identifier,
-              },
-            ],
-          }),
-        );
+        // props.navigation.dispatch(
+        //   CommonActions.reset({
+        //     index: 0,
+        //     routes: [
+        //       {
+        //         name: SCREENS.BottomBar.identifier,
+        //       },
+        //     ],
+        //   }),
+        // );
+        setShowRoleModal(true)
       } else {
         SHOW_TOAST(result?.data?.message, 'error');
         console.log('ERR', result?.data?.message);
@@ -346,6 +349,30 @@ export default function Login(props: any) {
         }}
       /> */}
       {isLoading && <ProgressView />}
+
+      {showRoleModal && (
+        <UserRoleModal
+  visible={showRoleModal}
+  onClose={() => setShowRoleModal(false)}
+  onSelect={(role) => {
+    console.log("Selected Role:", role);
+    setTimeout(()=>{
+      setUserType(role);
+    props.navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [
+              {
+                name: SCREENS.BottomBar.identifier,
+              },
+            ],
+          }),
+        );
+    },100)
+    
+  }}
+/>)
+      }
     </View>
   );
 }
@@ -373,3 +400,173 @@ const styles = (theme: ThemeContextType['theme']) =>
       marginBottom: getScaleSize(16),
     },
   });
+
+
+  interface Props {
+  visible: boolean;
+  onClose: () => void;
+  onSelect: (role: string) => void;
+}
+
+const roles = [
+  { id: userRoles.Service_Seeker_individual, label: userRoles.Service_Seeker_individual },
+  { id: userRoles.Service_Seeker_business, label: userRoles.Service_Seeker_business },
+];
+
+ function UserRoleModal({
+  visible,
+  onClose,
+  onSelect,
+}: Props) {
+  const [selectedRole, setSelectedRole] = useState<string>("");
+
+  const handleContinue = () => {
+    if (!selectedRole) return;
+    onSelect(selectedRole);
+    onClose();
+  };
+
+  return (
+    <Modal transparent visible={visible} animationType="fade">
+      <View style={modalStyles.overlay}>
+        <View style={modalStyles.container}>
+
+          {/* TITLE */}
+          <Text 
+          size={getScaleSize(16)}
+          color='black'
+          font={FONTS.Lato.Bold}
+          align='center'
+          >
+            Select Your Role
+          </Text>
+<View style={{gap:20,marginTop:20}}>
+          {/* OPTIONS */}
+          {roles.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={modalStyles.option}
+              onPress={() => setSelectedRole(item.id)}
+            >
+              {/* RADIO */}
+              <View
+                style={[
+                  modalStyles.radio,
+                  selectedRole === item.id && modalStyles.radioSelected,
+                ]}
+              />
+
+              {/* LABEL */}
+              <Text 
+              size={getScaleSize(14)}
+              color='black'
+              font={FONTS.Lato.Regular}
+              align='left'
+              >
+                {item.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+</View>
+          {/* BUTTON */}
+          <TouchableOpacity
+            style={[
+              modalStyles.button,
+              !selectedRole && { opacity: 0.5 },
+            ]}
+            disabled={!selectedRole}
+            onPress={handleContinue}
+          >
+            <Text 
+            size={16}
+            color={!selectedRole ?  "black":"white"}
+            font={FONTS.Lato.SemiBold}
+            >
+              Continue
+            </Text>
+          </TouchableOpacity>
+
+          {/* CANCEL */}
+          <TouchableOpacity 
+          style={{borderWidth:1,borderColor:"#EC613D",borderRadius:10,alignItems:"center",marginTop:20, paddingVertical:12}}
+          onPress={onClose}>
+            <Text 
+            size={16}
+            color={"#EC613D"}
+            font={FONTS.Lato.SemiBold}
+            >Cancel</Text>
+          </TouchableOpacity>
+
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const modalStyles = StyleSheet.create({
+
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    paddingHorizontal: getScaleSize(24),
+  },
+
+  container: {
+    backgroundColor: '#fff',
+    borderRadius: getScaleSize(20),
+    padding: getScaleSize(20),
+  },
+
+  title: {
+    fontSize: getScaleSize(18),
+    fontFamily: FONTS.Manrope.Bold,
+    textAlign: 'center',
+    marginBottom: getScaleSize(20),
+  },
+
+  option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: getScaleSize(16),
+  },
+
+  radio: {
+    width: getScaleSize(20),
+    height: getScaleSize(20),
+    borderRadius: getScaleSize(10),
+    borderWidth: 2,
+    borderColor: '#ccc',
+    marginRight: getScaleSize(12),
+  },
+
+  radioSelected: {
+    borderColor: '#E85D3F',
+    backgroundColor: '#E85D3F',
+  },
+
+  optionText: {
+    fontSize: getScaleSize(14),
+    fontFamily: FONTS.Manrope.Medium,
+  },
+
+  button: {
+    backgroundColor: '#E85D3F',
+    paddingVertical: getScaleSize(14),
+    borderRadius: getScaleSize(10),
+    alignItems: 'center',
+    marginTop: getScaleSize(10),
+  },
+
+  buttonText: {
+    color: '#fff',
+    fontFamily: FONTS.Manrope.Bold,
+  },
+
+  cancelText: {
+    textAlign: 'center',
+    marginTop: getScaleSize(12),
+    color: '#888',
+  },
+
+});

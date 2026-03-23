@@ -302,6 +302,17 @@ export default function Transactions(props: any) {
           </Tooltip>
         </View>
 
+{/* Payment Method */}
+<View style={[styles(theme).filterView,{backgroundColor:'red'}]}>
+          <Text size={14} font={FONTS.Lato.Medium} color={theme._2B2B2B}>
+            {"Payment Method"}
+          </Text>
+
+          <TouchableOpacity onPress={() => setOpen(true)}>
+            <Image source={IMAGES.ic_down} style={styles(theme).downIcon} />
+          </TouchableOpacity>
+        </View>
+
         {/* DATE */}
         <View style={styles(theme).filterView}>
           <Text size={14} font={FONTS.Lato.Medium} color={theme._2B2B2B}>

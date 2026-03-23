@@ -22,6 +22,7 @@ import { SCREENS } from '..';
 import { CommonActions } from '@react-navigation/native';
 import { stubFalse } from 'lodash';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { userRoles } from '../../constant/utils';
 
 
 export default function Profile(props: any) {
@@ -37,30 +38,50 @@ export default function Profile(props: any) {
 
   console.log('user', insets.bottom)
 
-  const profileItemsElder = [
-    { id: 1, title: STRING.my_profile, icon: IMAGES.ic_my_profile, onPress: SCREENS.MyProfile.identifier },
-    { id: 2, title: STRING.transactions, icon: IMAGES.ic_transactions, onPress: SCREENS.TransactionsElder.identifier },
-    { id: 3, title: STRING.ratings_reviews, icon: IMAGES.ic_ratings_reviews, onPress: SCREENS.RatingsReviews.identifier },
-    { id: 4, title: STRING.notifications, icon: IMAGES.ic_notifications, onPress: SCREENS.Notification.identifier },
-    { id: 5, title: STRING.prefered_language, icon: IMAGES.ic_language, onPress: SCREENS.Language.identifier }
+  props.navigation.navigate(SCREENS.MyProfile.identifier)
+
+  const profileSeekerIndividualItems = [
+    { id: 1, title: STRING.my_profile, icon: IMAGES.ic_my_profile, onPress: () => { props.navigation.navigate(SCREENS.MyProfile.identifier) } },
+    { id: 2, title: STRING.transactions, icon: IMAGES.ic_transactions, onPress: () => { props.navigation.navigate(SCREENS.TransactionsElder.identifier) } },
+    { id: 3, title: STRING.ratings_reviews, icon: IMAGES.ic_ratings_reviews, onPress: () => { props.navigation.navigate(SCREENS.RatingsReviews.identifier) } },
+    { id: 4, title: STRING.notifications, icon: IMAGES.ic_notifications, onPress: () => { props.navigation.navigate(SCREENS.Notification.identifier) } },
+    // { id: 5, title: STRING.prefered_language, icon: IMAGES.ic_language, onPress: ()=>{props.navigation.navigate(SCREENS.Language.identifier)} }
+    { id: 5, title: STRING.logout, icon: IMAGES.ic_logout, onPress: () => { bottomSheetRef.current.open() } }
   ]
 
   const profieItemsProfessional = [
-    { id: 1, title: STRING.my_profile, icon: IMAGES.ic_my_profile, onPress: SCREENS.MyProfileProfessional.identifier },
-    { id: 2, title: STRING.my_earnings, icon: IMAGES.ic_my_earnings, onPress: SCREENS.MyEarnings.identifier },
-    { id: 3, title: STRING.manage_services, icon: IMAGES.ic_manage_services, onPress: SCREENS.ManageServices.identifier },
-    { id: 4, title: STRING.manage_subscription, icon: IMAGES.ic_manage_subscription, onPress: SCREENS.ManageSubscription.identifier },
-    { id: 5, title: STRING.ratings_reviews, icon: IMAGES.ic_ratings_reviews, onPress: SCREENS.RatingsReviews.identifier },
-    { id: 6, title: STRING.notifications, icon: IMAGES.ic_notifications, onPress: SCREENS.Notification.identifier },
-    { id: 7, title: STRING.prefered_language, icon: IMAGES.ic_language, onPress: SCREENS.Language.identifier }
+    { id: 1, title: STRING.my_profile, icon: IMAGES.ic_my_profile, onPress: () => { props.navigation.navigate(SCREENS.MyProfileProfessional.identifier) } },
+    { id: 2, title: STRING.my_earnings, icon: IMAGES.ic_my_earnings, onPress: () => { props.navigation.navigate(SCREENS.MyEarnings.identifier) } },
+    { id: 3, title: STRING.manage_services, icon: IMAGES.ic_manage_services, onPress: () => { props.navigation.navigate(SCREENS.ManageServices.identifier) } },
+    { id: 4, title: STRING.manage_subscription, icon: IMAGES.ic_manage_subscription, onPress: () => { props.navigation.navigate(SCREENS.ManageSubscription.identifier) } },
+    { id: 5, title: STRING.ratings_reviews, icon: IMAGES.ic_ratings_reviews, onPress: () => { props.navigation.navigate(SCREENS.RatingsReviews.identifier) } },
+    { id: 6, title: STRING.notifications, icon: IMAGES.ic_notifications, onPress: () => { props.navigation.navigate(SCREENS.Notification.identifier) } },
+    // { id: 7, title: STRING.prefered_language, icon: IMAGES.ic_language, onPress: SCREENS.Language.identifier }
+  ]
 
+  const profileSeekerBusiness = [
+    { id: 1, title: STRING.my_profile, icon: IMAGES.ic_my_profile, onPress: () => { props.navigation.navigate(SCREENS.MyProfile.identifier) } },
+    { id: 2, title: STRING.transactions, icon: IMAGES.ic_transactions, onPress: () => { props.navigation.navigate(SCREENS.TransactionsElder.identifier) } },
+    { id: 3, title: STRING.ratings_reviews, icon: IMAGES.ic_ratings_reviews, onPress: () => { props.navigation.navigate(SCREENS.RatingsReviews.identifier) } },
+    {
+      id: 4, title: STRING.manage_subscription, icon: IMAGES.ic_manage_subscription,
+      isRightIcon: false,
+      onPress: () => { props.navigation.navigate(SCREENS.ManageSubscription.identifier) }
+    },
+    { id: 5, title: STRING.notifications, icon: IMAGES.ic_notifications, onPress: () => { props.navigation.navigate(SCREENS.Notification.identifier) } },
+    // { id: 5, title: STRING.prefered_language, icon: IMAGES.ic_language, onPress: ()=>{props.navigation.navigate(SCREENS.Language.identifier)} }
+    { id: 6, title: STRING.logout, icon: IMAGES.ic_logout, onPress: () => { bottomSheetRef.current.open() } }
   ]
 
   function getProfileItems() {
     if (userType === 'service_provider') {
       return profieItemsProfessional;
-    } else {
-      return profileItemsElder;
+    }
+    else if (userType == userRoles.Service_Seeker_business) {
+      return profileSeekerBusiness;
+    }
+    else {
+      return profileSeekerIndividualItems;
     }
   }
 
@@ -78,13 +99,13 @@ export default function Profile(props: any) {
   }
 
   return (
-    <View style={[styles(theme).container,{paddingTop:insets.top}]}>
+    <View style={[styles(theme).container, { paddingTop: insets.top }]}>
       <Header
         type="profile"
-        rightIcon={{ icon: IMAGES.ic_logout, title: STRING.logout }}
-        onPress={() => {
-          bottomSheetRef.current.open();
-        }}
+        // rightIcon={{ icon: IMAGES.ic_logout, title: STRING.logout }}
+        // onPress={() => {
+        //   bottomSheetRef.current.open();
+        // }}
         screenName={STRING.my_account}
       />
       <ScrollView showsVerticalScrollIndicator={false}
@@ -111,39 +132,41 @@ export default function Profile(props: any) {
             font={FONTS.Lato.SemiBold}
             align="center"
             numberOfLines={1}
-            color={theme._2B2B2B}>
+            color={theme.primaryText}>
             {(profile?.user?.first_name ?? "") + " " + (profile?.user?.last_name ?? "")}
           </Text>
-          {userType === 'service_provider' && (
-            <>
-              {(profile?.provider_info?.is_docs_verified === false ||
-                profile?.onboarding_status === false) && (
-                  <View style={styles(theme).checkStatusContainer}>
-                    <Image source={IMAGES.ic_alart} style={styles(theme).alartIcon} />
+          {userType == userRoles.Service_Seeker_business
+            // userType === 'service_provider' 
+            && (
+              <>
+                {/* {(profile?.provider_info?.is_docs_verified === false ||
+                profile?.onboarding_status === false) && ( */}
+                <View style={styles(theme).checkStatusContainer}>
+                  <Image source={IMAGES.ic_alart} style={styles(theme).alartIcon} />
+                  <Text
+                    size={getScaleSize(16)}
+                    font={FONTS.Lato.Bold}
+                    align="center"
+                    color={theme.primaryText}>
+                    {STRING.account_under_verification}
+                  </Text>
+                  {/* {profile?.provider_info?.is_docs_verified === false && ( */}
+                  <TouchableOpacity
+                    onPress={() => {
+                      props.navigation.navigate(SCREENS.ApplicationStatus.identifier);
+                    }}
+                    style={[styles(theme).checkStatusButton, { backgroundColor: theme.primary }]}>
                     <Text
-                      size={getScaleSize(19)}
-                      font={FONTS.Lato.Bold}
+                      size={getScaleSize(16)}
+                      font={FONTS.Lato.SemiBold}
                       align="center"
-                      color={theme._214C65}>
-                      {STRING.account_under_verification}
+                      color={theme.white}>
+                      {STRING.check_status}
                     </Text>
-                    {profile?.provider_info?.is_docs_verified === false && (
-                      <TouchableOpacity
-                        onPress={() => {
-                          props.navigation.navigate(SCREENS.ApplicationStatus.identifier);
-                        }}
-                        style={[styles(theme).checkStatusButton, { backgroundColor: theme._214C65 }]}>
-                        <Text
-                          size={getScaleSize(16)}
-                          font={FONTS.Lato.SemiBold}
-                          align="center"
-                          color={theme.white}>
-                          {STRING.check_status}
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                    {profile?.onboarding_status === false && (
-                      <TouchableOpacity
+                  </TouchableOpacity>
+                  {/* )} */}
+                  {/* {profile?.onboarding_status === false && ( */}
+                  {/* <TouchableOpacity
                         onPress={() => {
                           openStripeCheckout(profile?.onboarding_redirect_url ?? '')
                         }}
@@ -155,17 +178,18 @@ export default function Profile(props: any) {
                           color={theme.white}>
                           {STRING.onboarding_process}
                         </Text>
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                )}
-            </>
-          )}
+                      </TouchableOpacity> */}
+                  {/* )} */}
+                </View>
+                {/* )} */}
+              </>
+            )}
           <View style={{ marginTop: userType === 'service_provider' ? getScaleSize(20) : getScaleSize(40) }}>
             {getProfileItems().map((item: any, index: number) => {
               return (
                 <TouchableOpacity key={index}
-                  onPress={() => { props.navigation.navigate(item.onPress) }}
+                  // onPress={() => { props.navigation.navigate(item.onPress) }}
+                  onPress={() => { item?.onPress() }}
                   style={styles(theme).profileItemContainer}>
                   <Image
                     source={item.icon}
@@ -173,12 +197,12 @@ export default function Profile(props: any) {
                   />
                   <Text
                     style={{ flex: 1.0 }}
-                    size={getScaleSize(22)}
+                    size={getScaleSize(20)}
                     font={FONTS.Lato.SemiBold}
-                    color={theme._2C6587}>
+                    color={theme.primaryText}>
                     {item.title}
                   </Text>
-                  <Image source={IMAGES.ic_right} style={styles(theme).profileItemRightIcon} />
+                  {item.isRightIcon !== false && <Image source={IMAGES.ic_right} style={styles(theme).profileItemRightIcon} />}
                 </TouchableOpacity>
               )
             })}
@@ -252,15 +276,15 @@ const styles = (theme: ThemeContextType['theme']) =>
     },
     checkStatusContainer: {
       borderWidth: 1,
-      borderColor: theme._2C6587,
+      borderColor: theme.primary,
       borderRadius: getScaleSize(12),
       paddingHorizontal: getScaleSize(66),
       paddingVertical: getScaleSize(24),
       marginTop: getScaleSize(10),
     },
     alartIcon: {
-      width: getScaleSize(60),
-      height: getScaleSize(60),
+      width: getScaleSize(58),
+      height: getScaleSize(58),
       alignSelf: 'center',
       marginBottom: getScaleSize(12),
     },

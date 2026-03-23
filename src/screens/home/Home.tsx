@@ -28,6 +28,7 @@ import {
 import { SCREENS, TABS } from '..';
 import { API } from '../../api';
 import { userRoles } from '../../constant/utils';
+import SubscriptionSuccessModal from '../../components/SubcriptionSuccessModal';
 
 export default function Home(props: any) {
   const STRING = useString();
@@ -35,7 +36,10 @@ export default function Home(props: any) {
 
   const { userType } = useContext<any>(AuthContext);
 
-  console.log('USER TYPE',userType)
+  const {fromFromSubscription,userRole} = props.route?.params || {};
+
+  console.log('USER TYPE', userType)
+  console.log('fromFromSubscription', fromFromSubscription)
 
   const acceptRef = useRef<any>(null);
 
@@ -46,6 +50,7 @@ export default function Home(props: any) {
   const [professionalConnectedCount, setProfessionalConnectedCount] =
     useState(0);
 
+    const [subscriptionSuccessModalVisible,setSubscriptionSuccessModalVisible] = useState(false)
 
 
   const homeServices = [
@@ -179,9 +184,9 @@ export default function Home(props: any) {
   },]
 
 
-  const serviceData = userType == userRoles.Service_Provider_individual ? homeServices : businessSevice
+  const serviceData = userType == userRoles.Service_Seeker_individual ? homeServices : businessSevice
 
-  const otherServiceData = userType == userRoles.Service_Provider_individual ? otherService : businessOtherService
+  const otherServiceData = userType == userRoles.Service_Seeker_individual ? otherService : businessOtherService
 
   useFocusEffect(
     React.useCallback(() => {
@@ -193,6 +198,12 @@ export default function Home(props: any) {
       }
     }, []),
   );
+
+  useEffect(() => {
+    if (fromFromSubscription && userRole === userRoles.Service_Seeker_business) {
+      setSubscriptionSuccessModalVisible(true);
+    }
+  }, [fromFromSubscription, userRole]);
 
   const isFocused = useIsFocused();
   // useEffect(() => {
@@ -371,7 +382,7 @@ export default function Home(props: any) {
             size={getScaleSize(16)}
             font={FONTS.Lato.SemiBold}
             color={theme.primaryText}>
-            {STRING.home_services}
+            {userType == userRoles.Service_Seeker_individual ?  STRING.home_services : "Business Service"}
           </Text>
           <TouchableOpacity
             onPress={() => {
@@ -408,7 +419,7 @@ export default function Home(props: any) {
                   shadowOffset: { width: 0, height: 2 },
                   shadowOpacity: 0.1,
                   shadowRadius: 4,
-                  paddingHorizontal: getScaleSize(4)
+                  paddingHorizontal: getScaleSize(6)
                 }}
                 activeOpacity={1}
                 onPress={() => item.onPress(props.navigation)}>
@@ -488,7 +499,7 @@ export default function Home(props: any) {
                   shadowOffset: { width: 0, height: 2 },
                   shadowOpacity: 0.1,
                   shadowRadius: 4,
-                  paddingHorizontal: getScaleSize(4)
+                  paddingHorizontal: getScaleSize(6)
                 }}
                 activeOpacity={1}
                 onPress={() => item.onPress(props.navigation)}>
@@ -653,6 +664,11 @@ export default function Home(props: any) {
         {/* <View style={{ height: TABBAR_HEIGHT }} /> */}
       </ScrollView>
       {isLoading && <ProgressView />}
+     { subscriptionSuccessModalVisible &&<SubscriptionSuccessModal
+        visible={true}
+        onClose={() => setSubscriptionSuccessModalVisible(false)}
+        // data={subscriptionSuccessData}
+      />}
     </View>
   );
 }

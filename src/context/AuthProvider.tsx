@@ -17,7 +17,7 @@ export function AuthProvider(props: Readonly<AuthProviderProps>): any {
 
   const [user, setUser] = useState<any>(null);
   const [userType, setUserType] = useState<any>(userRoles.Service_Seeker_individual);
-  const [userRole, setUserRole] = useState<any>("individual");
+  const [userRole, setUserRole] = useState<any>("service_seeker");
   //service_seeker , service_provider , bussiness_seeker, bussiness_provider
   const [myPlan, setMyPlan] = useState<any>(null);
   //professional, non_professional
