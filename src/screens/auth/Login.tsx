@@ -44,7 +44,7 @@ export default function Login(props: any) {
   const [isLoading, setLoading] = useState(false);
   const [visibleCountry, setVisibleCountry] = useState(false);
 
-  const [showRoleModal,setShowRoleModal] = useState(false);
+  const [showRoleModal, setShowRoleModal] = useState(false);
 
   console.log('profile==>', profile);
   // const [countryCode, setCountryCode] = useState('+91');
@@ -352,26 +352,26 @@ export default function Login(props: any) {
 
       {showRoleModal && (
         <UserRoleModal
-  visible={showRoleModal}
-  onClose={() => setShowRoleModal(false)}
-  onSelect={(role) => {
-    console.log("Selected Role:", role);
-    setTimeout(()=>{
-      setUserType(role);
-    props.navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [
-              {
-                name: SCREENS.BottomBar.identifier,
-              },
-            ],
-          }),
-        );
-    },100)
-    
-  }}
-/>)
+          visible={showRoleModal}
+          onClose={() => setShowRoleModal(false)}
+          onSelect={(role) => {
+            console.log("Selected Role:", role);
+            setTimeout(() => {
+              setUserType(role);
+              props.navigation.dispatch(
+                CommonActions.reset({
+                  index: 0,
+                  routes: [
+                    {
+                      name: SCREENS.BottomBar.identifier,
+                    },
+                  ],
+                }),
+              );
+            }, 100)
+
+          }}
+        />)
       }
     </View>
   );
@@ -402,7 +402,7 @@ const styles = (theme: ThemeContextType['theme']) =>
   });
 
 
-  interface Props {
+interface Props {
   visible: boolean;
   onClose: () => void;
   onSelect: (role: string) => void;
@@ -413,7 +413,7 @@ const roles = [
   { id: userRoles.Service_Seeker_business, label: userRoles.Service_Seeker_business },
 ];
 
- function UserRoleModal({
+function UserRoleModal({
   visible,
   onClose,
   onSelect,
@@ -432,42 +432,42 @@ const roles = [
         <View style={modalStyles.container}>
 
           {/* TITLE */}
-          <Text 
-          size={getScaleSize(16)}
-          color='black'
-          font={FONTS.Lato.Bold}
-          align='center'
+          <Text
+            size={getScaleSize(16)}
+            color='black'
+            font={FONTS.Lato.Bold}
+            align='center'
           >
             Select Your Role
           </Text>
-<View style={{gap:20,marginTop:20}}>
-          {/* OPTIONS */}
-          {roles.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={modalStyles.option}
-              onPress={() => setSelectedRole(item.id)}
-            >
-              {/* RADIO */}
-              <View
-                style={[
-                  modalStyles.radio,
-                  selectedRole === item.id && modalStyles.radioSelected,
-                ]}
-              />
-
-              {/* LABEL */}
-              <Text 
-              size={getScaleSize(14)}
-              color='black'
-              font={FONTS.Lato.Regular}
-              align='left'
+          <View style={{ gap: 20, marginTop: 20 }}>
+            {/* OPTIONS */}
+            {roles.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={modalStyles.option}
+                onPress={() => setSelectedRole(item.id)}
               >
-                {item.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-</View>
+                {/* RADIO */}
+                <View
+                  style={[
+                    modalStyles.radio,
+                    selectedRole === item.id && modalStyles.radioSelected,
+                  ]}
+                />
+
+                {/* LABEL */}
+                <Text
+                  size={getScaleSize(14)}
+                  color='black'
+                  font={FONTS.Lato.Regular}
+                  align='left'
+                >
+                  {item.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
           {/* BUTTON */}
           <TouchableOpacity
             style={[
@@ -477,23 +477,23 @@ const roles = [
             disabled={!selectedRole}
             onPress={handleContinue}
           >
-            <Text 
-            size={16}
-            color={!selectedRole ?  "black":"white"}
-            font={FONTS.Lato.SemiBold}
+            <Text
+              size={16}
+              color={!selectedRole ? "black" : "white"}
+              font={FONTS.Lato.SemiBold}
             >
               Continue
             </Text>
           </TouchableOpacity>
 
           {/* CANCEL */}
-          <TouchableOpacity 
-          style={{borderWidth:1,borderColor:"#EC613D",borderRadius:10,alignItems:"center",marginTop:20, paddingVertical:12}}
-          onPress={onClose}>
-            <Text 
-            size={16}
-            color={"#EC613D"}
-            font={FONTS.Lato.SemiBold}
+          <TouchableOpacity
+            style={{ borderWidth: 1, borderColor: "#EC613D", borderRadius: 10, alignItems: "center", marginTop: 20, paddingVertical: 12 }}
+            onPress={onClose}>
+            <Text
+              size={16}
+              color={"#EC613D"}
+              font={FONTS.Lato.SemiBold}
             >Cancel</Text>
           </TouchableOpacity>
 

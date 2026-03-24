@@ -30,6 +30,8 @@ import {
   Button,
   SelectCountrySheet,
   KeyBoardAware,
+  CheckBox,
+  SafeView,
 } from '../../components';
 import { CommonActions } from '@react-navigation/native';
 import { API } from '../../api';
@@ -37,7 +39,7 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import { userRoles } from '../../constant/utils';
 
 const RadioItem = ({ label, value, selected, onPress }: any) => {
-  
+
   const { theme } = useContext<any>(ThemeContext);
   return (
     <TouchableOpacity
@@ -49,8 +51,8 @@ const RadioItem = ({ label, value, selected, onPress }: any) => {
           width: 18,
           height: 18,
           borderRadius: 18,
-          borderWidth: selected === value  ? 5 : 2,
-          borderColor: selected === value  ? theme.primary : theme._8C8C8C,
+          borderWidth: selected === value ? 5 : 2,
+          borderColor: selected === value ? theme.primary : theme._8C8C8C,
           justifyContent: 'center',
           alignItems: 'center',
           marginRight: 10
@@ -62,16 +64,16 @@ const RadioItem = ({ label, value, selected, onPress }: any) => {
               width: 10,
               height: 10,
               borderRadius: 10,
-              backgroundColor:theme.white
+              backgroundColor: theme.white
             }}
           />
         )}
       </View>
 
       <Text
-      size={getScaleSize(16)}
-      font={FONTS.Lato.Regular}
-      color={selected === value  ? theme.primary : theme._8C8C8C}
+        size={getScaleSize(16)}
+        font={FONTS.Lato.Regular}
+        color={selected === value ? theme.primary : theme._8C8C8C}
       >{label}</Text>
     </TouchableOpacity>
   );
@@ -104,7 +106,7 @@ export default function AddPersonalDetails(props: any) {
   const [countryFlag, setCountryFlag] = useState('🇮🇳');
   const [nationality, setNationality] = useState('');
   const [residence, setResidence] = useState('');
-  const [dropDownType, setDropDownType] = useState<'nationality' | 'residence'>('nationality');
+  const [dropDownType, setDropDownType] = useState<'nationality' | 'residence' | 'mobile_number'>('nationality');
 
 
   const [businessName, setBusinessName] = useState('')
@@ -127,6 +129,7 @@ export default function AddPersonalDetails(props: any) {
   const [relation, setRelation] = useState('')
   const [professionalTraining, setProfessionalTraining] = useState('')
   const [selfTaught, setSelfTaught] = useState('')
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false);
 
   // useEffect(() => {
   //   if (isPhoneNumber) {
@@ -502,6 +505,11 @@ export default function AddPersonalDetails(props: any) {
             placeholder={STRING.enter_mobile_no}
             placeholderTextColor={theme._939393}
             inputTitle={STRING.mobile_no}
+            countryCode={countryCode}
+            onPressCountryCode={() => {
+              setDropDownType('mobile_number');
+              setVisibleCountry(true);
+            }}
             // inputColor={true}
             // continerStyle={{ marginBottom: getScaleSize(16) }}
             value={mobileNo}
@@ -521,7 +529,7 @@ export default function AddPersonalDetails(props: any) {
           // }}
           />
           <Input
-            placeholder={STRING.enter_email}
+            placeholder={STRING.example_email}
             placeholderTextColor={theme._939393}
             inputTitle={STRING.email}
             // inputColor={true}
@@ -587,9 +595,9 @@ export default function AddPersonalDetails(props: any) {
       return (
         <>
           <Input
-            placeholder={STRING.business_name}
+            placeholder={STRING.enter_business_name}
             placeholderTextColor={theme._939393}
-            inputTitle={STRING.name}
+            inputTitle={STRING.business_name}
             // inputColor={}
             continerStyle={{ marginBottom: getScaleSize(16) }}
             value={businessName}
@@ -600,6 +608,39 @@ export default function AddPersonalDetails(props: any) {
               setBusinessNameError('');
             }}
             isError={businessNameError}
+          />
+          <Input
+            placeholder={STRING.enter_business_disc}
+            placeholderTextColor={theme._939393}
+            inputTitle={STRING.business_disc}
+            // inputColor={}
+            continerStyle={{ marginBottom: getScaleSize(16) }}
+            value={businessDisc}
+            maxLength={50}
+            onChangeText={text => {
+              // const clean = sanitizeNameInput(text);
+              setBusinessDisc(text);
+              setBusinessDiscError('');
+            }}
+            isError={businessDiscError}
+          />
+          <Input
+            placeholder={STRING.example_email}
+            placeholderTextColor={theme._939393}
+            inputTitle={STRING.business_email}
+            // inputColor={true}
+            containerStyle={{
+              opacity: 0.5,
+              backgroundColor: theme._F0EFF0,
+            }}
+            continerStyle={{ marginBottom: getScaleSize(16) }}
+            value={email}
+            editable={isEmail ? false : true}
+            onChangeText={text => {
+              setBusinessEmail(text);
+              setBusinessEmailError('');
+            }}
+            isError={businessEmailError}
           />
           <Input
             placeholder={STRING.enter_vat_number}
@@ -618,39 +659,6 @@ export default function AddPersonalDetails(props: any) {
               setVatNumberError('');
             }}
             isError={vatNumberError}
-          />
-          <Input
-            placeholder={STRING.enter_business_email}
-            placeholderTextColor={theme._939393}
-            inputTitle={STRING.business_email}
-            // inputColor={true}
-            // containerStyle={{
-            //   opacity: 0.5,
-            //   // backgroundColor: theme._F0EFF0,
-            // }}
-            continerStyle={{ marginBottom: getScaleSize(16) }}
-            value={email}
-            editable={true}
-            onChangeText={text => {
-              setBusinessEmail(text);
-              setBusinessEmailError('');
-            }}
-            isError={businessEmailError}
-          />
-          <Input
-            placeholder={STRING.enter_business_disc}
-            placeholderTextColor={theme._939393}
-            inputTitle={STRING.business_disc}
-            // inputColor={}
-            continerStyle={{ marginBottom: getScaleSize(16) }}
-            value={businessDisc}
-            maxLength={50}
-            onChangeText={text => {
-              // const clean = sanitizeNameInput(text);
-              setBusinessDisc(text);
-              setBusinessDiscError('');
-            }}
-            isError={businessDiscError}
           />
           <Input
             placeholder={STRING.enter_contact_person_name}
@@ -686,7 +694,20 @@ export default function AddPersonalDetails(props: any) {
             countryCode={countryCode}
             // countryFlag={countryFlag}
             onPressCountryCode={() => {
+              setDropDownType('mobile_number')
               setVisibleCountry(true);
+            }}
+          />
+          <Input
+            placeholder={STRING.placeHolders.select_nationality}
+            placeholderTextColor={theme._939393}
+            inputTitle={STRING.inputTitle.nationality}
+            isDropDown={true}
+            // continerStyle={{ marginBottom: getScaleSize(16) }}
+            value={nationality}
+            onPress={() => {
+              setDropDownType('nationality');
+              setVisibleCountry(true)
             }}
           />
           <Input
@@ -756,6 +777,7 @@ export default function AddPersonalDetails(props: any) {
             }}
             countryCode={countryCode}
             onPressCountryCode={() => {
+              setDropDownType('mobile_number')
               setVisibleCountry(true)
             }}
           />
@@ -806,53 +828,50 @@ export default function AddPersonalDetails(props: any) {
             value={relation}
             onChangeText={setRelation}
           />
-            <Text 
+          <Text
             size={getScaleSize(16)}
             font={FONTS.Lato.Medium}
-            >
-              Do you have professional training?
-            </Text>
-            <RadioItem
-              label="Yes, I have professional training."
-              value="yes"
-              selected={professionalTraining}
-              onPress={setProfessionalTraining}
-            />
-            <RadioItem
-              label="No, I don't have any professional training."
-              value="no"
-              selected={professionalTraining}
-              onPress={setProfessionalTraining}
-            />
-            <Text 
+          >
+            Do you have professional training?
+          </Text>
+          <RadioItem
+            label="Yes, I have professional training."
+            value="yes"
+            selected={professionalTraining}
+            onPress={setProfessionalTraining}
+          />
+          <RadioItem
+            label="No, I don't have any professional training."
+            value="no"
+            selected={professionalTraining}
+            onPress={setProfessionalTraining}
+          />
+          <Text
             size={getScaleSize(16)}
-            font={FONTS.Lato.Medium} 
-            >
-              Are you self taught?
-            </Text>
-            <RadioItem
-              label="Yes, I am self taught."
-              value="yes"
-              selected={selfTaught}
-              onPress={setSelfTaught}
-            />
+            font={FONTS.Lato.Medium}
+          >
+            Are you self taught?
+          </Text>
+          <RadioItem
+            label="Yes, I am self taught."
+            value="yes"
+            selected={selfTaught}
+            onPress={setSelfTaught}
+          />
 
-            <RadioItem
-              label="No, I am not self taught."
-              value="no"
-              selected={selfTaught}
-              onPress={setSelfTaught}
-            />
+          <RadioItem
+            label="No, I am not self taught."
+            value="no"
+            selected={selfTaught}
+            onPress={setSelfTaught}
+          />
         </>
       )
     }
   }
 
-
-
-
   return (
-    <View style={styles(theme).container}>
+    <SafeView style={styles(theme).container}>
       <Header
         onBack={() => {
           props.navigation.goBack();
@@ -910,6 +929,14 @@ export default function AddPersonalDetails(props: any) {
           </Text>
           <View style={{ gap: getScaleSize(16) }}>
             {getForm()}
+            <CheckBox
+              label="I agree to the terms and conditions"
+              checked={isTermsAccepted}
+              onPress={() => setIsTermsAccepted(!isTermsAccepted)}
+              onPressInfo={() => {
+                props.navigation.navigate(SCREENS.PrivacyDetails.identifier);
+              }}
+            />
           </View>
         </View>
         <Button
@@ -925,23 +952,24 @@ export default function AddPersonalDetails(props: any) {
         height={getScaleSize(500)}
         isVisible={visibleCountry}
         onPress={(e: any) => {
-          console.log('Selected Country:', e?.code);
+          console.log('Selected Country:', dropDownType);
 
           const countryName = e?.code ?? '';
 
           if (dropDownType === 'nationality') {
             setNationality(countryName);
-          } else {
+          } else if (dropDownType === 'residence') {
             setResidence(countryName);
+          } else if (dropDownType === 'mobile_number') {
+            setCountryCode(e?.dial_code);
           }
-
           setVisibleCountry(false);
         }}
         onClose={() => {
           setVisibleCountry(false);
         }}
       />
-    </View>
+    </SafeView>
   );
 }
 

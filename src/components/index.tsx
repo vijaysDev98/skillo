@@ -2,6 +2,7 @@ import Header from './header'
 import Text from './Text'
 import Input from './Input'
 import Button from './Button'
+import CheckBox from './CheckBox'
 import HomeHeader from './HomeHeader'
 import RequestItem from './RequestItem'
 import FavouritesItem from './FavouritesItem'
@@ -13,7 +14,7 @@ import ServiceItem from './ServiceItem'
 import AssistanceItems from './AssistanceItems'
 import TimePicker from './TimePicker'
 import RattingControler from './RattingControler'
-import  RejectBottomPopup  from './RejectBottomPopup'
+import RejectBottomPopup from './RejectBottomPopup'
 import AcceptBottomPopup from './AcceptBottomPopup'
 import PaymentBottomPopup from './PaymentBottomPopup'
 import StatusItem from './StatusItem'
@@ -38,49 +39,52 @@ import UploadDocumentBox from './UploadDocumentBox'
 import AppDropdown from './AppDropdown'
 import AccountCreatedModal from './AccountCreateModal'
 import ServiceCard from './ServiceCard'
-import { CalendarComponent,CustomTimePicker } from './CalendarComponent'
+import { CalendarComponent, CustomTimePicker } from './CalendarComponent'
+import SafeView from './SafeView'
 
 export {
-    Header,
-    Text,
-    Input,
-    Button,
-    HomeHeader,
-    RequestItem,
-    FavouritesItem,
-    SearchComponent,
-    Tabbar,
-    ProgressSlider,
-    CategoryDropdown,
-    ServiceItem,
-    AssistanceItems,
-    CalendarComponent,
-    CustomTimePicker,
-    TimePicker,
-    RattingControler,
-    RejectBottomPopup,
-    AcceptBottomPopup,
-    PaymentBottomPopup,
-    StatusItem,
-    ServiceRequest,
-    TaskItem,
-    RatingsReviewsItem,
-    UploadDocumentsSheet,
-    TransactionItem,
-    BottomSheet,
-    SelectCountrySheet,
-    ProgressView,
-    CancelScheduledServicePopup,
-    ModelWebView,
-    EarningsChart,
-    DateRangeModal,
-    DocumentStatusItem,
-    EmptyView,
-    RenegotiationSheet,
-    EnterSecurityCodeSheet,
-    KeyBoardAware,
-    UploadDocumentBox,
-    AppDropdown,
-    AccountCreatedModal,
-    ServiceCard
+  Header,
+  Text,
+  Input,
+  Button,
+  CheckBox,
+  HomeHeader,
+  RequestItem,
+  FavouritesItem,
+  SearchComponent,
+  Tabbar,
+  ProgressSlider,
+  CategoryDropdown,
+  ServiceItem,
+  AssistanceItems,
+  CalendarComponent,
+  CustomTimePicker,
+  TimePicker,
+  RattingControler,
+  RejectBottomPopup,
+  AcceptBottomPopup,
+  PaymentBottomPopup,
+  StatusItem,
+  ServiceRequest,
+  TaskItem,
+  RatingsReviewsItem,
+  UploadDocumentsSheet,
+  TransactionItem,
+  BottomSheet,
+  SelectCountrySheet,
+  ProgressView,
+  CancelScheduledServicePopup,
+  ModelWebView,
+  EarningsChart,
+  DateRangeModal,
+  DocumentStatusItem,
+  EmptyView,
+  RenegotiationSheet,
+  EnterSecurityCodeSheet,
+  KeyBoardAware,
+  UploadDocumentBox,
+  AppDropdown,
+  AccountCreatedModal,
+  ServiceCard,
+  SafeView
 }

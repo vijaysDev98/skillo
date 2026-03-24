@@ -1,4 +1,4 @@
-import React, {ReactElement, useContext, useEffect, useRef} from 'react';
+import React, { ReactElement, useContext, useEffect, useRef } from 'react';
 import {
   Linking,
   LogBox,
@@ -9,19 +9,19 @@ import {
 } from 'react-native';
 
 //CONTEXT
-import {ThemeProvider, AuthProvider, ThemeContext} from './src/context';
+import { ThemeProvider, AuthProvider, ThemeContext } from './src/context';
 
 //CONSTANT & ASSETS
-import {getScaleSize} from './src/constant';
-import {FONTS} from './src/assets';
-import {ThemeName} from './src/context/ThemeProvider';
+import { getScaleSize } from './src/constant';
+import { FONTS } from './src/assets';
+import { ThemeName } from './src/context/ThemeProvider';
 
 //SCREENS
-import {SCREENS} from './src/screens';
+import { SCREENS } from './src/screens';
 
 //PACKAGES
-import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import _ from 'lodash';
 import KeyboardManager from 'react-native-keyboard-manager';
 import Toast, {
@@ -37,8 +37,8 @@ const toastConfig = {
   success: (props: any) => (
     <BaseToast
       {...props}
-      style={{backgroundColor: '#FFFFFF', borderLeftColor: '#2E7D32'}}
-      contentContainerStyle={{paddingHorizontal: 15}}
+      style={{ backgroundColor: '#FFFFFF', borderLeftColor: '#2E7D32' }}
+      contentContainerStyle={{ paddingHorizontal: 15 }}
       text1NumberOfLines={3}
       text1Style={{
         fontSize: getScaleSize(12),
@@ -50,7 +50,7 @@ const toastConfig = {
   error: (props: any) => (
     <ErrorToast
       {...props}
-      style={{backgroundColor: '#FFFFFF', borderLeftColor: '#FF5959'}}
+      style={{ backgroundColor: '#FFFFFF', borderLeftColor: '#FF5959' }}
       text1NumberOfLines={3}
       text1Style={{
         fontSize: getScaleSize(12),
@@ -61,7 +61,7 @@ const toastConfig = {
   ),
   info: (props: any) => (
     <InfoToast
-      style={{backgroundColor: '#FFFFFF', borderLeftColor: '#FF5959'}}
+      style={{ backgroundColor: '#FFFFFF', borderLeftColor: '#FF5959' }}
       {...props}
       text1NumberOfLines={3}
       text1Style={{
@@ -73,7 +73,7 @@ const toastConfig = {
   ),
 };
 
-const {Navigator, Screen} = createStackNavigator();
+const { Navigator, Screen } = createStackNavigator();
 
 function App(): any {
   // const toastRef = useRef<any>(null);
@@ -85,16 +85,16 @@ function App(): any {
   }, []);
 
   function AppWrraper(): ReactElement {
-    const {currentTheme} = useContext(ThemeContext);
-    
+    const { currentTheme } = useContext(ThemeContext);
+
 
     return (
       <View style={styles.container}>
-        <StatusBar 
-         translucent={true}
-        backgroundColor={"transparent"}
+        <StatusBar
+          translucent={true}
+          backgroundColor={"transparent"}
         // barStyle={currentTheme === ThemeName.Light ? "light-content" : "light-content"}
-         />
+        />
         <NavigationContainer>
           <Navigator
             screenOptions={{
@@ -166,7 +166,7 @@ function App(): any {
   // };
 
   return (
-    <View style={{flex:1}}>
+    <View style={{ flex: 1 }}>
       <ThemeProvider>
         <AuthProvider>{AppWrraper()}</AuthProvider>
       </ThemeProvider>
