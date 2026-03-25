@@ -22,9 +22,15 @@ export default function MyEarnings(props: any) {
     const [earningsData, setEarningsData] = useState<any>(null);
 
     const itemData = [
-        { id: 1, title: 'Transaction Overview', onPress: SCREENS.Transactions.identifier },
-        // { id: 2, title: 'Account Information', onPress: SCREENS.BankDetails.identifier },
-        { id: 3, title: 'History of Withdrawals', onPress: SCREENS.WithdrawHistory.identifier },
+        { id: 1, title: 'Transaction History', onPress: SCREENS.Transactions.identifier },
+        { id: 2, title: 'Bank Account Information', onPress: SCREENS.BankDetails.identifier },
+    ]
+
+    const amountDetails = [
+        { title: 'Online Amount', value: `P${earningsData?.online_amount ?? '1500'}` },
+        { title: 'Cash Amount', value: `P${earningsData?.cash_amount ?? '1500'}` },
+        { title: 'Commission Deducted', value: `P${earningsData?.commission_deducted ?? '200'}` },
+        { title: 'Commission Due', value: `P${earningsData?.commission_due ?? '300'}` },
     ]
 
     useEffect(() => {
@@ -69,32 +75,51 @@ export default function MyEarnings(props: any) {
                 screenName={STRING.my_earnings}
             />
             <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={styles(theme).mainContainer}>
-                    <Text
-                        size={getScaleSize(17)}
-                        font={FONTS.Lato.Medium}
-                        align='center'
-                        color={theme._0E1B2780}>
-                        {STRING.available_balance}
-                    </Text>
-                    <Text
-                        style={{ marginVertical: getScaleSize(16) }}
-                        size={getScaleSize(37)}
-                        font={FONTS.Lato.ExtraBold}
-                        align='center'
-                        color={theme._0E1B27}>
-                        {`€ ${earningsData?.wallet?.total_balance ?? 0} USD`}
-                    </Text>
-                    <View style={styles(theme).flexView}>
-                        <Image source={IMAGES.ic_increase} style={styles(theme).increaseImage} />
+                <View style={[styles(theme).mainContainer, { marginTop: getScaleSize(24) }]}>
+                    <View style={styles(theme).balanceCard}>
                         <Text
-                            size={getScaleSize(16)}
+                            size={getScaleSize(17)}
                             font={FONTS.Lato.Medium}
-                            color={theme._4CAF50}>
-                            {`${earningsData?.increase_from_last_month?.percentage >= 0 ? '+' : '-'}${earningsData?.increase_from_last_month?.percentage ?? 0}% increase from last month`}
+                            align='center'
+                            color={theme._404040}>
+                            {STRING.available_balance}
                         </Text>
+                        <Text
+                            style={{ marginTop: getScaleSize(8) }}
+                            size={getScaleSize(42)}
+                            font={FONTS.Lato.Bold}
+                            align='center'
+                            color={theme._111111}>
+                            {`P${earningsData?.wallet?.total_balance ?? '3000'}`}
+                        </Text>
+                        <Text
+                            style={{ marginTop: getScaleSize(4), marginBottom: getScaleSize(18) }}
+                            size={getScaleSize(12)}
+                            font={FONTS.Lato.Regular}
+                            align='center'
+                            color={theme._404040}>
+                            {"You can Withdraw Available Balance"}
+                        </Text>
+
+                        <Button
+                            title={STRING.request_withdrawal}
+                            style={styles(theme).requestButtonInside}
+                            buttonTitleSize={getScaleSize(14)}
+                            onPress={() => {
+                                props.navigation.navigate(SCREENS.MoneyWithdrawal.identifier);
+                            }} />
                     </View>
-                    <View style={styles(theme).chartContainer}>
+
+                    <View style={styles(theme).amountDetailContainer}>
+                        {amountDetails.map((item, index) => (
+                            <View key={index} style={styles(theme).amountCard}>
+                                <Text size={getScaleSize(16)} font={FONTS.Lato.Medium} color={theme._404040}>{item.title}</Text>
+                                <Text size={getScaleSize(18)} font={FONTS.Lato.Bold} color={theme._111111}>{item.value}</Text>
+                            </View>
+                        ))}
+                    </View>
+
+                    <View style={styles(theme).chartCard}>
                         <EarningsChart
                             data={activities}
                             onMonthPress={() => setShowPicker(true)}
@@ -125,17 +150,17 @@ export default function MyEarnings(props: any) {
                             {STRING.no_transactions_data_found ?? ''}
                         </Text>
                     )}
-                    <View>
+                    <View style={{ marginBottom: getScaleSize(24) }}>
                         {itemData.map((item: any, index: number) => {
                             return (
                                 <TouchableOpacity
                                     key={item.id}
-                                    style={styles(theme).itemContainer}
+                                    style={styles(theme).navItemCard}
                                     onPress={() => { props.navigation.navigate(item.onPress) }}>
                                     <Text
                                         size={getScaleSize(16)}
                                         font={FONTS.Lato.Medium}
-                                        color={theme._2C6587}>
+                                        color={theme._111111}>
                                         {item.title}
                                     </Text>
                                     <Image source={IMAGES.ic_right} style={styles(theme).rightIcon} />
@@ -145,12 +170,6 @@ export default function MyEarnings(props: any) {
                     </View>
                 </View>
             </ScrollView>
-            <Button
-                style={{ marginHorizontal: getScaleSize(24), marginVertical: getScaleSize(24) }}
-                title={STRING.request_withdrawal}
-                onPress={() => {
-                    props.navigation.navigate(SCREENS.MoneyWithdrawal.identifier);
-                }} />
             {showPicker && (
                 <DateTimePicker
                     value={selectedDate}
@@ -169,41 +188,73 @@ const styles = (theme: ThemeContextType['theme']) => StyleSheet.create({
         backgroundColor: theme.white
     },
     mainContainer: {
-        marginTop: getScaleSize(30),
         marginHorizontal: getScaleSize(24),
     },
-    flexView: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    increaseImage: {
-        width: getScaleSize(19),
-        height: getScaleSize(19),
-        marginRight: getScaleSize(6),
-    },
-    chartContainer: {
+    balanceCard: {
+        backgroundColor: theme._FDEFEC,
+        borderRadius: getScaleSize(16),
+        padding: getScaleSize(24),
         borderWidth: 1,
-        borderColor: theme._DCDDDD,
-        borderRadius: getScaleSize(12),
-        marginVertical: getScaleSize(30),
-        overflow: 'hidden',
+        borderColor: '#E6E6E6',
+        marginBottom: getScaleSize(16),
     },
-    itemContainer: {
+    requestButtonInside: {
+        borderRadius: getScaleSize(12),
+        paddingVertical: getScaleSize(14),
+    },
+    amountDetailContainer: {
+        marginBottom: getScaleSize(6),
+    },
+    amountCard: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        backgroundColor: theme.white,
         borderWidth: 1,
-        borderColor: theme._E6E6E6,
+        borderColor: '#E6E6E6',
         borderRadius: getScaleSize(12),
-        padding: getScaleSize(16),
-        marginVertical: getScaleSize(8),
+        paddingVertical: getScaleSize(16),
+        paddingHorizontal: getScaleSize(16),
+        marginBottom: getScaleSize(10),
+    },
+    chartCard: {
+        borderWidth: 1,
+        borderColor: '#E6E6E6',
+        borderRadius: getScaleSize(16),
+        marginBottom: getScaleSize(24),
+        overflow: 'hidden',
+    },
+    navItemCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: theme.white,
+        borderWidth: 1,
+        borderColor: '#E6E6E6',
+        borderRadius: getScaleSize(12),
+        paddingVertical: getScaleSize(18),
+        paddingHorizontal: getScaleSize(16),
+        marginBottom: getScaleSize(10),
     },
     rightIcon: {
-        width: getScaleSize(24),
-        height: getScaleSize(24),
-        marginLeft: getScaleSize(12),
-        tintColor: theme._2C6587,
-
+        width: getScaleSize(20),
+        height: getScaleSize(20),
+        tintColor: theme._111111,
+    },
+    transactionItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    transactionItemImage: {
+        width: getScaleSize(48),
+        height: getScaleSize(48),
+        borderRadius: getScaleSize(24)
+    },
+    transactionItemDetails: {
+        flex: 1.0,
+        marginHorizontal: getScaleSize(12),
+    },
+    transactionStatusContainer: {
+        alignItems: 'flex-end',
     }
 })

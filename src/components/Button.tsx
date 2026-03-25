@@ -23,24 +23,26 @@ interface ButtonProps {
   onPress?: () => void;
   disabled?: boolean;
   titleColor?: string;
+  buttonTitleFont?: string;
+  buttonTitleSize?: number
 }
 
 const Button = (props: ButtonProps) => {
   const { theme } = useContext<any>(ThemeContext)
-  const { style, title, onPress, disabled, titleColor } = props;
+  const { style, title, onPress, disabled, titleColor, buttonTitleFont, buttonTitleSize } = props;
 
   return (
-    <TouchableOpacity 
-    onPress={onPress} 
-    style={[styles(theme).gradient, { backgroundColor: disabled ? theme.primary : theme.primary }, style]} activeOpacity={0.8}>
+    <TouchableOpacity
+      onPress={onPress}
+      style={[styles(theme).gradient, { backgroundColor: disabled ? theme.primary : theme.primary }, style]} activeOpacity={0.8}>
       <Text
         align="center"
-        font={FONTS.Lato.Bold}
-        size={getScaleSize(19)}
+        font={buttonTitleFont ? buttonTitleFont : FONTS.Lato.Bold}
+        size={buttonTitleSize ? buttonTitleSize : getScaleSize(19)}
         lineHeight={getScaleSize(24)}
         color={
-          disabled ?   theme.white : titleColor ? titleColor:  theme.white}
-        >
+          disabled ? theme.white : titleColor ? titleColor : theme.white}
+      >
         {title}
       </Text>
     </TouchableOpacity>

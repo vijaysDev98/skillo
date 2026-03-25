@@ -23,6 +23,7 @@ import { CommonActions } from '@react-navigation/native';
 import { stubFalse } from 'lodash';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { userRoles } from '../../constant/utils';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 
 export default function Profile(props: any) {
@@ -53,10 +54,10 @@ export default function Profile(props: any) {
     { id: 1, title: STRING.my_profile, icon: IMAGES.ic_my_profile, onPress: () => { props.navigation.navigate(SCREENS.MyProfileProfessional.identifier) } },
     { id: 2, title: STRING.my_earnings, icon: IMAGES.ic_my_earnings, onPress: () => { props.navigation.navigate(SCREENS.MyEarnings.identifier) } },
     { id: 3, title: STRING.manage_services, icon: IMAGES.ic_manage_services, onPress: () => { props.navigation.navigate(SCREENS.ManageServices.identifier) } },
-    { id: 4, title: STRING.manage_subscription, icon: IMAGES.ic_manage_subscription, onPress: () => { props.navigation.navigate(SCREENS.ManageSubscription.identifier) } },
+    { id: 4, title: STRING.manage_subscription, icon: IMAGES.ic_manage_subscription, onPress: () => { props.navigation.navigate(SCREENS.ManageSubscription.identifier) }, isRightIcon: false },
     { id: 5, title: STRING.ratings_reviews, icon: IMAGES.ic_ratings_reviews, onPress: () => { props.navigation.navigate(SCREENS.RatingsReviews.identifier) } },
     { id: 6, title: STRING.notifications, icon: IMAGES.ic_notifications, onPress: () => { props.navigation.navigate(SCREENS.Notification.identifier) } },
-    // { id: 7, title: STRING.prefered_language, icon: IMAGES.ic_language, onPress: SCREENS.Language.identifier }
+    { id: 7, title: STRING.logout, icon: IMAGES.ic_logout, onPress: () => { bottomSheetRef.current.open() } }
   ]
 
   const profileSeekerBusiness = [
@@ -74,7 +75,7 @@ export default function Profile(props: any) {
   ]
 
   function getProfileItems() {
-    if (userType === 'service_provider') {
+    if (userType === userRoles.Service_Provider_business || userType === userRoles.Service_Provider_individual) {
       return profieItemsProfessional;
     }
     else if (userType == userRoles.Service_Seeker_business) {
@@ -99,7 +100,7 @@ export default function Profile(props: any) {
   }
 
   return (
-    <View style={[styles(theme).container, { paddingTop: insets.top }]}>
+    <AppSafeAreaView style={styles(theme).container}>
       <Header
         type="profile"
         // rightIcon={{ icon: IMAGES.ic_logout, title: STRING.logout }}
@@ -224,7 +225,7 @@ export default function Profile(props: any) {
         }}
       />
       {isLoading && <ProgressView />}
-    </View>
+    </AppSafeAreaView>
   );
 }
 

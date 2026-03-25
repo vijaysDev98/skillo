@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TextInput,
   TextInputProps,
+  TextStyle,
   View,
   ViewStyle,
 } from 'react-native';
@@ -29,7 +30,7 @@ interface InputProps {
   passwordIcon?: boolean;
   secureTextEntry?: boolean;
   searchBox?: any;
-  inputContainer?: StyleProp<ViewStyle>;
+  inputContainer?: StyleProp<TextStyle>;
   isError?: string;
   inputTitle?: string;
   inputColor?: boolean;

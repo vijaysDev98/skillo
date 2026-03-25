@@ -54,7 +54,7 @@ export default function MyProfile(props: any) {
     const [addressHeight, setAddressHeight] = useState(inputHeight);
     const [visibleCountry, setVisibleCountry] = useState(false);
 
-    const [isEmailVerified,setIsEmailVerified] = useState(false)
+    const [isEmailVerified, setIsEmailVerified] = useState(false)
 
     const fullPhone = profile?.user?.phone_number ?? '';
 
@@ -442,43 +442,43 @@ export default function MyProfile(props: any) {
                             // )}
 
                             isRightComponent={
-  isEmailChange &&
-  (() => {
-    if (!isEmailVerified) {
-      return (
-        <Pressable
-          onPress={() => {
-            if (!REGEX.email.test(email.trim())) {
-              setEmailError(STRING.errorText.please_enter_valid_email);
-            } else {
-              props.navigation.navigate(SCREENS.Otp.identifier, {
-                type: "emailChange",
-                email: email,
-              });
-              setIsEmailVerified(true);
-            }
-          }}
-          style={styles(theme).changeEmailBtn}
-        >
-          <Text size={getScaleSize(12)} color={theme.white}>
-            {"Change Email"}
-          </Text>
-        </Pressable>
-      );
-    }
+                                isEmailChange &&
+                                (() => {
+                                    if (!isEmailVerified) {
+                                        return (
+                                            <Pressable
+                                                onPress={() => {
+                                                    if (!REGEX.email.test(email.trim())) {
+                                                        setEmailError(STRING.errorText.please_enter_valid_email);
+                                                    } else {
+                                                        props.navigation.navigate(SCREENS.Otp.identifier, {
+                                                            type: "emailChange",
+                                                            email: email,
+                                                        });
+                                                        setIsEmailVerified(true);
+                                                    }
+                                                }}
+                                                style={styles(theme).changeEmailBtn}
+                                            >
+                                                <Text size={getScaleSize(12)} color={theme.white}>
+                                                    {"Change Email"}
+                                                </Text>
+                                            </Pressable>
+                                        );
+                                    }
 
-    return (
-      <Text
-        size={getScaleSize(16)}
-        color={theme.successText}
-        font={FONTS.Lato.SemiBold}
-        style={{ marginRight: getScaleSize(20) }}
-      >
-        {"Verified"}
-      </Text>
-    );
-  })
-}
+                                    return (
+                                        <Text
+                                            size={getScaleSize(16)}
+                                            color={theme.successText}
+                                            font={FONTS.Lato.SemiBold}
+                                            style={{ marginRight: getScaleSize(20) }}
+                                        >
+                                            {"Verified"}
+                                        </Text>
+                                    );
+                                })
+                            }
                         />
                         {/* <Input
                         placeholder={STRING.enter_address}

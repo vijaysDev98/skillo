@@ -11,6 +11,7 @@ import { Button, EmptyView, Header, ProgressView, Text } from '../../components'
 import { SCREENS } from '..';
 import { API } from '../../api';
 import moment from 'moment';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 export default function ManageSubscription(props: any) {
 
@@ -60,21 +61,22 @@ export default function ManageSubscription(props: any) {
                     <Text
                         size={getScaleSize(16)}
                         font={FONTS.Lato.SemiBold}
-                        color={theme.primaryText}>
+                        color={theme._111111}>
                         {STRING.active_Plan}
                     </Text>
                     <View style={styles(theme).planContainer}>
-                        <View>
+                        <View style={styles(theme).planPriceContainer}>
                             <Text size={getScaleSize(18)}
                                 font={FONTS.Lato.Bold}
-                                color={theme.primaryText}
-                                style={{ marginBottom: getScaleSize(12) }}>
+                                color={theme._111111}
+                            // style={{ marginBottom: getScaleSize(12) }}
+                            >
                                 {/* {subscriptionPlanDetails?.plan?.name ?? ''} */}
                                 {"Monthly"}
                             </Text>
                             <Text size={getScaleSize(27)}
                                 font={FONTS.Lato.Bold}
-                                color={theme.mainText}>
+                                color={theme.primary}>
                                 {`P ${subscriptionPlanDetails?.plan?.price ?? '0.00'} `}
                                 {/* <Text size={getScaleSize(16)}
                                         font={FONTS.Lato.Medium}
@@ -83,7 +85,7 @@ export default function ManageSubscription(props: any) {
                                     </Text> */}
                             </Text>
                         </View>
-                        <Image source={IMAGES.radioCheck} style={{ width: getScaleSize(24), height: getScaleSize(24) }} />
+                        {/* <Image source={IMAGES.radioCheck} style={{ width: getScaleSize(24), height: getScaleSize(24) }} /> */}
                     </View>
                     <Text
                         size={getScaleSize(12)}
@@ -97,7 +99,7 @@ export default function ManageSubscription(props: any) {
                             font={FONTS.Lato.SemiBold}
                             align="center"
                             style={{ marginTop: getScaleSize(16), marginBottom: getScaleSize(8) }}
-                            color={theme.primaryText}>
+                            color={theme._404040}>
                             {/* {`Your plan will end on ${subscriptionPlanDetails?.subscription_expires_at ? moment.utc(subscriptionPlanDetails?.subscription_expires_at).local().format('MMMM DD, YYYY') : ''}\nat ${subscriptionPlanDetails?.subscription_expires_at ? moment.utc(subscriptionPlanDetails?.subscription_expires_at).local().format('hh:mm A') : ''}`} */}
                             {"Your plan will end on September 1, 2024 at 12:00 AM"}
                         </Text>
@@ -115,9 +117,9 @@ export default function ManageSubscription(props: any) {
                             color={theme._404040}>
                             {STRING.next_payment}
                         </Text>
-                        <Text size={getScaleSize(14)}
+                        <Text size={getScaleSize(16)}
                             font={FONTS.Lato.SemiBold}
-                            color={theme.primaryText}>
+                            color={theme._111111}>
                             {/* {subscriptionPlanDetails?.subscription_expires_at ? moment.utc(subscriptionPlanDetails?.subscription_expires_at).local().format('MMMM DD, YYYY') : ''} */}
                             {"September 1, 2024"}
                         </Text>
@@ -136,72 +138,19 @@ export default function ManageSubscription(props: any) {
                             color={theme._404040}>
                             {STRING.Total}
                         </Text>
-                        <Text size={getScaleSize(14)}
+                        <Text size={getScaleSize(16)}
                             font={FONTS.Lato.SemiBold}
-                            color={theme.primaryText}>
+                            color={theme._111111}>
                             {`P ${subscriptionPlanDetails?.plan?.price ?? '0.00'}`}
                         </Text>
                     </View>
                 </View>
-                <View style={{
-                    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: getScaleSize(24),
-                    marginTop: getScaleSize(100)
-                }}>
-                    <TouchableOpacity
-                        style={{
-                            backgroundColor: theme.white,
-                            borderColor: theme.primary,
-                            width: "48%",
-                            alignItems: 'center',
-                            borderWidth: 1,
-                            paddingVertical: getScaleSize(12),
-                            borderRadius: getScaleSize(10)
-                        }}
-                    >
-                        <Text
-                            size={getScaleSize(18)}
-                            font={FONTS.Lato.SemiBold}
-                            color={theme.primary}
-                        >{"Cancel"}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={() =>
-                            props.navigation.navigate(SCREENS.ChooseYourSubscription.identifier, {
-                                isFromSubscriptionButton: true,
-                            })}
-                        style={{
-                            backgroundColor: theme.primary, borderColor: theme.primary, width: "48%", borderWidth: 1, paddingVertical: getScaleSize(12),
-                            borderRadius: getScaleSize(10), alignItems: 'center'
-                        }}
-                    >
-                        <Text
-                            size={getScaleSize(18)}
-                            font={FONTS.Lato.SemiBold}
-                            color={theme.white}
-                        >{"Manage Plan"}</Text>
-                    </TouchableOpacity>
-                </View>
             </ScrollView>
         )
-        //     }
-        // }
-        // else {
-        //     return (
-        //         <EmptyView
-        //             title={STRING.you_have_not_subscribed_to_any_plan}
-        //             style={styles(theme).emptyView}
-        //             onPressButton={() => {
-        //                 props.navigation.navigate(SCREENS.ChooseYourSubscription.identifier, {
-        //                     isFromSubscriptionButton: true,
-        //                 });
-        //             }}
-        //         />
-        //     )
-        // }
     }
 
     return (
-        <View style={[styles(theme).container]}>
+        <AppSafeAreaView style={[styles(theme).container]}>
             <Header
                 onBack={() => {
                     props.navigation.goBack();
@@ -209,35 +158,43 @@ export default function ManageSubscription(props: any) {
                 screenName={STRING.manage_subscription}
             />
             {renderSubscriptionPlanDetails()}
-            {profile?.has_purchased && !isLoading && (
-                <View style={styles(theme).buttonContainer}>
-                    <TouchableOpacity
-                        onPress={() => {
-                            props.navigation.goBack();
-                        }
-                        } style={styles(theme).backButton}>
-                        <Text
-                            size={getScaleSize(19)}
-                            font={FONTS.Lato.Bold}
-                            color={theme._214C65}
-                            align="center">
-                            {STRING.cancel}
-                        </Text>
-                    </TouchableOpacity>
-                    <View style={{ width: getScaleSize(16) }} />
-                    <Button
-                        title={STRING.manage_plan}
-                        style={{ flex: 1.0 }}
-                        onPress={() => {
-                            props.navigation.navigate(SCREENS.ChooseYourSubscription.identifier, {
-                                isFromSubscriptionButton: true,
-                            });
-                        }}
-                    />
-                </View>
-            )}
-
-        </View>
+            <View style={styles(theme).buttonContainer}>
+                <TouchableOpacity
+                    onPress={() => props.navigation.goBack()}
+                    style={{
+                        backgroundColor: theme.white,
+                        borderColor: theme.primary,
+                        width: "48%",
+                        alignItems: 'center',
+                        borderWidth: 1,
+                        paddingVertical: getScaleSize(12),
+                        borderRadius: getScaleSize(10)
+                    }}
+                >
+                    <Text
+                        size={getScaleSize(18)}
+                        font={FONTS.Lato.SemiBold}
+                        color={theme.primary}
+                    >{"Cancel"}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={() =>
+                        props.navigation.navigate(SCREENS.ChooseYourSubscription.identifier, {
+                            isFromSubscriptionButton: true,
+                        })}
+                    style={{
+                        backgroundColor: theme.primary, borderColor: theme.primary, width: "48%", borderWidth: 1, paddingVertical: getScaleSize(12),
+                        borderRadius: getScaleSize(10), alignItems: 'center'
+                    }}
+                >
+                    <Text
+                        size={getScaleSize(18)}
+                        font={FONTS.Lato.SemiBold}
+                        color={theme.white}
+                    >{"Manage Plan"}</Text>
+                </TouchableOpacity>
+            </View>
+        </AppSafeAreaView>
     )
 }
 
@@ -262,6 +219,7 @@ const styles = (theme: ThemeContextType['theme']) => StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between'
     },
+    planPriceContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flex: 1 },
     planDetailsContainer: {
         backgroundColor: theme._FDEFEC,
         borderRadius: getScaleSize(12),
@@ -278,8 +236,8 @@ const styles = (theme: ThemeContextType['theme']) => StyleSheet.create({
     buttonContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginHorizontal: getScaleSize(24),
-        marginBottom: getScaleSize(24)
+        justifyContent: 'space-between', marginHorizontal: getScaleSize(24),
+        paddingBottom: getScaleSize(10),
     },
     backButton: {
         flex: 1.0,
