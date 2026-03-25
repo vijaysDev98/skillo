@@ -18,6 +18,7 @@ import { Header, Input, Text, Button } from '../../components';
 import OTPTextInput from 'react-native-otp-textinput';
 
 import { API } from '../../api';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 export default function Otp(props: any) {
 
@@ -224,7 +225,7 @@ export default function Otp(props: any) {
 
     return (
 
-        <View style={styles(theme).container}>
+        <AppSafeAreaView style={styles(theme).container}>
             <Header
                 onBack={() => {
                     props.navigation.goBack();
@@ -330,12 +331,12 @@ export default function Otp(props: any) {
                 // title={isFromSignup ? STRING.buttonText.verify_OTP : STRING.buttonText.continue}
                 title={STRING.buttonText.verify_OTP}
                 // disabled={!otp}
-                style={{ marginBottom: getScaleSize(24), marginHorizontal: getScaleSize(24) }}
+                style={{ marginBottom: getScaleSize(10), marginHorizontal: getScaleSize(24) }}
                 onPress={() => {
-                        onOtp()
+                    onOtp()
                 }}
             />
-        </View>
+        </AppSafeAreaView>
         // </KeyboardAvoidingView>
     );
 }

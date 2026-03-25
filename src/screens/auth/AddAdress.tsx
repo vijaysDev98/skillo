@@ -4,10 +4,10 @@ import { AuthContext, ThemeContext, ThemeContextType } from '../../context';
 import { getScaleSize, SHOW_TOAST, Storage, useString } from '../../constant';
 import { Button, Header, Input, KeyBoardAware } from '../../components';
 import { SCREENS } from '..';
-import { name } from 'lodash';
 import { API } from '../../api';
 import { CommonActions } from '@react-navigation/native';
 import { userRoles } from '../../constant/utils';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 const AddAdress = (props: any) => {
     const { data } = props.route.params ?? "";
@@ -201,7 +201,7 @@ const AddAdress = (props: any) => {
     }
 
     return (
-        <View style={styles(theme).container}>
+        <AppSafeAreaView style={styles(theme).container}>
             <Header
                 onBack={() => {
                     props.navigation.goBack();
@@ -269,21 +269,16 @@ const AddAdress = (props: any) => {
                             setState((prev) => ({ ...prev, postalCode: text }));
                         }}
                     />
-                    <Button
-                        title={STRING.buttonText.add_address}
-                        style={{
-                            marginVertical: getScaleSize(24),
-                        }}
-                        onPress={() => {
-                            // onSignup();
-
-                            handleAddAddress();
-
-                        }}
-                    />
                 </View>
             </KeyBoardAware>
-        </View>
+            <Button
+                title={STRING.buttonText.add_address}
+                style={styles(theme).btnStyle}
+                onPress={() => {
+                    handleAddAddress();
+                }}
+            />
+        </AppSafeAreaView>
     );
 };
 
@@ -317,5 +312,10 @@ const styles = (theme: ThemeContextType['theme']) =>
         },
         scrollContent: {
             paddingBottom: getScaleSize(50),
+        },
+        btnStyle: {
+            marginHorizontal: getScaleSize(24),
+            marginBottom: getScaleSize(10),
+            marginTop: 'auto'
         }
     });

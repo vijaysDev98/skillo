@@ -46,8 +46,8 @@ export const useString = () => {
     category_message:
       'Please pick a category to begin. This will help us connect you with the right professional for your needs.',
     Selectacategory: 'Select a category',
-    enter_your_registered_email_or_phone_number_below_to_get_reset_your_password:
-      'Enter your Registered Email or Mobile Number below to recover your password.',
+    enter_your_registered_email_below_to_get_reset_your_password:
+      'Enter your Registered Email below to recover your password.',
     continue: 'Continue',
     To_reset_your_password_Please_enter_the_4_Digit_PIN_sent_to_your_Email_or_Phone_Number:
       'To reset your password. Please enter the 4 Digit PIN sent to your Email',
@@ -342,6 +342,7 @@ export const useString = () => {
     full_name: 'Full Name',
     e_mail_id: 'E-mail id',
     mobile_number: 'Mobile Number',
+    gender: 'Gender',
     enter_mobile_number: 'Enter Mobile Number',
     update: 'Update',
     are_you_sure_you_want_to_delete_your_account:
@@ -607,7 +608,7 @@ export const useString = () => {
       verify_OTP: 'Verify OTP',
       upload_profile_picture: 'Upload profile picture',
       add_address: 'Add Address',
-      forgotPassword: 'Forgot Password',
+      forgotPassword: 'Forgot Password?',
       send_otp: "Send OTP"
     },
     SingUp: {
@@ -617,7 +618,7 @@ export const useString = () => {
     },
     otp: {
       title: 'Enter OTP',
-      subTitle: "Please enter the 6 Digit PIN sent to your Email or Mobile Number.",
+      subTitle: "Please enter the 6 Digit PIN sent to your Email.",
       code: 'Code',
       resend_code: 'Resend code',
     },

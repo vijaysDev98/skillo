@@ -11,6 +11,8 @@ import {
   Platform
 } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import moment from 'moment';
 
 //CONTEXT
 import { AuthContext, ThemeContext, ThemeContextType } from '../../context';
@@ -31,12 +33,13 @@ import {
   SelectCountrySheet,
   KeyBoardAware,
   CheckBox,
-  SafeView,
+  GenderSelection,
 } from '../../components';
 import { CommonActions } from '@react-navigation/native';
 import { API } from '../../api';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { userRoles } from '../../constant/utils';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 const RadioItem = ({ label, value, selected, onPress }: any) => {
 
@@ -106,7 +109,8 @@ export default function AddPersonalDetails(props: any) {
   const [countryFlag, setCountryFlag] = useState('🇮🇳');
   const [nationality, setNationality] = useState('');
   const [residence, setResidence] = useState('');
-  const [dropDownType, setDropDownType] = useState<'nationality' | 'residence' | 'mobile_number'>('nationality');
+  const [dropDownType, setDropDownType] = useState<'nationality' | 'residence' | 'mobile_number' | 'kin_mobile_number'>('nationality');
+  const [kinCountryCode, setKinCountryCode] = useState('+91');
 
 
   const [businessName, setBusinessName] = useState('')
@@ -130,6 +134,7 @@ export default function AddPersonalDetails(props: any) {
   const [professionalTraining, setProfessionalTraining] = useState('')
   const [selfTaught, setSelfTaught] = useState('')
   const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // useEffect(() => {
   //   if (isPhoneNumber) {
@@ -678,7 +683,7 @@ export default function AddPersonalDetails(props: any) {
           <Input
             placeholder={STRING.enter_mobile_no}
             placeholderTextColor={theme._939393}
-            inputTitle={STRING.mobile_no}
+            inputTitle={STRING.mobile_number}
             // inputColor={true}
             continerStyle={{ marginBottom: getScaleSize(16) }}
             value={mobileNo}
@@ -698,18 +703,20 @@ export default function AddPersonalDetails(props: any) {
               setVisibleCountry(true);
             }}
           />
-          <Input
-            placeholder={STRING.placeHolders.select_nationality}
-            placeholderTextColor={theme._939393}
-            inputTitle={STRING.inputTitle.nationality}
-            isDropDown={true}
-            // continerStyle={{ marginBottom: getScaleSize(16) }}
-            value={nationality}
-            onPress={() => {
-              setDropDownType('nationality');
-              setVisibleCountry(true)
-            }}
-          />
+          {userType == userRoles.Service_Provider_individual && (
+            <Input
+              placeholder={STRING.placeHolders.select_nationality}
+              placeholderTextColor={theme._939393}
+              inputTitle={STRING.inputTitle.nationality}
+              isDropDown={true}
+              // continerStyle={{ marginBottom: getScaleSize(16) }}
+              value={nationality}
+              onPress={() => {
+                setDropDownType('nationality');
+                setVisibleCountry(true)
+              }}
+            />
+          )}
           <Input
             placeholder={STRING.placeHolders.select_country_of_residence}
             placeholderTextColor={theme._939393}
@@ -755,19 +762,23 @@ export default function AddPersonalDetails(props: any) {
             placeholder="Date of Birth"
             inputTitle="Date of Birth"
             value={dob}
+            editable={false}
             isDropDown={true}
+            onPress={() => {
+              setShowDatePicker(true);
+            }}
           />
 
-          <Input
-            placeholder="Gender"
-            inputTitle="Gender"
-            isDropDown={true}
+          <GenderSelection
+            inputTitle={STRING.gender}
+            placeholder={STRING.gender}
             value={gender}
+            onSelect={setGender}
           />
 
           <Input
-            placeholder="Enter Mobile No"
-            inputTitle="Mobile Number"
+            placeholder={STRING.enter_mobile_no}
+            inputTitle={STRING.mobile_number}
             value={mobileNo}
             keyboardType="number-pad"
             maxLength={10}
@@ -783,10 +794,22 @@ export default function AddPersonalDetails(props: any) {
           />
 
           <Input
-            placeholder="Enter Email"
-            inputTitle="Email address"
+            placeholder={STRING.example_email}
+            placeholderTextColor={theme._939393}
+            inputTitle={STRING.email}
+            // inputColor={true}
+            containerStyle={{
+              opacity: 0.5,
+              backgroundColor: theme._F0EFF0,
+            }}
+            // continerStyle={{ marginBottom: getScaleSize(16) }}
             value={email}
-            onChangeText={setEmail}
+            editable={isEmail ? false : true}
+            onChangeText={text => {
+              setEmail(text);
+              setEmailError('');
+            }}
+            isError={emailError}
           />
 
           <Input
@@ -821,6 +844,11 @@ export default function AddPersonalDetails(props: any) {
             keyboardType="number-pad"
             value={nextOfKinNumber}
             onChangeText={setNextOfKinNumber}
+            countryCode={kinCountryCode}
+            onPressCountryCode={() => {
+              setDropDownType('kin_mobile_number');
+              setVisibleCountry(true);
+            }}
           />
           <Input
             placeholder="Relation"
@@ -871,7 +899,7 @@ export default function AddPersonalDetails(props: any) {
   }
 
   return (
-    <SafeView style={styles(theme).container}>
+    <AppSafeAreaView style={styles(theme).container}>
       <Header
         onBack={() => {
           props.navigation.goBack();
@@ -962,6 +990,8 @@ export default function AddPersonalDetails(props: any) {
             setResidence(countryName);
           } else if (dropDownType === 'mobile_number') {
             setCountryCode(e?.dial_code);
+          } else if (dropDownType === 'kin_mobile_number') {
+            setKinCountryCode(e?.dial_code);
           }
           setVisibleCountry(false);
         }}
@@ -969,7 +999,21 @@ export default function AddPersonalDetails(props: any) {
           setVisibleCountry(false);
         }}
       />
-    </SafeView>
+      {showDatePicker && (
+        <DateTimePicker
+          value={dob ? new Date(dob) : new Date()}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          maximumDate={new Date()}
+          onChange={(event, selectedDate) => {
+            setShowDatePicker(false);
+            if (selectedDate) {
+              setDob(moment(selectedDate).format('YYYY-MM-DD'));
+            }
+          }}
+        />
+      )}
+    </AppSafeAreaView>
   );
 }
 
@@ -987,7 +1031,6 @@ const styles = (theme: ThemeContextType['theme']) =>
     },
     imageContainer: {
       alignItems: 'center',
-      marginTop: getScaleSize(20),
       marginBottom: getScaleSize(16),
     },
     image: {

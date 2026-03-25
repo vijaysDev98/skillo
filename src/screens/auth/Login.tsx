@@ -263,9 +263,9 @@ export default function Login(props: any) {
               />
             ) : ( */}
             <Input
-              placeholder={STRING.placeHolders.enter_email_or_mobile_number}
+              placeholder={STRING.placeHolders.enter_email}
               placeholderTextColor={theme._B3B3B3}
-              inputTitle={STRING.inputTitle.email_or_mobile_number}
+              inputTitle={STRING.inputTitle.email}
               inputColor={false}
               value={email}
               keyboardType="email-address"

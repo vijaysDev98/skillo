@@ -14,6 +14,7 @@ import { SCREENS } from '..';
 //COMPONENTS
 import { Header, Input, Text, Button, SelectCountrySheet } from '../../components';
 import { API } from '../../api';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 export default function ResetPassword(props: any) {
 
@@ -64,11 +65,11 @@ export default function ResetPassword(props: any) {
                 email: email,
             };
             // }
- props.navigation.navigate(SCREENS.Otp.identifier, {
-                        email: email,
-                        // isPhoneNumber: isPhoneNumber,
-                        countryCode: countryCode,
-                    });
+            props.navigation.navigate(SCREENS.Otp.identifier, {
+                email: email,
+                // isPhoneNumber: isPhoneNumber,
+                countryCode: countryCode,
+            });
 
             // try {
             //     setLoading(true);
@@ -98,7 +99,7 @@ export default function ResetPassword(props: any) {
 
 
     return (
-        <View style={styles(theme).container}>
+        <AppSafeAreaView style={styles(theme).container}>
             <Header
                 onBack={() => {
                     props.navigation.goBack();
@@ -112,7 +113,7 @@ export default function ResetPassword(props: any) {
                         font={FONTS.Lato.SemiBold}
                         color={theme.secondaryText}
                         style={{ marginBottom: getScaleSize(20) }}>
-                        {STRING.enter_your_registered_email_or_phone_number_below_to_get_reset_your_password}
+                        {STRING.enter_your_registered_email_below_to_get_reset_your_password}
                     </Text>
                     <View style={styles(theme).inputContainer}>
                         {/* {isPhoneNumber ? (
@@ -137,9 +138,9 @@ export default function ResetPassword(props: any) {
                             />
                         ) : ( */}
                         <Input
-                            placeholder={STRING.placeHolders.enter_email_or_mobile_number}
+                            placeholder={STRING.placeHolders.enter_email}
                             placeholderTextColor={theme._8C8C8C}
-                            inputTitle={STRING.inputTitle.email_or_mobile_number}
+                            inputTitle={STRING.inputTitle.email}
                             inputColor={false}
                             value={email}
                             maxLength={100}
@@ -172,10 +173,10 @@ export default function ResetPassword(props: any) {
                 style={styles(theme).sendOtpBtn}
                 onPress={() => {
                     onResetPassword();
-                   
+
                 }}
             />
-        </View>
+        </AppSafeAreaView>
     );
 }
 
@@ -201,7 +202,8 @@ const styles = (theme: ThemeContextType['theme']) =>
         inputContainer: {
             marginBottom: getScaleSize(16),
         },
-        sendOtpBtn:{ 
-            margin : getScaleSize(24) 
+        sendOtpBtn: {
+            marginBottom: getScaleSize(10),
+            marginHorizontal: getScaleSize(24)
         }
     });

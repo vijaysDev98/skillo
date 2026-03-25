@@ -15,6 +15,7 @@ import { SCREENS } from '..';
 import { Header, Text, Button, CategoryDropdown, ServiceItem, BottomSheet, ProgressView, AccountCreatedModal } from '../../components';
 import { API } from '../../api';
 import { CommonActions } from '@react-navigation/native';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 const servicesData = [
     { id: 1, label: "DIY", value: "diy", category_name: "DIY" },
@@ -361,7 +362,7 @@ export default function AddServices(props: any) {
     console.log("selected", selectedCategory)
 
     return (
-        <View style={styles(theme).container}>
+        <AppSafeAreaView style={styles(theme).container}>
             <Header
                 onBack={() => {
                     props.navigation.goBack();
@@ -500,15 +501,15 @@ export default function AddServices(props: any) {
                 }}
             />
             {isAccountCreated && <AccountCreatedModal
-            visible={isAccountCreated}
-            onPressHome={() => {
-                setIsAccountCreated(false);
-                props.navigation.navigate(SCREENS.BottomBar.identifier);
-            }}
-            isGoToHome={true}
+                visible={isAccountCreated}
+                onPressHome={() => {
+                    setIsAccountCreated(false);
+                    props.navigation.navigate(SCREENS.BottomBar.identifier);
+                }}
+                isGoToHome={true}
             />}
             {isLoading && <ProgressView />}
-        </View>
+        </AppSafeAreaView>
     );
 }
 
@@ -529,7 +530,7 @@ const styles = (theme: ThemeContextType['theme']) =>
             flexDirection: 'row',
             alignItems: 'center',
             marginHorizontal: getScaleSize(24),
-            marginBottom: getScaleSize(24)
+            marginBottom: getScaleSize(10)
         },
         backButton: {
             flex: 1.0,

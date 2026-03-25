@@ -40,7 +40,7 @@ import AppDropdown from './AppDropdown'
 import AccountCreatedModal from './AccountCreateModal'
 import ServiceCard from './ServiceCard'
 import { CalendarComponent, CustomTimePicker } from './CalendarComponent'
-import SafeView from './SafeView'
+import GenderSelection from './GenderSelection'
 
 export {
   Header,
@@ -86,5 +86,5 @@ export {
   AppDropdown,
   AccountCreatedModal,
   ServiceCard,
-  SafeView
+  GenderSelection,
 }

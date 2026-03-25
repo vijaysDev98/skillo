@@ -364,7 +364,7 @@ const styles = (theme: ThemeContextType['theme']) =>
     nextImage: {
       height: getScaleSize(24),
       width: getScaleSize(24),
-      tintColor:theme._262B43B2
+      tintColor: theme._262B43B2
     },
     newCalenderContainer: {
       marginTop: getScaleSize(16),
@@ -387,9 +387,9 @@ const styles = (theme: ThemeContextType['theme']) =>
 
     selectedTime: {
       backgroundColor: theme.primary,
-      paddingVertical:getScaleSize(6),
-      paddingHorizontal:getScaleSize(22)
+      paddingVertical: getScaleSize(6),
+      paddingHorizontal: getScaleSize(22)
     },
   });
 
-export {CalendarComponent,CustomTimePicker };
+export { CalendarComponent, CustomTimePicker };

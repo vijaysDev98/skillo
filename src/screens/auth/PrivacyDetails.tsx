@@ -14,8 +14,8 @@ import {
   Header,
   Text,
   KeyBoardAware,
-  SafeView,
 } from '../../components';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 const PrivacySection = ({ title, desc, theme }: { title: string, desc: string, theme: any }) => (
   <View style={styles(theme).sectionContainer}>
@@ -56,7 +56,7 @@ export default function PrivacyDetails(props: any) {
   ];
 
   return (
-    <SafeView style={styles(theme).mainContainer}>
+    <AppSafeAreaView style={styles(theme).mainContainer}>
       <Header
         screenName={STRING.privacyDetails.title}
         onBack={() => props.navigation.goBack()}
@@ -89,7 +89,7 @@ export default function PrivacyDetails(props: any) {
           {STRING.privacyDetails.agree_to_privacy_notice}
         </Text>
       </KeyBoardAware>
-    </SafeView>
+    </AppSafeAreaView>
   );
 }
 

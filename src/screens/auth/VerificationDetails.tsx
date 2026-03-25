@@ -8,6 +8,7 @@ import { pick, types, isErrorWithCode, errorCodes } from '@react-native-document
 import { serviceProviderBusinessDocs, serviceproviderIndividualDocs, serviceSeekerBusinessDocs, userRoles } from '../../constant/utils';
 import { CommonActions } from '@react-navigation/native';
 import { SCREENS } from '..';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 const docRoleMap = {
   [userRoles.Service_Seeker_business]: serviceSeekerBusinessDocs,
@@ -91,9 +92,9 @@ const VerificationDetails = (props: any) => {
       //   })
       // );
 
-        props.navigation.navigate(SCREENS.ChooseYourSubscription.identifier, {
-                                  id: ""
-                              });
+      props.navigation.navigate(SCREENS.ChooseYourSubscription.identifier, {
+        id: ""
+      });
 
       return;
     }
@@ -187,7 +188,7 @@ const VerificationDetails = (props: any) => {
 
   return (
 
-    <View style={styles(theme).container}>
+    <AppSafeAreaView style={styles(theme).container}>
 
       <Header
         onBack={() => {
@@ -275,7 +276,7 @@ const VerificationDetails = (props: any) => {
 
       </View>
 
-    </View>
+    </AppSafeAreaView>
 
   );
 };
@@ -293,7 +294,7 @@ const styles = (theme: ThemeContextType['theme']) =>
     contentContainer: {
       flex: 1,
       paddingHorizontal: getScaleSize(24),
-      paddingVertical: getScaleSize(24)
+      paddingTop: getScaleSize(24),
     },
 
     scrollContainer: {
@@ -312,12 +313,16 @@ const styles = (theme: ThemeContextType['theme']) =>
       marginBottom: getScaleSize(20)
     },
 
-    btnStyle: {},
+    btnStyle: {
+      marginBottom: getScaleSize(10),
+      paddingVertical: getScaleSize(18)
+    },
 
     stepTwoContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between'
+      justifyContent: 'space-between',
+      marginBottom: getScaleSize(10),
     },
 
     prevBtn: {
@@ -325,12 +330,12 @@ const styles = (theme: ThemeContextType['theme']) =>
       borderWidth: 1,
       borderColor: theme.primary,
       width: getScaleSize(183),
-      paddingVertical: getScaleSize(14)
+      paddingVertical: getScaleSize(18)
     },
 
     nextBtn: {
       width: getScaleSize(183),
-      paddingVertical: getScaleSize(14)
+      paddingVertical: getScaleSize(18)
     },
 
     stepTwoFields: {
