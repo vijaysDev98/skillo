@@ -600,6 +600,7 @@ export default function TaskStatus(props: any) {
         onProcessPress={() => {
           renegotiatioAcceptSheetRef.current?.close();
         }}
+        
       />
       <EnterSecurityCodeSheet
         onRef={enterSecurityCodeSheetRef}
