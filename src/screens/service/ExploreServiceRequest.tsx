@@ -174,6 +174,10 @@ export default function ExploreServiceRequest(props: any) {
       />
       <View style={styles(theme).searchView}>
         <View style={styles(theme).searchBox}>
+          <Image
+            style={styles(theme).searchImage}
+            source={IMAGES.search}
+          />
           <TextInput
             style={styles(theme).searchInput}
             placeholderTextColor={theme._555555}
@@ -189,12 +193,9 @@ export default function ExploreServiceRequest(props: any) {
               getAllServices(1, true);
             }}
           />
-          <Image
-            style={styles(theme).searchImage}
-            source={IMAGES.search_icon}
-          />
+          
         </View>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles(theme).filterContainer}
           onLayout={(event) => {
             const { y, height } = event.nativeEvent.layout;
@@ -214,8 +215,8 @@ export default function ExploreServiceRequest(props: any) {
             style={styles(theme).arrowImage}
             source={IMAGES.arrow_left}
           />
-        </TouchableOpacity>
-        <Modal visible={filterModal} transparent animationType="fade">
+        </TouchableOpacity> */}
+        {/* <Modal visible={filterModal} transparent animationType="fade">
           <TouchableOpacity
             style={styles(theme).modalOverlay}
             activeOpacity={1}
@@ -260,7 +261,7 @@ export default function ExploreServiceRequest(props: any) {
               ))}
             </View>
           </TouchableOpacity>
-        </Modal>
+        </Modal> */}
       </View>
       <FlatList
         data={serviceList}
@@ -355,15 +356,15 @@ const styles = (theme: ThemeContextType['theme']) =>
       height: getScaleSize(53),
     },
     searchImage: {
-      height: getScaleSize(32),
-      width: getScaleSize(32),
+      height: getScaleSize(24),
+      width: getScaleSize(24),
       alignSelf: 'center' as FlexAlignType,
     },
 
     searchInput: {
       fontFamily: FONTS.Lato.Regular,
       fontSize: getScaleSize(14),
-      color: theme.black,
+      color: theme.secondaryText,
       // marginLeft: getScaleSize(12),
       flex: 1.0,
     },

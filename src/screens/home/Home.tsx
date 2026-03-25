@@ -38,9 +38,6 @@ export default function Home(props: any) {
 
   const {fromFromSubscription,userRole} = props.route?.params || {};
 
-  console.log('USER TYPE', userType)
-  console.log('fromFromSubscription', fromFromSubscription)
-
   const acceptRef = useRef<any>(null);
 
   const [isLoading, setLoading] = useState(false);

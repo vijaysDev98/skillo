@@ -50,7 +50,7 @@ const SearchComponent = (props: any) => {
           </TouchableOpacity>
         )}
       </View>
-    //   {/* <TouchableOpacity
+      {/* <TouchableOpacity
     //     onPress={props.onPressMicrophone}
     //     style={styles(theme).microPhoneContainer}>
     //     <Image

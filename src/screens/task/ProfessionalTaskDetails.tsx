@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   View,
   StatusBar,
@@ -12,50 +12,53 @@ import {
 } from 'react-native';
 
 //ASSETS
-import {FONTS, IMAGES} from '../../assets';
+import { FONTS, IMAGES } from '../../assets';
 
 //CONTEXT
-import {AuthContext, ThemeContext, ThemeContextType} from '../../context';
+import { AuthContext, ThemeContext, ThemeContextType } from '../../context';
 
 //CONSTANT
-import {arrayIcons, getScaleSize, SHOW_TOAST, useString} from '../../constant';
+import { arrayIcons, DummyData, getScaleSize, SHOW_TOAST, useString } from '../../constant';
 
 //COMPONENT
-import {Header, ProgressView, StatusItem, Text} from '../../components';
+import { Header, ProgressView, StatusItem, Text } from '../../components';
 
 //PACKAGES
-import {useFocusEffect} from '@react-navigation/native';
-import {SCREENS} from '..';
-import {API} from '../../api';
+import { useFocusEffect } from '@react-navigation/native';
+import { SCREENS } from '..';
+import { API } from '../../api';
 import moment from 'moment';
 import Video from 'react-native-video';
-import {buildThreadId} from '../../services/chat';
+import { buildThreadId } from '../../services/chat';
+import { RecentSearchCard } from '../home/Search';
+import JobDetailBox from '../service/ui/JobDetailx';
+
 
 export default function ProfessionalTaskDetails(props: any) {
   const STRING = useString();
-  const {theme} = useContext<any>(ThemeContext);
+  const { theme } = useContext<any>(ThemeContext);
 
   const item = props?.route?.params?.item ?? {};
   const serviceId = props?.route?.params?.serviceId ?? '';
-  const {profile} = useContext<any>(AuthContext);
+  const { profile } = useContext<any>(AuthContext);
   const [isStatus, setIsStatus] = useState(false);
   const [visibleTaskDetails, setVisibleTaskDetails] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [taskDetails, setTaskDetails] = useState<any>({});
   const [attachments, setAttachments] = useState<any>([]);
 
-  useEffect(() => {
-    if (item) {
-      getServiceDetails();
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (item) {
+  //     getServiceDetails();
+  //   }
+  // }, []);
 
   // function getItemUrl() {
-  //   if (item?.quote_status === 'send') {
+  //   if (item?.status === 'send') {
   //     return '/quotes'
-  //   } else if (item?.quote_status === 'accepted') {
+  //   } else if (item?.status === 'accepted') {
   //     return '/accepted'
-  //   } else if (item?.quote_status === 'completed') {
+  //   } else if (item?.status === 'completed') {
   //     return '/completed'
   //   }
   // }
@@ -65,7 +68,7 @@ export default function ProfessionalTaskDetails(props: any) {
       setLoading(true);
       const result = await API.Instance.get(
         API.API_ROUTES.getTsakDetails +
-          `/quotes/${serviceId ? serviceId : item?.service_request_id}`,
+        `/quotes/${serviceId ? serviceId : item?.service_request_id}`,
       );
       if (result.status) {
         setTaskDetails(result?.data?.data ?? {});
@@ -106,7 +109,7 @@ export default function ProfessionalTaskDetails(props: any) {
     return [...photos, ...videos];
   };
 
-  const AttachmentItem = ({item}: any) => {
+  const AttachmentItem = ({ item }: any) => {
     switch (item.type) {
       case 'photo':
         return (
@@ -118,7 +121,8 @@ export default function ProfessionalTaskDetails(props: any) {
             }}>
             <Image
               style={[styles(theme).photosView]}
-              source={{uri: item?.url ?? ''}}
+              // source={{ uri: item?.url ?? '' }}
+              source={item?.url}
             />
           </TouchableOpacity>
         );
@@ -127,7 +131,7 @@ export default function ProfessionalTaskDetails(props: any) {
         return (
           <View style={styles(theme).photosView}>
             <Video
-              source={{uri: item.url}}
+              source={{ uri: item.url }}
               resizeMode="cover"
               pointerEvents="none"
               controls
@@ -135,7 +139,7 @@ export default function ProfessionalTaskDetails(props: any) {
               fullscreen={false}
               playInBackground={false}
               playWhenInactive={false}
-              style={{width: '100%', height: '100%'}}
+              style={styles(theme).videoPreview}
             />
           </View>
         );
@@ -143,6 +147,8 @@ export default function ProfessionalTaskDetails(props: any) {
         return null;
     }
   };
+
+  const statusData = item?.tab == "accepted" ? DummyData?.taskDetailsOngoingDummyData.task_status : DummyData.taskDetailsDummyData?.task_status
 
   return (
     <View style={styles(theme).container}>
@@ -155,177 +161,57 @@ export default function ProfessionalTaskDetails(props: any) {
       <ScrollView
         style={styles(theme).scrolledContainer}
         showsVerticalScrollIndicator={false}>
-        <View style={styles(theme).imageContainer}>
-          {taskDetails?.task?.subcategory?.icon ? (
-            <Image
-              style={styles(theme).imageView}
-              source={{uri: taskDetails?.task?.subcategory?.icon}}
-            />
-          ) : (
-            <View
-              style={[
-                styles(theme).imageView,
-                {backgroundColor: theme._D5D5D5},
-              ]}
-            />
-          )}
-          <Text
-            style={{
-              marginVertical: getScaleSize(12),
-              marginLeft: getScaleSize(4),
-            }}
-            size={getScaleSize(24)}
-            font={FONTS.Lato.Bold}
-            color={theme.primary}>
-            {taskDetails?.task?.subcategory?.name ?? ''}
-          </Text>
-          <View style={styles(theme).informationView}>
-            <View style={styles(theme).horizontalView}>
-              <View style={styles(theme).itemView}>
-                <Image
-                  style={styles(theme).informationIcon}
-                  source={IMAGES.calender}
-                />
-                <Text
-                  style={{
-                    marginHorizontal: getScaleSize(8),
-                    alignSelf: 'center',
-                  }}
-                  size={getScaleSize(12)}
-                  font={FONTS.Lato.Medium}
-                  color={theme.primary}>
-                  {taskDetails?.task?.chosen_date_time
-                    ? moment
-                        .utc(taskDetails?.task?.chosen_date_time)
-                        .local()
-                        .format('DD MMM, YYYY')
-                    : '-'}
-                </Text>
-              </View>
-              <View style={styles(theme).itemView}>
-                <Image
-                  style={styles(theme).informationIcon}
-                  source={IMAGES.clock}
-                />
-                <Text
-                  style={{
-                    marginHorizontal: getScaleSize(8),
-                    alignSelf: 'center',
-                  }}
-                  size={getScaleSize(12)}
-                  font={FONTS.Lato.Medium}
-                  color={theme.primary}>
-                  {taskDetails?.task?.chosen_date_time
-                    ? moment
-                        .utc(taskDetails?.task?.chosen_date_time)
-                        .local()
-                        .format('hh:mm A')
-                    : '-'}
-                </Text>
-              </View>
-            </View>
-            <View
-              style={[
-                styles(theme).horizontalView,
-                {marginTop: getScaleSize(12)},
-              ]}>
-              <View style={styles(theme).itemView}>
-                {taskDetails?.task?.category?.name ? (
-                  <Image
-                    style={[
-                      styles(theme).informationIcon,
-                      {tintColor: theme._1A3D51},
-                    ]}
-                    source={
-                      arrayIcons[
-                        taskDetails?.task?.category?.name?.toLowerCase() as keyof typeof arrayIcons
-                      ] ?? (arrayIcons['diy'] as any)
-                    }
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <View style={[styles(theme).informationIcon]} />
-                )}
-                <Text
-                  style={{
-                    marginHorizontal: getScaleSize(8),
-                    alignSelf: 'center',
-                  }}
-                  size={getScaleSize(12)}
-                  font={FONTS.Lato.Medium}
-                  color={theme.primary}>
-                  {taskDetails?.task?.category?.name ?? ''}
-                </Text>
-              </View>
-              <View style={styles(theme).itemView}>
-                <Image
-                  style={styles(theme).informationIcon}
-                  source={IMAGES.pin}
-                />
-                <Text
-                  style={{
-                    marginHorizontal: getScaleSize(8),
-                    alignSelf: 'center',
-                  }}
-                  size={getScaleSize(12)}
-                  font={FONTS.Lato.Medium}
-                  numberOfLines={4}
-                  color={theme.primary}>
-                  {taskDetails?.elderly_user?.address ?? '-'}
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-        {item?.quote_status === 'accepted' && (
-          <View style={styles(theme).amountContainer}>
+        <Text
+          size={getScaleSize(20)}
+          color={theme.primaryText}
+          font={FONTS.Lato.Bold}
+        >
+          {"Office Cleaning"}
+        </Text>
+        <RecentSearchCard
+          onPress={() => { }}
+          containerStyle={styles(theme).recentCard}
+          image={IMAGES.furnitureAssemblyImg}
+          title={"Furniture Assembly"}
+        />
+        <JobDetailBox
+          jobBudgetValue={"P100 to P500"}
+          jobDate={"2025-10-15"}
+          jobTime={"10:00 AM"}
+        />
+        {item?.tab === 'accepted' && (
+          <>
             <Text
-              style={{flex: 1.0}}
-              size={getScaleSize(18)}
-              font={FONTS.Lato.Medium}
-              color={theme._323232}>
-              {STRING.FinalizedQuoteAmount}
+              style={styles(theme).finalQuoteLabel}
+              size={getScaleSize(16)}
+              font={FONTS.Lato.SemiBold}
+              color={theme.primaryText}
+
+            >
+              {"Final Quote Amount"}
             </Text>
-            <Text
-              style={{flex: 1.0, marginTop: getScaleSize(8)}}
-              size={getScaleSize(27)}
-              font={FONTS.Lato.Bold}
-              color={theme._323232}>
-              {`€${taskDetails?.quote?.amount ?? 0}`}
-            </Text>
-          </View>
+
+            <View style={styles(theme).amountContainer}>
+
+              <Text
+                size={getScaleSize(18)}
+                font={FONTS.Lato.SemiBold}
+                color={theme.primaryText}>
+                {`P${taskDetails?.quote?.amount ?? 0}`}
+              </Text>
+            </View>
+          </>
         )}
-        {item?.quote_status === 'accepted' && (
-          <View style={styles(theme).amountContainer}>
+
+        {item?.tab === 'accepted' && (
+          <View style={styles(theme).securityContainer}>
             <Text
-              style={{flex: 1.0}}
+              style={styles(theme).flexFill}
               size={getScaleSize(18)}
               font={FONTS.Lato.Medium}
               color={theme._323232}>
               {STRING.SecurityCode}
             </Text>
-            {/* <FlatList
-              data={taskDetails?.task?.displayed_service_code?.split('') ?? []}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              renderItem={({ item, index }) => {
-                return (
-                  <View
-                    style={[
-                      styles(theme).securityItemContainer,
-                      { marginLeft: index === 0 ? 0 : 6 },
-                    ]}>
-                    <Text
-                      style={{ flex: 1.0 }}
-                      size={getScaleSize(18)}
-                      font={FONTS.Lato.Medium}
-                      color={theme._323232}>
-                      {item}
-                    </Text>
-                  </View>
-                );
-              }}
-            /> */}
             <View style={styles(theme).codeViewDirection}>
               {taskDetails?.task?.displayed_service_code
                 ?.toString()
@@ -335,7 +221,7 @@ export default function ProfessionalTaskDetails(props: any) {
                     key={index}
                     style={[
                       styles(theme).securityItemContainer,
-                      {marginLeft: index === 0 ? 0 : 3},
+                      index !== 0 && styles(theme).securityItemSpacing,
                     ]}>
                     <Text
                       size={getScaleSize(18)}
@@ -347,311 +233,240 @@ export default function ProfessionalTaskDetails(props: any) {
                 ))}
             </View>
             <Text
-              style={{flex: 1.0, marginTop: getScaleSize(12)}}
+              style={styles(theme).securityNote}
               size={getScaleSize(11)}
               font={FONTS.Lato.Regular}
-              color={'#424242'}>
+              color={theme._8C8C8C}>
               {STRING.security_note}
             </Text>
           </View>
         )}
-        <View style={styles(theme).profileContainer}>
-          <View style={styles(theme).horizontalView}>
-            <Text
-              style={{flex: 1.0}}
-              size={getScaleSize(18)}
-              font={FONTS.Lato.SemiBold}
-              color={theme._323232}>
-              {'About client'}
-            </Text>
-          </View>
-          <View
-            style={[
-              styles(theme).horizontalView,
-              {marginTop: getScaleSize(16)},
-            ]}>
-            {taskDetails?.elderly_user?.profile_photo_url ? (
+
+        <View style={styles(theme).clientContainer}>
+          <Text
+            size={getScaleSize(16)}
+            font={FONTS.Lato.SemiBold}
+            color={theme._8C8C8C}
+          >{"About Client"}</Text>
+          <View style={styles(theme).clientRow}>
+            <View style={styles(theme).clientInfoRow}>
               <Image
-                style={[
-                  styles(theme).profilePicView,
-                  {backgroundColor: theme._D5D5D5},
-                ]}
-                source={{uri: taskDetails?.elderly_user?.profile_photo_url}}
+                source={IMAGES.dummyUser}
+                style={styles(theme).clientAvatar}
               />
-            ) : (
-              <Image
-                style={styles(theme).profilePicView}
-                source={IMAGES.user_placeholder}
-              />
-            )}
-            <View style={{flex: 1.0}}>
               <Text
-                style={{marginLeft: getScaleSize(16)}}
                 size={getScaleSize(20)}
                 font={FONTS.Lato.SemiBold}
-                color={'#0F232F'}>
-                {`${taskDetails?.elderly_user?.first_name ?? ''} ${
-                  taskDetails?.elderly_user?.last_name ?? ''
-                }`}
-              </Text>
-              <Text
-                style={{marginLeft: getScaleSize(16)}}
-                size={getScaleSize(12)}
-                font={FONTS.Lato.Medium}
-                color={'#595959'}>
-                {`${taskDetails?.elderly_user?.phone_country_code ?? ''}${
-                  taskDetails?.elderly_user?.phone_number ?? ''
-                }`}
-              </Text>
+                color={theme.primaryText}
+              >{"Jhon Doe"}</Text>
             </View>
-            {item?.task_status !== 'completed' && (
-              <TouchableOpacity
-                activeOpacity={1}
-                style={[
-                  styles(theme).newButton,
-                  {marginRight: getScaleSize(6)},
-                ]}
-                onPress={() => {
-                  const conversationId = buildThreadId(
-                    taskDetails?.elderly_user?.id,
-                    profile?.user?.id,
-                  );
-                  props.navigation.navigate(SCREENS.ChatDetails.identifier, {
-                    conversationId: conversationId,
-                    peerUser: {
-                      user_id: taskDetails?.elderly_user?.id,
-                      name: taskDetails?.elderly_user?.first_name,
-                      email: taskDetails?.elderly_user?.email,
-                      avatarUrl: taskDetails?.elderly_user?.profile_photo_url,
-                    },
-                  });
-                }}>
+            <TouchableOpacity
+              onPress={() => {
+                props.navigation.navigate(SCREENS.ChatDetails.identifier, {
+                  conversationId: "12",
+                  peerUser: {
+                    user_id: "12",
+                    name: "Joe",
+                    email: "Joe@yopmail.com",
+                    avatarUrl: "https://via.placeholder.com/150",
+                  },
+                });
+              }}
+              style={styles(theme).clientChatButton}>
+              <Text
+                size={getScaleSize(12)}
+                font={FONTS.Lato.SemiBold}
+                color={theme.white}
+              >{"Chat"}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        {item?.tab === 'accepted' && (
+          <>
+            <Text
+              style={styles(theme).addressLabel}
+              size={getScaleSize(16)}
+              font={FONTS.Lato.SemiBold}
+              color={theme._404040}
+            >{"Address"}</Text>
+            <View style={styles(theme).addressBox}>
+              <Image
+                source={IMAGES.homeIcon}
+                style={styles(theme).addressIcon}
+              />
+              <Text
+                size={getScaleSize(16)}
+                font={FONTS.Lato.Medium}
+                color={theme._2B2B2B}
+              >{"Plot 1234, Gaborone West Industrial, Gaborone, Botswana"}</Text>
+            </View>
+          </>
+        )}
+
+        {item?.tab === 'accepted' && (
+          <>
+            <Text
+              style={styles(theme).paymentTitle}
+              size={getScaleSize(18)}
+              font={FONTS.Lato.SemiBold}
+              color={theme._323232}
+            >
+              {"Payment Breakdown"}
+            </Text>
+
+            <View style={styles(theme).informationContainer}>
+
+              <View style={styles(theme).newHorizontalView}>
+                <Text
+                  style={styles(theme).flexFill}
+                  size={getScaleSize(14)}
+                  font={FONTS.Lato.SemiBold}
+                  color={theme._8C8C8C}>
+                  {STRING.FinalizedQuoteAmount}
+                </Text>
                 <Text
                   size={getScaleSize(14)}
-                  font={FONTS.Lato.Medium}
-                  color={theme.white}>
-                  {STRING.Chat}
+                  font={FONTS.Lato.SemiBold}
+                  color={theme._404040}>
+                  {`P${taskDetails?.quote?.amount ?? 0}`}
                 </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-        {item?.quote_status === 'accepted' && (
-          <View style={styles(theme).profileContainer}>
-            <Text
-              style={{flex: 1.0}}
-              size={getScaleSize(18)}
-              font={FONTS.Lato.Medium}
-              color={theme._323232}>
-              {'Address'}
-            </Text>
-            <View style={{flexDirection: 'row', marginTop: getScaleSize(12)}}>
-              <Image
-                style={{height: getScaleSize(24), width: getScaleSize(24)}}
-                source={IMAGES.map_pin}
-              />
-              <Text
-                style={{flex: 1.0, marginLeft: getScaleSize(4)}}
-                size={getScaleSize(14)}
-                font={FONTS.Lato.SemiBold}
-                color={'#595959'}>
-                {taskDetails?.elderly_user?.address ?? '-'}
-              </Text>
+              </View>
+              <View style={styles(theme).newHorizontalView}>
+                <Text
+                  style={styles(theme).flexFill}
+                  size={getScaleSize(14)}
+                  font={FONTS.Lato.SemiBold}
+                  color={theme._8C8C8C}>
+                  {`${STRING.PlatformFee} (${taskDetails?.quote?.platform_fee_percentage ?? 0}%)`}
+                </Text>
+                <Text
+                  size={getScaleSize(14)}
+                  font={FONTS.Lato.SemiBold}
+                  color={theme._404040}>
+                  {`P${taskDetails?.quote?.platform_fee ?? 0}`}
+                </Text>
+              </View>
+              <View style={styles(theme).dotView} />
+              <View style={styles(theme).newHorizontalView}>
+                <Text
+                  style={styles(theme).flexFill}
+                  size={getScaleSize(20)}
+                  font={FONTS.Lato.SemiBold}
+                  color={theme._primaryText}>
+                  {STRING.Total}
+                </Text>
+                <Text
+                  size={getScaleSize(20)}
+                  font={FONTS.Lato.SemiBold}
+                  color={theme.primary}>
+                  {`P${taskDetails?.quote?.total ?? 0}`}
+                </Text>
+              </View>
             </View>
-          </View>
+          </>
         )}
-        <View
-          style={[
-            styles(theme).profileContainer,
-            {paddingVertical: getScaleSize(26)},
-          ]}>
-          <TouchableOpacity
-            style={{flexDirection: 'row'}}
-            activeOpacity={1}
-            onPress={() => {
-              setIsStatus(!isStatus);
-            }}>
+
+
+        <TouchableOpacity
+          style={styles(theme).profileContainer}
+          activeOpacity={1}
+          onPress={() => {
+            setIsStatus(!isStatus);
+          }}>
+          <Text
+            style={styles(theme).flexFill}
+            size={getScaleSize(16)}
+            font={FONTS.Lato.Medium}
+            color={theme._8C8C8C}>
+            {"Task Status"}
+          </Text>
+          <Image
+            style={styles(theme).accordionArrow}
+            source={isStatus ? IMAGES.up : IMAGES.down}
+          />
+
+        </TouchableOpacity>
+        {
+          isStatus && (
+            <View style={styles(theme).statusContainer}>
+              {statusData.map(
+                (item: any, index: number) => (
+                  <StatusItem
+                    statusItemContainer={styles(theme).statusItemSpacing}
+                    key={index}
+                    item={item}
+                    index={index}
+                    isLast={
+                      index === taskDetails?.task_lifecycle?.length - 1
+                    }
+                  />
+                ),
+              )}
+            </View>
+          )
+        }
+
+        <TouchableOpacity
+          style={styles(theme).profileContainer}
+          activeOpacity={1}
+          onPress={() => {
+            setVisibleTaskDetails(!visibleTaskDetails);
+          }}>
+          <Text
+            style={styles(theme).flexFill}
+            size={getScaleSize(16)}
+            font={FONTS.Lato.Medium}
+            color={theme._8C8C8C}>
+            {"Task Details"}
+          </Text>
+          <Image
+            style={styles(theme).accordionArrow}
+            source={isStatus ? IMAGES.up : IMAGES.down}
+          />
+
+        </TouchableOpacity>
+        {visibleTaskDetails && (
+          <View style={styles(theme).taskDetailsCard}>
             <Text
-              style={{flex: 1.0}}
+              style={styles(theme).flexFill}
               size={getScaleSize(18)}
-              font={FONTS.Lato.Medium}
-              color={theme._323232}>
-              {STRING.CheckStatus}
+              font={FONTS.Lato.SemiBold}
+              color={'#424242'}>
+              {STRING.Servicedescription}
             </Text>
-            <TouchableOpacity
-              style={{height: getScaleSize(25), width: getScaleSize(24)}}
-              activeOpacity={1}
-              onPress={() => {
-                setIsStatus(!isStatus);
-              }}>
-              <Image
-                style={{height: getScaleSize(25), width: getScaleSize(24)}}
-                source={isStatus ? IMAGES.up : IMAGES.down}
-              />
-            </TouchableOpacity>
-          </TouchableOpacity>
-          {isStatus && (
-            <>
-              {taskDetails?.task_lifecycle?.length > 0 && (
+            <Text
+              style={styles(theme).taskDescription}
+              size={getScaleSize(14)}
+              font={FONTS.Lato.Medium}
+              color={theme._404040}>
+              {/* {taskDetails?.task?.description ?? '-'} */}
+              {DummyData.taskDetailsDummyData?.description ?? '-'}
+            </Text>
+            {
+              DummyData?.taskDetailsDummyData?.job_photos.length > 0 && (
                 <>
-                  <View style={styles(theme).devider}></View>
-                  <View style={{marginTop: getScaleSize(32)}}>
-                    {taskDetails?.task_lifecycle?.map(
-                      (item: any, index: number) => (
-                        <StatusItem
-                          key={index}
-                          item={item}
-                          index={index}
-                          isLast={
-                            index === taskDetails?.task_lifecycle?.length - 1
-                          }
-                        />
-                      ),
-                    )}
-                  </View>
+                  <Text
+                    style={styles(theme).jobPhotosLabel}
+                    size={getScaleSize(18)}
+                    font={FONTS.Lato.SemiBold}
+                    color={'#424242'}>
+                    {STRING.Jobphotos}
+                  </Text>
+                  <FlatList
+                    data={DummyData?.taskDetailsDummyData?.job_photos ?? []}
+                    numColumns={2}
+                    columnWrapperStyle={styles(theme).jobPhotosWrapper}
+                    contentContainerStyle={styles(theme).jobPhotosContent}
+                    keyExtractor={(item: any, index: number) => index.toString()}
+                    showsHorizontalScrollIndicator={false}
+                    renderItem={({ item }) => <AttachmentItem item={item} />}
+                  />
                 </>
               )}
-            </>
-          )}
-        </View>
-        <View
-          style={[
-            styles(theme).profileContainer,
-            {paddingVertical: getScaleSize(26)},
-          ]}>
-          <TouchableOpacity
-            style={{flexDirection: 'row'}}
-            activeOpacity={1}
-            onPress={() => {
-              setVisibleTaskDetails(!visibleTaskDetails);
-            }}>
-            <Text
-              style={{flex: 1.0}}
-              size={getScaleSize(18)}
-              font={FONTS.Lato.SemiBold}
-              color={theme._323232}>
-              {STRING.TaskDetails}
-            </Text>
-            <TouchableOpacity
-              style={{height: getScaleSize(25), width: getScaleSize(24)}}
-              activeOpacity={1}
-              onPress={() => {
-                setVisibleTaskDetails(!visibleTaskDetails);
-              }}>
-              <Image
-                style={{height: getScaleSize(25), width: getScaleSize(24)}}
-                source={visibleTaskDetails ? IMAGES.up : IMAGES.down}
-              />
-            </TouchableOpacity>
-          </TouchableOpacity>
-          {visibleTaskDetails && (
-            <>
-              <View style={styles(theme).devider}></View>
-              <Text
-                style={{flex: 1.0, marginTop: getScaleSize(20)}}
-                size={getScaleSize(18)}
-                font={FONTS.Lato.SemiBold}
-                color={'#424242'}>
-                {STRING.Servicedescription}
-              </Text>
-              <Text
-                style={{flex: 1.0, marginTop: getScaleSize(16)}}
-                size={getScaleSize(14)}
-                font={FONTS.Lato.Medium}
-                color={theme._939393}>
-                {taskDetails?.task?.description ?? '-'}
-              </Text>
-              <Text
-                style={{flex: 1.0, marginVertical: getScaleSize(20)}}
-                size={getScaleSize(18)}
-                font={FONTS.Lato.SemiBold}
-                color={'#424242'}>
-                {STRING.Jobphotos}
-              </Text>
-              <FlatList
-                data={attachments ?? []}
-                numColumns={2}
-                columnWrapperStyle={{gap: getScaleSize(12)}}
-                contentContainerStyle={{gap: getScaleSize(12)}}
-                keyExtractor={(item: any, index: number) => index.toString()}
-                showsHorizontalScrollIndicator={false}
-                renderItem={({item}) => <AttachmentItem item={item} />}
-              />
-            </>
-          )}
-        </View>
-        {item?.quote_status === 'accepted' && (
-          <View style={styles(theme).informationContainer}>
-            <Text
-              size={getScaleSize(18)}
-              font={FONTS.Lato.SemiBold}
-              color={theme._323232}>
-              {STRING.FinalPaymentBreakdown}
-            </Text>
-            <View style={styles(theme).newHorizontalView}>
-              <Text
-                style={{flex: 1.0}}
-                size={getScaleSize(14)}
-                font={FONTS.Lato.SemiBold}
-                color={'#595959'}>
-                {STRING.FinalizedQuoteAmount}
-              </Text>
-              <Text
-                size={getScaleSize(14)}
-                font={FONTS.Lato.SemiBold}
-                color={'#595959'}>
-                {`€${taskDetails?.quote?.amount ?? 0}`}
-              </Text>
-            </View>
-            <View style={styles(theme).newHorizontalView}>
-              <Text
-                style={{flex: 1.0}}
-                size={getScaleSize(14)}
-                font={FONTS.Lato.SemiBold}
-                color={'#595959'}>
-                {STRING.PlatformFee}
-              </Text>
-              <Text
-                size={getScaleSize(14)}
-                font={FONTS.Lato.SemiBold}
-                color={'#595959'}>
-                {`€${taskDetails?.quote?.platform_fee ?? 0}`}
-              </Text>
-            </View>
-            <View style={styles(theme).newHorizontalView}>
-              <Text
-                style={{flex: 1.0}}
-                size={getScaleSize(14)}
-                font={FONTS.Lato.SemiBold}
-                color={'#595959'}>
-                {STRING.Taxes}
-              </Text>
-              <Text
-                size={getScaleSize(14)}
-                font={FONTS.Lato.SemiBold}
-                color={'#595959'}>
-                {`€${taskDetails?.quote?.Tax ?? 0}`}
-              </Text>
-            </View>
-            <View style={styles(theme).dotView} />
-            <View style={styles(theme).newHorizontalView}>
-              <Text
-                style={{flex: 1.0}}
-                size={getScaleSize(20)}
-                font={FONTS.Lato.SemiBold}
-                color={'#0F232F'}>
-                {STRING.Total}
-              </Text>
-              <Text
-                size={getScaleSize(20)}
-                font={FONTS.Lato.SemiBold}
-                color={theme.primary}>
-                {`€${taskDetails?.quote?.total ?? 0}`}
-              </Text>
-            </View>
           </View>
         )}
-        <View style={{height: getScaleSize(100)}} />
+
+        <View style={styles(theme).spacerLarge} />
       </ScrollView>
       {isLoading && <ProgressView />}
     </View>
@@ -660,10 +475,18 @@ export default function ProfessionalTaskDetails(props: any) {
 
 const styles = (theme: ThemeContextType['theme']) =>
   StyleSheet.create({
-    container: {flex: 1, backgroundColor: theme.white},
+    container: { flex: 1, backgroundColor: theme.white },
     scrolledContainer: {
       marginTop: getScaleSize(19),
       marginHorizontal: getScaleSize(24),
+    },
+    recentCard: {
+      marginHorizontal: 0,
+      marginTop: getScaleSize(16),
+      elevation: 1,
+    },
+    flexFill: {
+      flex: 1,
     },
     imageContainer: {
       paddingVertical: getScaleSize(12),
@@ -696,10 +519,10 @@ const styles = (theme: ThemeContextType['theme']) =>
       alignSelf: 'center',
     },
     amountContainer: {
-      marginTop: getScaleSize(32),
-      paddingVertical: getScaleSize(9),
+      // marginTop: getScaleSize(32),
+      paddingVertical: getScaleSize(15),
       borderWidth: 1,
-      borderColor: '#D5D5D5',
+      borderColor: theme._B3B3B3,
       borderRadius: getScaleSize(16),
       paddingHorizontal: getScaleSize(16),
     },
@@ -712,12 +535,13 @@ const styles = (theme: ThemeContextType['theme']) =>
       backgroundColor: theme.primary,
     },
     profileContainer: {
-      borderColor: theme._D5D5D5,
-      paddingVertical: getScaleSize(13),
+      borderColor: theme._D9D9D9,
+      paddingVertical: getScaleSize(17),
       paddingHorizontal: getScaleSize(16),
       borderWidth: 1,
       borderRadius: getScaleSize(16),
       marginTop: getScaleSize(24),
+      flexDirection: 'row'
     },
     likeIcon: {
       height: getScaleSize(28),
@@ -764,7 +588,7 @@ const styles = (theme: ThemeContextType['theme']) =>
     },
     photosView: {
       height: getScaleSize(144),
-      width: (Dimensions.get('window').width - getScaleSize(96)) / 2,
+      width: (Dimensions.get('window').width - getScaleSize(110)) / 2,
       borderRadius: getScaleSize(8),
       overflow: 'hidden',
       backgroundColor: theme._EAF0F3,
@@ -796,7 +620,7 @@ const styles = (theme: ThemeContextType['theme']) =>
     },
     securityItemContainer: {
       paddingVertical: getScaleSize(5),
-      paddingHorizontal: getScaleSize(11.11),
+      paddingHorizontal: getScaleSize(10),
       borderRadius: getScaleSize(12),
       borderColor: '#D5D5D5',
       borderWidth: 1,
@@ -810,17 +634,16 @@ const styles = (theme: ThemeContextType['theme']) =>
     dotView: {
       // flex:1.0,
       borderStyle: 'dashed',
-      borderColor: theme.primary,
+      borderColor: theme._D9D9D9,
       borderWidth: 1,
-      marginTop: getScaleSize(8),
+      marginVertical: getScaleSize(16),
     },
     informationContainer: {
-      marginTop: getScaleSize(24),
       borderWidth: 1,
-      borderColor: '#D5D5D5',
-      borderRadius: getScaleSize(16),
-      paddingHorizontal: getScaleSize(24),
-      paddingVertical: getScaleSize(24),
+      borderColor: theme._D9D9D9,
+      borderRadius: getScaleSize(12),
+      paddingHorizontal: getScaleSize(16),
+      paddingVertical: getScaleSize(13),
     },
     newHorizontalView: {
       flexDirection: 'row',
@@ -829,5 +652,128 @@ const styles = (theme: ThemeContextType['theme']) =>
     codeViewDirection: {
       flexDirection: 'row',
       marginTop: getScaleSize(16),
+    },
+    clientContainer: {
+      padding: getScaleSize(16),
+      borderRadius: getScaleSize(10),
+      borderWidth: 1,
+      borderColor: theme._E6E6E6,
+      marginTop: getScaleSize(24),
+    },
+    clientRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: getScaleSize(16),
+      marginTop: getScaleSize(16),
+      justifyContent: 'space-between'
+    },
+    clientInfoRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: getScaleSize(12),
+    },
+    clientChatButton: {
+      width: getScaleSize(77),
+      paddingVertical: getScaleSize(10),
+      borderRadius: getScaleSize(10),
+      backgroundColor: theme.primary,
+      alignItems: 'center',
+    },
+    clientAvatar: {
+      height: getScaleSize(48),
+      width: getScaleSize(48),
+      borderRadius: getScaleSize(24),
+      borderWidth: 0.5,
+      borderColor: theme._B3B3B3,
+    },
+    addressLabel: {
+      marginTop: getScaleSize(24),
+      marginBottom: getScaleSize(8),
+    },
+    addressBox: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme._D9D9D9,
+      paddingHorizontal: getScaleSize(16),
+      paddingVertical: getScaleSize(14),
+      borderRadius: getScaleSize(10),
+      gap: getScaleSize(14),
+    },
+    addressIcon: {
+      height: getScaleSize(30),
+      width: getScaleSize(24),
+    },
+    paymentTitle: {
+      marginTop: getScaleSize(24),
+      marginBottom: getScaleSize(16),
+    },
+    accordionArrow: {
+      height: getScaleSize(25),
+      width: getScaleSize(24),
+      tintColor: theme._8C8C8C,
+    },
+    statusContainer: {
+      backgroundColor: theme.white,
+      padding: getScaleSize(20),
+      borderWidth: 1,
+      borderColor: theme._D9D9D9,
+      borderRadius: getScaleSize(10),
+      marginTop: getScaleSize(8),
+    },
+    statusItemSpacing: {
+      marginVertical: getScaleSize(20),
+    },
+    taskDetailsCard: {
+      backgroundColor: theme.white,
+      padding: getScaleSize(20),
+      borderWidth: 1,
+      borderColor: theme._D9D9D9,
+      borderRadius: getScaleSize(10),
+      marginTop: getScaleSize(8),
+    },
+    taskDescription: {
+      flex: 1,
+      marginTop: getScaleSize(16),
+    },
+    jobPhotosLabel: {
+      flex: 1,
+      marginTop: getScaleSize(40),
+      marginBottom: getScaleSize(20),
+    },
+    jobPhotosWrapper: {
+      gap: getScaleSize(12),
+    },
+    jobPhotosContent: {
+      gap: getScaleSize(12),
+    },
+    spacerLarge: {
+      height: getScaleSize(100),
+    },
+    videoPreview: {
+      width: '100%',
+      height: '100%',
+    },
+    securityItemSpacing: {
+      marginLeft: getScaleSize(3),
+    },
+    finalQuoteLabel: {
+      marginTop: getScaleSize(24),
+      marginBottom: getScaleSize(16),
+    },
+    securityContainer: {
+      marginTop: getScaleSize(24),
+      paddingVertical: getScaleSize(13),
+      borderWidth: 1,
+      borderColor: '#D5D5D5',
+      borderRadius: getScaleSize(16),
+      paddingHorizontal: getScaleSize(16),
+    },
+    securityListContent: {
+      gap: getScaleSize(6),
+    },
+    securityNote: {
+      flex: 1,
+      marginTop: getScaleSize(12),
     },
   });

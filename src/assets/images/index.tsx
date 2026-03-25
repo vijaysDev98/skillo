@@ -160,5 +160,10 @@ export const IMAGES = {
 
   congratulationIcon: require('./congratulationIcon.png'),
   creditCardIcon: require('./creditCardIcon.png'),
-  appyCouponIcon : require('./applyCouponIcon.png')
+  appyCouponIcon : require('./applyCouponIcon.png'),
+
+  verificationImg : require('./verificationImg.png'),
+  homeIcon: require('./homeIcon.png'),
+  addQuoteSuccessImg: require('./addQuotoSuccessImg.png'),
+  filterIcon:require('./filterIcon.png')
 };

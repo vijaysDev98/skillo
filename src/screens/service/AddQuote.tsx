@@ -8,6 +8,7 @@ import {
   Image,
   Platform,
   TextInput,
+  Modal,
 } from 'react-native';
 
 //API
@@ -38,17 +39,23 @@ import { createThumbnail } from 'react-native-create-thumbnail';
 
 //SCREENS
 import { SCREENS } from '..';
+import { RecentSearchCard } from '../home/Search';
+import JobDetailBox from './ui/JobDetailx';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function AddQuote(props: any) {
 
   const serviceDetails = props?.route?.params?.item
   const isItem = props?.route?.params?.isItem
+  const headerTitle = props?.route?.params?.headerTitle
 
   const STRING = useString();
 
   const { theme } = useContext<any>(ThemeContext);
 
   const { profile } = useContext(AuthContext)
+
+  const insets = useSafeAreaInsets()
 
   const [amount, setAmount] = useState('');
   const [desctiption, setDescription] = useState('');
@@ -65,17 +72,13 @@ export default function AddQuote(props: any) {
   const [descriptionError, setDescriptionError] = useState('');
   const [docError, setDocError] = useState('');
   const [videoError, setVideoError] = useState('');
+  const [isQuoteSuccessModalVisible, setIsQuoteSuccessModalVisible] = useState(false);
 
   useEffect(() => {
     if (!isServiceDetails && isItem) {
       getServicesDetails()
     }
   }, [])
-
-
-  console.log('doc1Id==>', doc1Id, doc2Id)
-
-
 
   async function getServicesDetails() {
     try {
@@ -249,66 +252,67 @@ export default function AddQuote(props: any) {
   async function sendQuote() {
 
     const photoIds = [doc1Id, doc2Id].filter(Boolean)
-
+setIsQuoteSuccessModalVisible(true)
     // amount validation only for professional
-    if (profile?.user?.service_provider_type === 'professional' && !amount) {
-      setAmountError('Please enter amount');
-    } else if (!desctiption) {
-      setDescriptionError('Please enter short description');
-    } else if (photoIds.length === 0) {
-      setDocError('Please upload at least one document');
-    } else {
-      try {
-        setLoading(true);
+    // if (profile?.user?.service_provider_type === 'professional' && !amount) {
+    //   setAmountError('Please enter amount');
+    // } else if (!desctiption) {
+    //   setDescriptionError('Please enter short description');
+    // } else if (photoIds.length === 0) {
+    //   setDocError('Please upload at least one document');
+    // } else {
+    //   try {
+    //     setLoading(true);
 
-        let payload: any = {
-          servicesid: isServiceDetails?.service_id,
-          description: desctiption,
-        };
+    //     let payload: any = {
+    //       servicesid: isServiceDetails?.service_id,
+    //       description: desctiption,
+    //     };
 
-        // PROFESSIONAL PAYLOAD
-        if (profile?.user?.service_provider_type === 'professional') {
-          payload = {
-            ...payload,
-            provider_quote_amount: amount,
-            offer_photoids: photoIds,
-            offer_videoids: videoId ? [videoId] : [],
-          };
-        }
+    //     // PROFESSIONAL PAYLOAD
+    //     if (profile?.user?.service_provider_type === 'professional') {
+    //       payload = {
+    //         ...payload,
+    //         provider_quote_amount: amount,
+    //         offer_photoids: photoIds,
+    //         offer_videoids: videoId ? [videoId] : [],
+    //       };
+    //     }
 
-        // NON-PROFESSIONAL PAYLOAD
-        if (profile?.user?.service_provider_type === 'non_professional') {
-          payload = {
-            ...payload,
-            offer_photos: photoIds.map(key => ({
-              storage_key: key,
-            })),
-            offer_videos: videoId
-              ? [{ storage_key: videoId }]
-              : [],
-          };
-        }
+    //     // NON-PROFESSIONAL PAYLOAD
+    //     if (profile?.user?.service_provider_type === 'non_professional') {
+    //       payload = {
+    //         ...payload,
+    //         offer_photos: photoIds.map(key => ({
+    //           storage_key: key,
+    //         })),
+    //         offer_videos: videoId
+    //           ? [{ storage_key: videoId }]
+    //           : [],
+    //       };
+    //     }
 
-        const result: any = await API.Instance.post(
-          API.API_ROUTES.sendQuoteRequest,
-          payload
-        );
+    //     const result: any = await API.Instance.post(
+    //       API.API_ROUTES.sendQuoteRequest,
+    //       payload
+    //     );
 
-        setLoading(false);
+    //     setLoading(false);
 
-        if (result?.status) {
-          props.navigation.navigate(SCREENS.Success.identifier, {
-            isFromHome: true,
-          });
-        } else {
-          SHOW_TOAST(result?.message || 'Failed to send quote', 'error');
-        }
-      } catch (e: any) {
-        setLoading(false);
-        SHOW_TOAST(e?.message || 'Something went wrong', 'error');
-      }
-    }
+    //     if (result?.status) {
+    //       props.navigation.navigate(SCREENS.Success.identifier, {
+    //         isFromHome: true,
+    //       });
+    //     } else {
+    //       SHOW_TOAST(result?.message || 'Failed to send quote', 'error');
+    //     }
+    //   } catch (e: any) {
+    //     setLoading(false);
+    //     SHOW_TOAST(e?.message || 'Something went wrong', 'error');
+    //   }
+    // }
   }
+
 
   return (
     <View style={styles(theme).container}>
@@ -316,168 +320,68 @@ export default function AddQuote(props: any) {
         onBack={() => {
           props.navigation.goBack();
         }}
-        screenName={STRING.Addquoteamount}
+        screenName={headerTitle ? headerTitle : STRING.Addquoteamount}
       />
       <ScrollView
-        style={styles(theme).scrolledContainer}
+        contentContainerStyle={styles(theme).scrolledContainer}
         showsVerticalScrollIndicator={false}>
-        <View style={styles(theme).imageContainer}>
-          {isServiceDetails?.subcategory_info?.sub_category_img_url === null ?
-            <View style={[styles(theme).imageView, {
-              backgroundColor: 'gray'
-            }]}>
-            </View>
-            :
-            <Image
-              style={styles(theme).imageView}
-              resizeMode='cover'
-              source={{ uri: isServiceDetails?.subcategory_info?.sub_category_img_url }}
-            />
-          }
-          <Text
-            style={{
-              marginVertical: getScaleSize(12),
-              marginLeft: getScaleSize(4),
-            }}
-            size={getScaleSize(24)}
-            font={FONTS.Lato.Bold}
-            color={theme.primary}>
-            {isServiceDetails?.subcategory_info?.sub_category_name ?? ''}
-          </Text>
-          <View style={styles(theme).informationView}>
-            <View style={styles(theme).horizontalView}>
-              <View style={styles(theme).itemView}>
-                <Image
-                  style={styles(theme).informationIcon}
-                  source={IMAGES.calender}
-                />
-                <Text
-                  style={{
-                    marginHorizontal: getScaleSize(8),
-                    alignSelf: 'center',
-                  }}
-                  size={getScaleSize(12)}
-                  font={FONTS.Lato.Medium}
-                  color={theme.primary}>
-                  {moment.utc(isServiceDetails?.date).local().format('DD MMM, YYYY')}
-                </Text>
-              </View>
-              <View style={styles(theme).itemView}>
-                <Image
-                  style={styles(theme).informationIcon}
-                  source={IMAGES.clock}
-                />
-                <Text
-                  style={{
-                    marginHorizontal: getScaleSize(8),
-                    alignSelf: 'center',
-                  }}
-                  size={getScaleSize(12)}
-                  font={FONTS.Lato.Medium}
-                  color={theme.primary}>
-                  {moment.utc(isServiceDetails?.time, "HH:mm").local().format("hh:mm A")}
-                </Text>
-              </View>
-            </View>
-            <View
-              style={[
-                styles(theme).horizontalView,
-                { marginTop: getScaleSize(12) },
-              ]}>
-              <View style={styles(theme).itemView}>
-                {isServiceDetails?.category_info?.category_name ?
-                  <Image
-                    style={[styles(theme).informationIcon, { tintColor: theme._1A3D51 }]}
-                    source={arrayIcons[isServiceDetails?.category_info?.category_name?.toLowerCase() as keyof typeof arrayIcons] ?? arrayIcons['diy'] as any}
-                    resizeMode='cover'
-                  />
-                  :
-                  <View style={styles(theme).informationIcon} />
-                }
-                <Text
-                  style={{
-                    marginHorizontal: getScaleSize(8),
-                    alignSelf: 'center',
-                  }}
-                  size={getScaleSize(12)}
-                  font={FONTS.Lato.Medium}
-                  color={theme.primary}>
-                  {`${isServiceDetails?.category_info?.category_name ?? ''} Services`}
-                </Text>
-              </View>
-              <View style={styles(theme).itemView}>
-                <Image
-                  style={styles(theme).informationIcon}
-                  source={IMAGES.pin}
-                />
-                <Text
-                  style={{
-                    marginHorizontal: getScaleSize(8),
-                    alignSelf: 'center',
-                  }}
-                  size={getScaleSize(12)}
-                  numberOfLines={4}
-                  font={FONTS.Lato.Medium}
-                  color={theme.primary}>
-                  {isServiceDetails?.service_address}
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-        <View style={styles(theme).profileContainer}>
-          <View style={styles(theme).horizontalView}>
-            <Text
-              style={{ flex: 1.0 }}
-              size={getScaleSize(18)}
-              font={FONTS.Lato.SemiBold}
-              color={theme._323232}>
-              {STRING.Aboutclient}
-            </Text>
-          </View>
-          <View
-            style={[
-              styles(theme).horizontalView,
-              { marginTop: getScaleSize(16) },
-            ]}>
-            {isServiceDetails?.about_client?.profile_photo ?
-              <Image
-                style={styles(theme).profilePicView}
-                resizeMode='contain'
-                source={{ uri: isServiceDetails?.about_client?.profile_photo }}
-              />
-              : <Image
-                style={styles(theme).profilePicView}
-                source={IMAGES.user_placeholder}
-              />
+        <RecentSearchCard
+          image={IMAGES.furnitureAssemblyImg}
+          containerStyle={styles(theme).recentSearchCard}
+          title="Furniture Assembly"
+        />
+        <JobDetailBox
+        isTitle={true}
+          jobBudgetValue='P200 to P500'
+          jobDate='14 Dec'
+          jobTime='18:00 Pm'
+        />
 
-            }
+        <View style={styles(theme).clientContainer}>
+          <Text
+            size={getScaleSize(16)}
+            font={FONTS.Lato.SemiBold}
+            color={theme._8C8C8C}
+          >{"About Client"}</Text>
+          <View style={styles(theme).clientRow}>
+            <Image
+              source={IMAGES.dummyUser}
+              style={styles(theme).clientAvatar}
+            />
             <Text
-              style={{ alignSelf: 'center', marginLeft: getScaleSize(16) }}
               size={getScaleSize(20)}
               font={FONTS.Lato.SemiBold}
-              color={'#0F232F'}>
-              {isServiceDetails?.about_client?.name}
-            </Text>
-            {/* <Image
-              style={{
-                height: getScaleSize(25),
-                width: getScaleSize(25),
-                alignSelf: 'center',
-                marginLeft: getScaleSize(6),
-              }}
-              source={IMAGES.verify}
-            /> */}
+              color={theme.primaryText}
+            >{"Jhon Doe"}</Text>
           </View>
         </View>
+        <View style={styles(theme).addressContainer}>
+          <Text
+            size={getScaleSize(16)}
+            font={FONTS.Lato.SemiBold}
+            color={theme._8C8C8C}
+          >{"Address"}</Text>
+          <View style={styles(theme).addressRow}>
+            <Image
+              source={IMAGES.homeIcon}
+              style={styles(theme).addressIcon}
+            />
+            <Text
+              size={getScaleSize(16)}
+              font={FONTS.Lato.Medium}
+              color={theme._2B2B2B}
+            >{"Plot 1234, Gaborone West Industrial, Gaborone, Botswana"}</Text>
+          </View>
+        </View>
+
         {profile?.user?.service_provider_type === 'professional' &&
           <Input
             placeholder={`${isServiceDetails?.estimated_cost ? `€${isServiceDetails?.estimated_cost}` : '0'}`}
             placeholderTextColor={theme._D5D5D5}
             inputTitle={STRING.EnterQuoteAmount}
             inputColor={true}
-            continerStyle={{ marginTop: getScaleSize(16) }}
-            value={amount ? `${'€'}${amount}` : ''}
+            mainContinerStyle={{ marginTop: getScaleSize(16) }}
+            value={amount ? `P${amount}` : ''}
             keyboardType="decimal-pad"
             autoCapitalize="none"
             onChangeText={text => {
@@ -490,9 +394,10 @@ export default function AddQuote(props: any) {
         <Input
           inputTitle={STRING.Addpersonalizedshortmessage}
           placeholder={STRING.Enterdescriptionhere}
+          placeholderTextColor={theme._8C8C8C}
           inputColor={true}
           value={desctiption}
-          continerStyle={{ marginTop: getScaleSize(16) }}
+          mainContinerStyle={{ marginTop: getScaleSize(16) }}
           inputContainer={styles(theme).inputContainerHeight}
           multiline={true}
           numberOfLines={8}
@@ -503,10 +408,10 @@ export default function AddQuote(props: any) {
           isError={descriptionError}
         />
         <Text
-          style={{ marginTop: getScaleSize(20) }}
-          size={getScaleSize(17)}
-          font={FONTS.Lato.Medium}
-          color={theme._424242}>
+          style={{ marginTop: getScaleSize(16) }}
+          size={getScaleSize(16)}
+          font={FONTS.Lato.SemiBold}
+          color={theme._404040}>
           {STRING.Attachsupportingdocuments}
         </Text>
         <View style={styles(theme).imageUploadContent}>
@@ -523,8 +428,9 @@ export default function AddQuote(props: any) {
                   style={{ marginTop: getScaleSize(8) }}
                   size={getScaleSize(15)}
                   font={FONTS.Lato.Regular}
-                  color={theme._818285}>
-                  {STRING.upload_from_device}
+                  align='center'
+                  color={theme._8C8C8C}>
+                  {"upload from \ndevice"}
                 </Text>
               </>
             )}
@@ -542,8 +448,9 @@ export default function AddQuote(props: any) {
                   style={{ marginTop: getScaleSize(8) }}
                   size={getScaleSize(15)}
                   font={FONTS.Lato.Regular}
-                  color={theme._818285}>
-                  {STRING.upload_from_device}
+                  align='center'
+                  color={theme._8C8C8C}>
+                  {"upload from \ndevice"}
                 </Text>
               </>
             )}
@@ -558,10 +465,10 @@ export default function AddQuote(props: any) {
           </Text>
         }
         <Text
-          style={{ marginTop: getScaleSize(20) }}
-          size={getScaleSize(17)}
-          font={FONTS.Lato.Medium}
-          color={theme._424242}>
+          style={{ marginTop: getScaleSize(16) }}
+          size={getScaleSize(16)}
+          font={FONTS.Lato.SemiBold}
+          color={theme._404040}>
           {STRING.Uploadashortvideo}
         </Text>
         <TouchableOpacity
@@ -583,8 +490,9 @@ export default function AddQuote(props: any) {
                 style={{ marginTop: getScaleSize(8) }}
                 size={getScaleSize(15)}
                 font={FONTS.Lato.Regular}
-                color={theme._818285}>
-                {STRING.upload_from_device}
+                align='center'
+                color={theme._8C8C8C}>
+                {"upload from \ndevice"}
               </Text>
             </>
           }
@@ -599,23 +507,99 @@ export default function AddQuote(props: any) {
           </Text>
         }
       </ScrollView>
-      <Button
-        title={STRING.SubmitQuote}
-        disabled={
-          (profile?.user?.service_provider_type === 'professional' && amount === '') ||
-          desctiption === ''
-        }
-        style={{
-          marginVertical: getScaleSize(24),
-          marginHorizontal: getScaleSize(24),
-          opacity: isLoading ? 0.6 : 1,
-        }}
-        onPress={sendQuote}
-      />
+
+      <TouchableOpacity style={{
+        marginHorizontal: getScaleSize(24),
+        paddingVertical: getScaleSize(16),
+        alignItems: 'center',
+        backgroundColor: theme.primary,
+        borderRadius: getScaleSize(10),
+        marginBottom: insets.bottom + getScaleSize(16)
+      }}
+     onPress={sendQuote}
+      >
+        <Text
+          size={getScaleSize(20)}
+          font={FONTS.Lato.SemiBold}
+          color={theme.white}
+        >{STRING.SubmitQuote}</Text>
+      </TouchableOpacity>
       {isLoading && <ProgressView />}
+      {isQuoteSuccessModalVisible && (
+        <QuoteSuccessModal
+        visible={isQuoteSuccessModalVisible}
+        onGoHome={() => {
+          setIsQuoteSuccessModalVisible(false)
+          props.navigation.navigate(SCREENS.BottomBar.identifier)
+        }}
+        onRequestClose={() => {setIsQuoteSuccessModalVisible(false)}}
+        theme={theme}
+        title="Great job! Your service quote submitted successfully."
+        buttonTitle="Go To Home"
+        />)
+      }
     </View>
   );
 }
+
+type QuoteSuccessModalProps = {
+  visible: boolean;
+  onGoHome: () => void;
+  onRequestClose?: () => void;
+  theme: ThemeContextType['theme'];
+  title?: string;
+  description?: string;
+  buttonTitle?: string;
+};
+
+export const QuoteSuccessModal: React.FC<QuoteSuccessModalProps> = ({
+  visible,
+  onGoHome,
+  onRequestClose,
+  theme,
+  title = 'Great job! Your service quote submitted successfully.',
+  buttonTitle = 'Go To Home',
+}) => {
+  return (
+    <Modal
+      transparent
+      visible={visible}
+      animationType="fade"
+      onRequestClose={onRequestClose}
+    >
+      <View style={styles(theme).modalOverlay}>
+        <View style={styles(theme).modalCard}>
+          <Image
+            source={IMAGES.addQuoteSuccessImg}
+            style={styles(theme).modalImage}
+            resizeMode='contain'
+          />
+          <Text
+            size={getScaleSize(20)}
+            font={FONTS.Lato.Bold}
+            color={theme._0F232F}
+            align='center'
+          >
+            {title}
+          </Text>
+          <TouchableOpacity
+            style={styles(theme).modalButton}
+            activeOpacity={0.9}
+            onPress={onGoHome}
+          >
+            <Text
+              size={getScaleSize(12)}
+              font={FONTS.Lato.SemiBold}
+              color={theme.white}
+            >
+              {buttonTitle}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 const styles = (theme: ThemeContextType['theme']) =>
   StyleSheet.create({
@@ -623,6 +607,34 @@ const styles = (theme: ThemeContextType['theme']) =>
     scrolledContainer: {
       marginTop: getScaleSize(19),
       marginHorizontal: getScaleSize(24),
+      paddingBottom: getScaleSize(100)
+    },
+    jobDetailTitle: {
+      marginTop: getScaleSize(24),
+    },
+    recentSearchCard: {
+      marginHorizontal: getScaleSize(0),
+      elevation: 2,
+    },
+    detailsContainer: {
+      flexDirection: "row",
+      justifyContent: 'space-between',
+      borderWidth: 0.5,
+      borderColor: theme._D9D9D9,
+      borderRadius: getScaleSize(10),
+      paddingHorizontal: getScaleSize(16),
+      paddingVertical: getScaleSize(21),
+      marginTop: getScaleSize(16),
+      backgroundColor: theme.white,
+      elevation: 2,
+    },
+    detailItem: {
+      alignItems: "center",
+      gap: getScaleSize(6),
+    },
+    verticalDivider: {
+      width: getScaleSize(1),
+      backgroundColor: theme._D6D6D6,
     },
     imageContainer: {
       paddingVertical: getScaleSize(12),
@@ -710,18 +722,20 @@ const styles = (theme: ThemeContextType['theme']) =>
     uploadButton: {
       flex: 1.0,
       borderWidth: 1,
-      borderColor: theme._818285,
+      borderColor: theme._D9D9D9,
       borderStyle: 'dashed',
       borderRadius: getScaleSize(8),
       justifyContent: 'center',
       alignItems: 'center',
       height: getScaleSize(160),
-      overflow: 'hidden'
+      overflow: 'hidden',
+      // backgroundColor:'red'
     },
     attachmentIcon: {
       height: getScaleSize(40),
       width: getScaleSize(40),
       alignSelf: 'center',
+      tintColor: '#ACADAD',
     },
     photosView: {
       height: getScaleSize(144),
@@ -808,6 +822,76 @@ const styles = (theme: ThemeContextType['theme']) =>
     },
     inputContainerHeight: {
       minHeight: getScaleSize(190),
-      textAlignVertical: 'top'
+      textAlignVertical: 'top',
+      fontFamily: FONTS.Lato.Regular
+    },
+    clientContainer: {
+      padding: getScaleSize(16),
+      borderRadius: getScaleSize(10),
+      borderWidth: 1,
+      borderColor: theme._E6E6E6,
+      marginTop: getScaleSize(24),
+    },
+    clientRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: getScaleSize(16),
+      marginTop: getScaleSize(16),
+    },
+    clientAvatar: {
+      height: getScaleSize(48),
+      width: getScaleSize(48),
+      borderRadius: getScaleSize(24),
+      borderWidth: 0.5,
+      borderColor: theme._B3B3B3,
+    },
+    addressContainer: {
+      padding: getScaleSize(16),
+      borderRadius: getScaleSize(10),
+      borderWidth: 1,
+      borderColor: theme._E6E6E6,
+      marginTop: getScaleSize(24),
+    },
+    addressRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: getScaleSize(12),
+      marginTop: getScaleSize(16),
+    },
+    addressIcon: {
+      height: getScaleSize(30),
+      width: getScaleSize(24),
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: '#777777CC',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: getScaleSize(20),
+    },
+    modalCard: {
+      width: '100%',
+      borderRadius: getScaleSize(14),
+      backgroundColor: theme.white,
+      paddingHorizontal: getScaleSize(20),
+      paddingVertical: getScaleSize(24),
+      alignItems: 'center',
+    },
+    modalImage: {
+      height: getScaleSize(220),
+      width: getScaleSize(200),
+      marginBottom: getScaleSize(16),
+    },
+    modalSubtitle: {
+      marginTop: getScaleSize(4),
+      marginBottom: getScaleSize(24),
+    },
+    modalButton: {
+      width: '100%',
+      paddingVertical: getScaleSize(10),
+      borderRadius: getScaleSize(10),
+      backgroundColor: theme.primary,
+      alignItems: 'center',
+      marginTop:getScaleSize(32)
     },
   });

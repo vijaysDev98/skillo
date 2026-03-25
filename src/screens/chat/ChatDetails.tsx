@@ -281,7 +281,8 @@ export default function ChatDetails(props: any) {
                 source={
                   currentUserAvatar
                     ? { uri: currentUserAvatar }
-                    : IMAGES.user_placeholder
+                    :
+                     IMAGES.user_placeholder
                 }
               />
             )}

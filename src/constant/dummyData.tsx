@@ -276,7 +276,7 @@ export const requestData = {
       jobDate: "14 Dec",
       jobTime: "18:00 PM",
 
-       address: {
+      address: {
         banglo: "Plot 2222",
         city: "Extension 2",
         state: "Gaborone",
@@ -298,7 +298,7 @@ export const requestData = {
       jobDate: "14 Dec",
       jobTime: "18:00 PM",
 
-       address: {
+      address: {
         banglo: "Plot 2222",
         city: "Extension 2",
         state: "Gaborone",
@@ -321,7 +321,7 @@ export const requestData = {
       jobDate: "14 Dec",
       jobTime: "18:00 PM",
 
-       address: {
+      address: {
         banglo: "Plot 2222",
         city: "Extension 2",
         state: "Gaborone",
@@ -998,55 +998,160 @@ export const NegotiationScreenData = {
 };
 
 
-export const subscriptionPlansData =  [
-    {
-      id: "monthly",
-      label: "Monthly",
-      price: 200,
-      currency: "₱",
-      selected: true,
-      isExpanded: true,
-      billingText: "*Billed & recurring monthly cancel anytime",
+export const subscriptionPlansData = [
+  {
+    id: "monthly",
+    label: "Monthly",
+    price: 200,
+    currency: "₱",
+    selected: true,
+    isExpanded: true,
+    billingText: "*Billed & recurring monthly cancel anytime",
 
-      features: [
-        "Apply to service requests",
-        "Profile visibility in search",
-        "Customer chat access",
-        "Earnings dashboard",
-      ],
-    },
+    features: [
+      "Apply to service requests",
+      "Profile visibility in search",
+      "Customer chat access",
+      "Earnings dashboard",
+    ],
+  },
 
-    {
-      id: "quarterly",
-      label: "Quarterly",
-      price: 500,
-      currency: "₱",
-      selected: false,
-      isExpanded: false,
-      saveText: "Save ₱100",
-      billingText: "*Billed & recurring Quarterly cancel anytime",
-      features: [
-        "Apply to service requests",
-        "Profile visibility in search",
-        "Customer chat access",
-        "Earnings dashboard",
-      ],
-    },
+  {
+    id: "quarterly",
+    label: "Quarterly",
+    price: 500,
+    currency: "₱",
+    selected: false,
+    isExpanded: false,
+    saveText: "Save ₱100",
+    billingText: "*Billed & recurring Quarterly cancel anytime",
+    features: [
+      "Apply to service requests",
+      "Profile visibility in search",
+      "Customer chat access",
+      "Earnings dashboard",
+    ],
+  },
 
+  {
+    id: "yearly",
+    label: "Yearly",
+    price: 2000,
+    currency: "₱",
+    selected: false,
+    isExpanded: false,
+    saveText: "Save ₱400",
+    billingText: "*Billed & recurring Yearly cancel anytime",
+    features: [
+      "Apply to service requests",
+      "Profile visibility in search",
+      "Customer chat access",
+      "Earnings dashboard",
+    ],
+  },
+]
+
+export const taskDetailsOngoingDummyData = {
+  id: "task_001",
+
+  task_status: [
     {
-      id: "yearly",
-      label: "Yearly",
-      price: 2000,
-      currency: "₱",
-      selected: false,
-      isExpanded: false,
-      saveText: "Save ₱400",
-      billingText: "*Billed & recurring Yearly cancel anytime",
-      features: [
-        "Apply to service requests",
-        "Profile visibility in search",
-        "Customer chat access",
-        "Earnings dashboard",
-      ],
+      id: 0,
+      name: "Quote Sent",
+      time: "2025-01-18T19:07:00Z",
+      completed: true,
     },
-  ]
+    {
+      id: 1,
+      name: "Quote Accepted",
+      time: "2025-01-18T19:07:00Z",
+      completed: true,
+    },
+    {
+      id: 2,
+      name: "Out for Service",
+      time: "2025-01-18T19:07:00Z",
+      completed: false,
+    },
+    {
+      id: 3,
+      name: "Started Service",
+      time: null, // expected → will show "-"
+      completed: false,
+    },
+    {
+      id: 4,
+      name: "Service Completed",
+      time: null,
+      completed: false,
+    },
+    {
+      id: 5,
+      name: "Payment received",
+      time: null,
+      completed: false,
+    },
+  ],
+};
+
+export const taskDetailsDummyData = {
+  id: "task_001",
+
+  service: {
+    title: "Office Cleaning",
+    subtitle: "Washroom Cleaning",
+    image:
+      "https://images.unsplash.com/photo-1581578731548-c64695cc6952",
+  },
+
+  job_details: {
+    budget: {
+      min: 300,
+      max: 500,
+      currency: "P",
+    },
+    date: "2026-12-14",
+    time: "18:00",
+
+    formatted: {
+      budget: "P300 to P500",
+      date: "14 Dec",
+      time: "18:00 Pm",
+    },
+  },
+
+  client: {
+    name: "Jhon Doe",
+    profile_image:
+      "https://randomuser.me/api/portraits/men/32.jpg",
+    id: "client_001",
+  },
+
+  // ✅ UPDATED FOR StatusItem
+  task_status: [
+    {
+      id: 0,
+      name: "Quote Sent",
+      time: "2025-01-20T15:15:00Z", // ISO format (important for moment)
+      completed: true,
+    },
+    {
+      id: 1,
+      name: "Waiting for Quote Acceptance",
+      time: null,
+      completed: false,
+    },
+  ],
+
+  description: `Transform your space with our expert furniture assembly services...`,
+
+  job_photos: [{
+    id: 1, type: "photo",
+    url:IMAGES.furnitureAssemblyImg
+  },
+  {
+    id: 1, type: "photo",
+    url:IMAGES.furnitureAssemblyImg
+  }
+  ],
+};

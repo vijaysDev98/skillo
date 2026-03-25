@@ -276,9 +276,7 @@ const AddAdress = (props: any) => {
                         }}
                         onPress={() => {
                             // onSignup();
-
                             handleAddAddress();
-
                         }}
                     />
                 </View>

@@ -39,6 +39,7 @@ import AppDropdown from './AppDropdown'
 import AccountCreatedModal from './AccountCreateModal'
 import ServiceCard from './ServiceCard'
 import { CalendarComponent,CustomTimePicker } from './CalendarComponent'
+import VerificationModal from './VerificationModal'
 
 export {
     Header,
@@ -82,5 +83,6 @@ export {
     UploadDocumentBox,
     AppDropdown,
     AccountCreatedModal,
-    ServiceCard
+    ServiceCard,
+    VerificationModal
 }

@@ -45,6 +45,14 @@ import { useFocusEffect } from '@react-navigation/native'; import moment from 'm
 
 //SCREENS
 import { SCREENS } from '..';
+import { RecentSearchCard } from '../home/Search';
+import JobDetailBox from './ui/JobDetailx';
+
+const JobPhotosdata = [
+  { id: 1, image: IMAGES.furnitureAssemblyImg },
+  { id: 2, image: IMAGES.furnitureAssemblyImg },
+  { id: 3, image: IMAGES.furnitureAssemblyImg },
+]
 
 export default function ServicePreview(props: any) {
 
@@ -93,7 +101,6 @@ export default function ServicePreview(props: any) {
       }
     }, []),
   );
-
   return (
     <View style={styles(theme).container}>
       <Header
@@ -105,254 +112,104 @@ export default function ServicePreview(props: any) {
       <ScrollView
         style={styles(theme).scrolledContainer}
         showsVerticalScrollIndicator={false}>
-        <View style={styles(theme).imageContainer}>
-          {serviceDetails?.subcategory_info?.sub_category_img_url === null ?
-            <View style={[styles(theme).imageView, {
-              backgroundColor: 'gray'
-            }]}>
-            </View>
-            :
-            <Image
-              style={styles(theme).imageView}
-              resizeMode='cover'
-              source={{ uri: serviceDetails?.subcategory_info?.sub_category_img_url }}
-            />
-          }
+        <RecentSearchCard
+          image={IMAGES.furnitureAssemblyImg}
+          containerStyle={styles(theme).recentSearchCard}
+          title="Furniture Assembly"
+        />
+        {/* <JobDetails /> */}
+        {/* <Text
+          font={FONTS.Lato.SemiBold}
+          size={getScaleSize(16)}
+          color={theme.primaryText}
+          style={styles(theme).jobDetailTitle}>Job Details</Text>
+        <View style={styles(theme).detailsContainer}>
+          <JobItem
+            title='Budget'
+            value='P200 to P500'
+          />
+          <View style={styles(theme).verticalDivider} />
+          <JobItem
+            title='Job Date'
+            value='14 Dec'
+          />
+          <View style={styles(theme).verticalDivider} />
+          <JobItem
+            title='Job Time'
+            value='18:00 Pm'
+          /> */}
+        {/* </View> */}
+        <JobDetailBox
+        isTitle={true}
+        jobBudgetValue='P200 to P500'
+        jobDate='14 Dec'
+        jobTime='18:00 Pm'
+        />
+        <View style={styles(theme).clientContainer}>
           <Text
-            style={{
-              marginVertical: getScaleSize(12),
-              marginLeft: getScaleSize(4),
-            }}
-            size={getScaleSize(24)}
-            font={FONTS.Lato.Bold}
-            color={theme.primary}>
-            {serviceDetails?.subcategory_info?.sub_category_name ?? ''}
-          </Text>
-          <View style={styles(theme).informationView}>
-            <View style={styles(theme).horizontalView}>
-              <View style={styles(theme).itemView}>
-                <Image
-                  style={styles(theme).informationIcon}
-                  source={IMAGES.calender}
-                />
-                <Text
-                  style={{
-                    marginHorizontal: getScaleSize(8),
-                    alignSelf: 'center',
-                  }}
-                  size={getScaleSize(12)}
-                  font={FONTS.Lato.Medium}
-                  color={theme.primary}>
-                  {moment.utc(serviceDetails?.date).local().format('DD MMM, YYYY')}
-                </Text>
-              </View>
-              <View style={styles(theme).itemView}>
-                <Image
-                  style={styles(theme).informationIcon}
-                  source={IMAGES.clock}
-                />
-                <Text
-                  style={{
-                    marginHorizontal: getScaleSize(8),
-                    alignSelf: 'center',
-                  }}
-                  size={getScaleSize(12)}
-                  font={FONTS.Lato.Medium}
-                  color={theme.primary}>
-                  {moment.utc(serviceDetails?.time, "HH:mm").local().format("hh:mm A")}
-                </Text>
-              </View>
-            </View>
-            <View
-              style={[
-                styles(theme).horizontalView,
-                { marginTop: getScaleSize(12) },
-              ]}>
-              <View style={styles(theme).itemView}>
-                {serviceDetails?.category_info?.category_name ?
-                  <Image
-                    style={[styles(theme).informationIcon, { tintColor: theme._1A3D51 }]}
-                    source={arrayIcons[serviceDetails?.category_info?.category_name?.toLowerCase() as keyof typeof arrayIcons] ?? arrayIcons['diy'] as any}
-                    resizeMode='cover'
-                  />
-                  :
-                  <View style={[styles(theme).informationIcon]} />
-                }
-                <Text
-                  style={{
-                    marginHorizontal: getScaleSize(8),
-                    alignSelf: 'center',
-                  }}
-                  size={getScaleSize(12)}
-                  font={FONTS.Lato.Medium}
-                  color={theme.primary}>
-                  {`${serviceDetails?.category_info?.category_name ?? 'No'} Service`}
-                </Text>
-              </View>
-              <View style={styles(theme).itemView}>
-                <Image
-                  style={styles(theme).informationIcon}
-                  source={IMAGES.pin}
-                />
-                <Text
-                  style={{
-                    marginHorizontal: getScaleSize(8),
-                    alignSelf: 'center',
-                  }}
-                  size={getScaleSize(12)}
-                  font={FONTS.Lato.Medium}
-                  numberOfLines={4}
-                  color={theme.primary}>
-                  {serviceDetails?.service_address ?? '-'}
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-        <View style={styles(theme).profileContainer}>
-          <View style={styles(theme).horizontalView}>
+            size={getScaleSize(16)}
+            font={FONTS.Lato.SemiBold}
+            color={theme._8C8C8C}
+          >{"About Client"}</Text>
+          <View style={styles(theme).clientRow}>
+            <Image
+              source={IMAGES.dummyUser}
+              style={styles(theme).clientAvatar}
+            />
             <Text
-              style={{ flex: 1.0 }}
-              size={getScaleSize(18)}
-              font={FONTS.Lato.SemiBold}
-              color={theme._323232}>
-              {STRING.Aboutclient}
-            </Text>
-          </View>
-          <View
-            style={[
-              styles(theme).horizontalView,
-              { marginTop: getScaleSize(16) },
-            ]}>
-            {serviceDetails?.about_client?.profile_photo ?
-              <Image
-                style={styles(theme).profilePicView}
-                resizeMode='cover'
-                source={{ uri: serviceDetails?.about_client?.profile_photo }}
-              />
-              :
-              <Image
-                style={styles(theme).profilePicView}
-                source={IMAGES.user_placeholder}
-              />
-            }
-            <Text
-              style={{ alignSelf: 'center', marginLeft: getScaleSize(16) }}
               size={getScaleSize(20)}
               font={FONTS.Lato.SemiBold}
-              color={'#0F232F'}>
-              {serviceDetails?.about_client?.name}
-            </Text>
+              color={theme.primaryText}
+            >{"Jhon Doe"}</Text>
           </View>
         </View>
-        {profile?.user?.service_provider_type === 'non_professional' &&
-          <View style={styles(theme).profileContainer}>
-            <View>
-              <Text
-                style={{ flex: 1.0 }}
-                size={getScaleSize(18)}
-                font={FONTS.Lato.Medium}
-                color={theme._555555}>
-                {STRING.exchange_product}
-              </Text>
-              <Text
-                style={styles(theme).exchangeProductView}
-                size={getScaleSize(27)}
-                font={FONTS.Lato.ExtraBold}
-                color={theme._0F232F}>
-                {serviceDetails?.barter_details?.product_name}
-              </Text>
-            </View>
-          </View>
-        }
-        {profile?.user?.service_provider_type === 'non_professional' &&
-          <View style={styles(theme).profileContainer}>
-            <View>
-              <Text
-                style={{ flex: 1.0 }}
-                size={getScaleSize(18)}
-                font={FONTS.Lato.Medium}
-                color={theme._555555}>
-                {STRING.quantity}
-              </Text>
-              <Text
-                style={styles(theme).exchangeProductView}
-                size={getScaleSize(27)}
-                font={FONTS.Lato.ExtraBold}
-                color={theme._0F232F}>
-                {serviceDetails?.barter_details?.quantity}
-              </Text>
-            </View>
-          </View>
-        }
-        {profile?.user?.service_provider_type === 'non_professional' &&
-          <View style={styles(theme).profileContainer}>
-            <View>
-              <Text
-                style={{ flex: 1.0 }}
-                size={getScaleSize(18)}
-                font={FONTS.Lato.Medium}
-                color={theme._555555}>
-                {STRING.product_images}
-              </Text>
-              <FlatList
-                data={serviceDetails?.barter_details?.product_photos}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                renderItem={({ item, index }) => {
-                  return (
-                    <>
-                      {item ?
-                        <TouchableOpacity onPress={() => {
-                          props.navigation.navigate(SCREENS.WebViewScreen.identifier, {
-                            url: item,
-                          })
-                        }}>
-                          <Image
-                            style={styles(theme).photosView}
-                            resizeMode='cover'
-                            source={{ uri: item }}
-                          />
-                        </TouchableOpacity>
 
-                        :
-                        <View style={[styles(theme).photosView, {
-                          backgroundColor: 'gray'
-                        }]}></View>}
-                    </>
-                  );
-                }}
-              />
-            </View>
+        <View style={styles(theme).addressContainer}>
+          <Text
+            size={getScaleSize(16)}
+            font={FONTS.Lato.SemiBold}
+            color={theme._8C8C8C}
+          >{"Address"}</Text>
+          <View style={styles(theme).addressRow}>
+            <Image
+              source={IMAGES.homeIcon}
+              style={styles(theme).addressIcon}
+            />
+            <Text
+              size={getScaleSize(16)}
+              font={FONTS.Lato.Medium}
+              color={theme._2B2B2B}
+            >{"Plot 1234, Gaborone West Industrial, Gaborone, Botswana"}</Text>
           </View>
-        }
+        </View>
+
         <Text
-          style={{ marginTop: getScaleSize(24) }}
-          size={getScaleSize(18)}
+          style={styles(theme).serviceDescriptionTitle}
+          size={getScaleSize(16)}
           font={FONTS.Lato.SemiBold}
-          color={theme._323232}>
+          color={theme.primaryText}>
           {STRING.Servicedescription}
         </Text>
         <View style={styles(theme).serviceDescriptionView}>
           <Text
-            size={getScaleSize(18)}
+            size={getScaleSize(16)}
             font={FONTS.Lato.Regular}
-            color={theme._555555}>
-            {serviceDetails?.service_description}
+            color={theme._404040}>
+            {"I need professional washroom cleaning service for my home/office. The washroom requires deep cleaning including toilet, sink, floor, and tiles. Stain removal and proper sanitization are required.Looking for a reliable service provider with cleaning equipment and materials."}
           </Text>
         </View>
         <Text
-          style={{ marginTop: getScaleSize(24) }}
-          size={getScaleSize(18)}
+          size={getScaleSize(16)}
           font={FONTS.Lato.SemiBold}
-          color={theme._323232}>
-          {STRING.Jobphotos}
-        </Text>
+          color={theme.primaryText}
+          style={styles(theme).jobPhotosTitle}
+        >{"Job Photos"}</Text>
         <FlatList
-          data={serviceDetails?.job_photos}
+          // data={serviceDetails?.job_photos}
+          data={JobPhotosdata}
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: getScaleSize(16), marginBottom: getScaleSize(24) }}
+          contentContainerStyle={styles(theme).photosListContent}
           renderItem={({ item, index }) => {
             return (
               <TouchableOpacity onPress={() => {
@@ -363,7 +220,8 @@ export default function ServicePreview(props: any) {
                 <Image
                   style={styles(theme).photosView}
                   resizeMode='cover'
-                  source={{ uri: item }}
+                  // source={{ uri: item }}
+                  source={item?.image}
                 />
               </TouchableOpacity>
 
@@ -374,21 +232,22 @@ export default function ServicePreview(props: any) {
       <View
         style={[
           styles(theme).horizontalView,
-          { marginTop: getScaleSize(24), marginHorizontal: getScaleSize(22), marginBottom: getScaleSize(16) },
+          styles(theme).actionBarContainer,
         ]}>
-        <View style={{ flex: 1.0 }}>
+        <View style={styles(theme).flexOne}>
           <Text
-            size={getScaleSize(14)}
-            font={FONTS.Lato.Medium}
-            color={theme._2C6587}>
-            {STRING.EstimatedCost}
+            size={getScaleSize(16)}
+            font={FONTS.Lato.SemiBold}
+            color={theme.primaryText}>
+            {"Budget"}
           </Text>
           <Text
-            style={{ marginTop: getScaleSize(2) }}
+            style={styles(theme).budgetValue}
             size={getScaleSize(27)}
             font={FONTS.Lato.ExtraBold}
-            color={theme._2C6587}>
-            {`€${serviceDetails?.estimated_cost === null ? "" : serviceDetails?.estimated_cost}`}
+            color={theme.primary}>
+            {/* {`P${serviceDetails?.estimated_cost === null ? "" : serviceDetails?.estimated_cost}`} */}
+            {`P 300 to P500`}
           </Text>
         </View>
         <TouchableOpacity
@@ -398,6 +257,7 @@ export default function ServicePreview(props: any) {
             props.navigation.navigate(SCREENS.AddQuote.identifier, {
               item: serviceDetails,
               isFromHome: isFromHome,
+              headerTitle:"Service Preview"
             })
           }}>
           <Text
@@ -420,76 +280,78 @@ const styles = (theme: ThemeContextType['theme']) =>
       marginTop: getScaleSize(19),
       marginHorizontal: getScaleSize(24),
     },
-    imageContainer: {
-      paddingVertical: getScaleSize(12),
-      paddingHorizontal: getScaleSize(12),
-      borderRadius: getScaleSize(20),
-      backgroundColor: '#EAF0F3',
+    jobDetailTitle: {
+      marginTop: getScaleSize(24),
     },
-    imageView: {
-      height: getScaleSize(172),
-      borderRadius: getScaleSize(20),
-      flex: 1.0,
+    recentSearchCard: {
+      marginHorizontal: getScaleSize(0),
+      elevation: 2,
     },
-    informationView: {
-      paddingVertical: getScaleSize(16),
-      backgroundColor: theme.white,
-      borderRadius: getScaleSize(16),
+    detailsContainer: {
+      flexDirection: "row",
+      justifyContent: 'space-between',
+      borderWidth: 0.5,
+      borderColor: theme._D9D9D9,
+      borderRadius: getScaleSize(10),
       paddingHorizontal: getScaleSize(16),
+      paddingVertical: getScaleSize(21),
+      marginTop: getScaleSize(16),
+      backgroundColor: theme.white,
+      elevation: 2,
+    },
+    detailItem: {
+      alignItems: "center",
+      gap: getScaleSize(6),
+    },
+    verticalDivider: {
+      width: getScaleSize(1),
+      backgroundColor: theme._D6D6D6,
+    },
+    clientContainer: {
+      padding: getScaleSize(16),
+      borderRadius: getScaleSize(10),
+      borderWidth: 1,
+      borderColor: theme._E6E6E6,
+      marginTop: getScaleSize(24),
+    },
+    clientRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: getScaleSize(16),
+      marginTop: getScaleSize(16),
+    },
+    clientAvatar: {
+      height: getScaleSize(48),
+      width: getScaleSize(48),
+      borderRadius: getScaleSize(24),
+      borderWidth: 0.5,
+      borderColor: theme._B3B3B3,
+    },
+    addressContainer: {
+      padding: getScaleSize(16),
+      borderRadius: getScaleSize(10),
+      borderWidth: 1,
+      borderColor: theme._E6E6E6,
+      marginTop: getScaleSize(24),
+    },
+    addressRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: getScaleSize(12),
+      marginTop: getScaleSize(16),
+    },
+    addressIcon: {
+      height: getScaleSize(30),
+      width: getScaleSize(24),
+    },
+    serviceDescriptionTitle: {
+      marginTop: getScaleSize(24),
     },
     horizontalView: {
       flexDirection: 'row',
     },
-    itemView: {
-      flexDirection: 'row',
-      flex: 1.0,
-    },
-    informationIcon: {
-      height: getScaleSize(25),
-      width: getScaleSize(25),
-      alignSelf: 'center',
-    },
-    amountContainer: {
-      marginTop: getScaleSize(32),
-      paddingVertical: getScaleSize(9),
-      borderWidth: 1,
-      borderColor: '#D5D5D5',
-      borderRadius: getScaleSize(16),
-      paddingHorizontal: getScaleSize(16),
-    },
-    negociateButton: {
-      paddingVertical: getScaleSize(10),
-      paddingHorizontal: getScaleSize(20),
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderRadius: getScaleSize(8),
-      backgroundColor: theme.primary,
-    },
-    profileContainer: {
-      borderColor: '#D5D5D5',
-      paddingVertical: getScaleSize(13),
-      paddingHorizontal: getScaleSize(16),
-      borderWidth: 1,
-      borderRadius: getScaleSize(16),
+    jobPhotosTitle: {
       marginTop: getScaleSize(24),
-    },
-    likeIcon: {
-      height: getScaleSize(28),
-      width: getScaleSize(28),
-      alignSelf: 'center',
-    },
-    profilePicView: {
-      height: getScaleSize(56),
-      width: getScaleSize(56),
-      borderRadius: getScaleSize(28),
-    },
-    newButton: {
-      flex: 1.0,
-      backgroundColor: theme.primary,
-      borderRadius: 8,
-      height: getScaleSize(38),
-      justifyContent: 'center',
-      alignItems: 'center',
     },
     serviceDescriptionView: {
       marginTop: getScaleSize(12),
@@ -499,98 +361,33 @@ const styles = (theme: ThemeContextType['theme']) =>
       paddingVertical: 14,
       paddingHorizontal: 16,
     },
-    imageUploadContent: {
+    photosListContent: {
+      gap: getScaleSize(16),
+      marginBottom: getScaleSize(24),
       marginTop: getScaleSize(12),
-      flexDirection: 'row',
-    },
-    uploadButton: {
-      flex: 1.0,
-      borderWidth: 1,
-      borderColor: theme._818285,
-      borderStyle: 'dashed',
-      borderRadius: getScaleSize(8),
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: getScaleSize(160),
-    },
-    attachmentIcon: {
-      height: getScaleSize(40),
-      width: getScaleSize(40),
-      alignSelf: 'center',
     },
     photosView: {
       height: getScaleSize(144),
       width: (Dimensions.get('window').width - getScaleSize(66)) / 2,
-      borderRadius: 8,
+      borderRadius: getScaleSize(10),
       resizeMode: 'cover',
-      marginTop: getScaleSize(18),
       backgroundColor: theme._EAF0F3,
     },
-    buttonContainer: {
-      flexDirection: 'row',
-      marginHorizontal: getScaleSize(22),
-      marginBottom: getScaleSize(17),
-    },
-    backButtonContainer: {
-      flex: 1.0,
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: theme.primary,
-      borderRadius: getScaleSize(12),
-      paddingVertical: getScaleSize(18),
-      backgroundColor: theme.white,
-      marginRight: getScaleSize(8),
-    },
-    nextButtonContainer: {
-      flex: 1.0,
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: theme.primary,
-      borderRadius: getScaleSize(12),
-      paddingVertical: getScaleSize(18),
-      backgroundColor: theme.primary,
-      marginLeft: getScaleSize(8),
-    },
-    securityItemContainer: {
-      paddingVertical: getScaleSize(8),
-      paddingHorizontal: getScaleSize(12),
-      borderRadius: getScaleSize(12),
-      borderColor: '#D5D5D5',
-      borderWidth: 1,
-      marginTop: getScaleSize(16),
-    },
-    devider: {
-      backgroundColor: '#E6E6E6',
-      height: 1,
-      marginTop: getScaleSize(18),
-    },
-    dotView: {
-      // flex:1.0,
-      borderStyle: 'dashed',
-      borderColor: theme.primary,
-      borderWidth: 1,
-      marginTop: getScaleSize(8),
-    },
-    informationContainer: {
+    actionBarContainer: {
       marginTop: getScaleSize(24),
-      borderWidth: 1,
-      borderColor: '#D5D5D5',
-      borderRadius: getScaleSize(16),
-      paddingHorizontal: getScaleSize(24),
-      paddingVertical: getScaleSize(24),
+      marginHorizontal: getScaleSize(22),
+      marginBottom: getScaleSize(16),
     },
-    newHorizontalView: {
-      flexDirection: 'row',
-      marginTop: getScaleSize(8),
+    flexOne: {
+      flex: 1,
+    },
+    budgetValue: {
+      marginTop: getScaleSize(2),
     },
     quateContainer: {
       paddingVertical: getScaleSize(16),
-      paddingHorizontal: getScaleSize(62),
+      paddingHorizontal: getScaleSize(30),
       borderRadius: getScaleSize(12),
-      backgroundColor: theme._214C65,
+      backgroundColor: theme.primary,
     },
-    exchangeProductView: {
-      flex: 1.0,
-      marginTop: getScaleSize(15)
-    }
   });

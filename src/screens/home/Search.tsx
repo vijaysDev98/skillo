@@ -67,7 +67,7 @@ export const RecentSearchCard = (props: any) => {
             >
                 <LinearGradient
                     colors={["transparent","#ffffff","#ffffff"]}
-                    locations={[0.6, 1, 1]}
+                    locations={[0.6, 0.9, 1]}
                     style={{
                         borderRadius: getScaleSize(20),flex:1,
                         justifyContent:'flex-end',

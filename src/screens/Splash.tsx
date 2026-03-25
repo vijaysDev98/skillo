@@ -29,11 +29,14 @@ import Geolocation from 'react-native-geolocation-service';
 import { PERMISSIONS, request, RESULTS } from 'react-native-permissions';
 
 import LinearGradient from 'react-native-linear-gradient'
+import { userRoles } from '../constant/utils';
 
 export default function Splash(props: any) {
   const { theme } = useContext(ThemeContext);
-  const { setUser, setUserType, setProfile } = useContext<any>(AuthContext);
+  const { setUser, setUserType, setProfile, userType } = useContext<any>(AuthContext);
 
+
+  console.log("Splash userType=====>>>",userType)
   useEffect(() => {
     checkUserDetails();
   }, []);
@@ -97,6 +100,7 @@ export default function Splash(props: any) {
     if (userData && userData?.user_data?.role) {
       setUser(userData);
       // setUserType(userData?.user_data?.role);
+      setUserType(userRoles.Service_Provider_individual)
       getProfileData();
     } else {
       setTimeout(() => {
@@ -124,6 +128,7 @@ export default function Splash(props: any) {
   }
 
   async function getProfileData() {
+    setUserType(userRoles.Service_Provider_business)
       props.navigation.dispatch(
           CommonActions.reset({
             index: 0,

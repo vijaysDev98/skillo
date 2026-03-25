@@ -12,7 +12,7 @@ const StatusItem = (props: any) => {
   const STRING = useString();
   const { theme } = useContext<any>(ThemeContext);
 
-  const { item, isLast, isPaymentReceived, taskStatusData, securityCode } = props;
+  const { item, isLast, isPaymentReceived, taskStatusData, securityCode, statusItemContainer } = props;
 
   const isProcessing =
     isPaymentReceived === false &&
@@ -46,7 +46,7 @@ const StatusItem = (props: any) => {
 
     // 3️⃣ Service completed
     if (item?.completed) {
-      return IMAGES.status_green;
+      return IMAGES.confirmed_icon;
     }
 
     // 4️⃣ Default / empty state
@@ -54,7 +54,7 @@ const StatusItem = (props: any) => {
   }
 
   return (
-    <View style={[styles(theme).statusItem, {}]}>
+    <View style={[styles(theme).statusItem, statusItemContainer]}>
       {/* Timeline line */}
       <View style={styles(theme).timelineContainer}>
         <Image
@@ -67,10 +67,13 @@ const StatusItem = (props: any) => {
         />
         {!item?.completed && item?.id && getImage() !== IMAGES.service_running && getImage() !== IMAGES.ic_cancelled && (
           <Text
-            style={{ position: 'absolute', top: getScaleSize(3.2) }}
+            style={{
+              position: 'absolute',
+              // top: getScaleSize(3.2) 
+            }}
             size={getScaleSize(12)}
             font={FONTS.Lato.Medium}
-            color={theme.white}>
+            color={theme._404040}>
             {String(item?.id != null ? item.id + 1 : 0)}
           </Text>
         )}
@@ -99,16 +102,18 @@ const StatusItem = (props: any) => {
           style={{}}>
           {(item?.name === 'Payment received' && isProcessing ? 'Processing Payment' : item?.name) ?? ''}
         </Text>
-        <Text
-          size={getScaleSize(12)}
-          font={FONTS.Lato.Regular}
-          color={theme._737373}
-          style={{ marginTop: getScaleSize(4) }}>
-          {
-            (item?.name === 'Payment received' && isProcessing ? 'Scheduled on ' + moment.utc(taskStatusData?.is_otp_verifed?.time).local().format('ddd, DD MMM’ YYYY  -  hh:mm A') :
-              item?.time ? moment.utc(item?.time).local().format('ddd, DD MMM’ YYYY  -  hh:mm A')
-                : '-')}
-        </Text>
+        {item?.time && (
+          <Text
+            size={getScaleSize(12)}
+            font={FONTS.Lato.Regular}
+            color={theme._737373}
+            style={{ marginTop: getScaleSize(4) }}>
+            {
+              (item?.name === 'Payment received' && isProcessing ? 'Scheduled on ' + moment.utc(taskStatusData?.is_otp_verifed?.time).local().format('ddd, DD MMM’ YYYY  -  hh:mm A') :
+                item?.time ? moment.utc(item?.time).local().format('ddd, DD MMM’ YYYY  -  hh:mm A')
+                  : '-')}
+          </Text>
+        )}
         {item?.name === 'Service Started' && securityCode && (
           <>
             <Text
@@ -174,10 +179,10 @@ const styles = (theme: ThemeContextType['theme']) =>
     },
     timelineContainer: {
       alignItems: 'center',
-      justifyContent:'center',
+      justifyContent: 'center',
       marginRight: 16,
       width: 24,
-      marginVertical:getScaleSize(20)
+      // marginVertical:getScaleSize(20)
     },
     timelineDot: {
       width: 20,
@@ -211,12 +216,12 @@ const styles = (theme: ThemeContextType['theme']) =>
     },
     content: {
       flex: 1,
-      paddingBottom: 8,
+      // paddingBottom: 8,
     },
     title: {
       fontSize: getScaleSize(16),
       fontFamily: FONTS.Lato.SemiBold,
-      marginBottom: 4,
+      // marginBottom: 4,
       color: '#2B2B2B',
     },
     date: {

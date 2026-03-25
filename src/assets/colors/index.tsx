@@ -72,7 +72,8 @@ export const LIGHT_THEME_COLOR = {
   _fafafa: "#fafafa",
   _262B43B2: "#262B43B2",
   _0F232F: "#0F232F",
-  successText: "#10B981"
+  successText: "#10B981",
+_10B98133:"#10B98133",
 };
 
 export const DARK_THEME_COLOR = {
@@ -90,5 +91,7 @@ export const DARK_THEME_COLOR = {
   activeTabBg: "#F9CEC3",
   inActiveTabBg: "#F0F0F0",
   _0F232F: "#0F232F",
-  successText: "#10B981"
+  successText: "#10B981",
+_10B98133:"#10B98133",
+_FDEFEC:"#FDEFEC"
 };

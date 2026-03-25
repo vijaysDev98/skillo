@@ -130,8 +130,9 @@ export default function Login(props: any) {
       const result = await API.Instance.post(API.API_ROUTES.login, params);
       if (result.status) {
         Storage.save(Storage.USER_DETAILS, JSON.stringify(result?.data?.data));
-        // setUser(result?.data?.data);
-        setUserType(result?.data?.data?.user_data?.role);
+        setUser(result?.data?.data);
+        // setUserType(result?.data?.data?.user_data?.role);
+        setUserType(userRoles.Service_Provider_individual)
         getProfileData();
       } else {
         SHOW_TOAST(result?.data?.message, 'error');
@@ -195,16 +196,16 @@ export default function Login(props: any) {
           console.log('❌ Failed to save user to Firebase:', firebaseError);
         }
 
-        // props.navigation.dispatch(
-        //   CommonActions.reset({
-        //     index: 0,
-        //     routes: [
-        //       {
-        //         name: SCREENS.BottomBar.identifier,
-        //       },
-        //     ],
-        //   }),
-        // );
+        props.navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [
+              {
+                name: SCREENS.BottomBar.identifier,
+              },
+            ],
+          }),
+        );
         setShowRoleModal(true)
       } else {
         SHOW_TOAST(result?.data?.message, 'error');
@@ -350,7 +351,7 @@ export default function Login(props: any) {
       /> */}
       {isLoading && <ProgressView />}
 
-      {showRoleModal && (
+      {/* {showRoleModal && (
         <UserRoleModal
   visible={showRoleModal}
   onClose={() => setShowRoleModal(false)}
@@ -372,7 +373,7 @@ export default function Login(props: any) {
     
   }}
 />)
-      }
+      } */}
     </View>
   );
 }

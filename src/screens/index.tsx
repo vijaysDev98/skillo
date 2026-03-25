@@ -77,6 +77,7 @@ import VerificationDetails from './auth/VerificationDetails';
 import HomeAddServices from './home/HomeAddServices';
 import ProvideRequest from './request/ProvideRequest';
 import RaiseDispute from './request/RaiseDispute';
+import SearchProvider from './home/SearchProvider';
 
 export const SCREENS = {
   Splash: {
@@ -355,6 +356,10 @@ export const SCREENS = {
   RaiseDispute:{
     identifier: 'RaiseDispute',
     component: RaiseDispute,
+  },
+  SearchProvider:{
+    identifier: 'SearchProvider',
+    component: SearchProvider,
   }
 };
 

@@ -41,6 +41,7 @@ import {
 import {
   EmptyView,
   Header,
+  HomeHeader,
   ProgressView,
   RequestItem,
   SearchComponent,
@@ -62,6 +63,8 @@ import Geolocation from 'react-native-geolocation-service';
 import {PERMISSIONS, request, RESULTS} from 'react-native-permissions';
 import {EventRegister} from 'react-native-event-listeners';
 import {buildThreadId} from '../../services/chat';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import VerificationModal from '../../components/VerificationModal';
 
 export default function ProfessionalHome(props: any) {
   const skipSubscription = props?.route?.params?.skipSubscription;
@@ -76,9 +79,13 @@ export default function ProfessionalHome(props: any) {
   const [serviceList, setServiceList] = useState<any>([]);
   const [locationDenied, setLocationDenied] = useState(false);
 
+  const [isVerificationPending,setIsVerificationPending] = useState(false)
+
   const isFocused = useIsFocused();
 
   let currentState = AppState.currentState;
+
+  const insets = useSafeAreaInsets()
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', nextState => {
@@ -289,19 +296,140 @@ export default function ProfessionalHome(props: any) {
   const renderServiceRequestListView = () => {
     return (
       <View>
+        {/* Instant Request */}
+        <View>
+          <Text
+            size={getScaleSize(16)}
+            font={FONTS.Lato.SemiBold}
+            color={theme.primaryText}
+            style={{
+              marginTop: getScaleSize(28),
+              marginBottom:getScaleSize(24)
+            }}>
+            {"Instant Requests"}
+          </Text>
+            {serviceList?.recent_tasks?.data?.length > 0 && (
+          <>
+            {(serviceList?.recent_tasks?.data?.length > 0
+              ? serviceList?.recent_tasks?.data
+              : []
+            )?.map((item: any, index: number) => {
+              return (
+                <TaskItem
+                  key={index}
+                  item={item}
+                  status={"instant"}
+                  cardContainerStyle={{backgroundColor:theme._FDEFEC,borderColor:theme._EC613D,borderWidth:0.5}}
+                  onPressItem={() => {
+                    // if (item?.task_status === 'pending') {
+                    //   props.navigation.navigate(
+                    //     SCREENS.OpenRequestDetails.identifier,
+                    //     {
+                    //       item: item,
+                    //     },
+                    //   );
+                    // } else if (item?.task_status === 'accepted') {
+                    //   props.navigation.navigate(
+                    //     SCREENS.CompletedTaskDetails.identifier,
+                    //     {
+                    //       item: item,
+                    //     },
+                    //   );
+                    // }
+                    props.navigation.navigate(
+                      SCREENS.ProfessionalTaskDetails.identifier,
+                      {
+                        item: item,
+                      },
+                    );
+                  }}
+                  onPressStatus={() => {
+                    props.navigation.navigate(SCREENS.TaskStatus.identifier, {
+                      item: item,
+                    });
+                  }}
+                  onPressChat={() => {
+                    getServiceDetails(item?.service_request_id);
+                  }}
+                />
+              );
+            })}
+          </>
+        ) }
+        </View>
+        {/* Ongoing Task */}
+         <View>
+          <Text
+            size={getScaleSize(16)}
+            font={FONTS.Lato.SemiBold}
+            color={theme.primaryText}
+            style={{
+              marginTop: getScaleSize(28),
+              marginBottom:getScaleSize(24)
+            }}>
+            {"Ongoing Task"}
+          </Text>
+            {serviceList?.recent_tasks?.data?.length > 0 && (
+          <>
+            {(serviceList?.recent_tasks?.data?.length > 0
+              ? serviceList?.recent_tasks?.data
+              : []
+            )?.map((item: any, index: number) => {
+              return (
+                <TaskItem
+                  key={index}
+                  item={item}
+                  onPressItem={() => {
+                    // if (item?.task_status === 'pending') {
+                    //   props.navigation.navigate(
+                    //     SCREENS.OpenRequestDetails.identifier,
+                    //     {
+                    //       item: item,
+                    //     },
+                    //   );
+                    // } else if (item?.task_status === 'accepted') {
+                    //   props.navigation.navigate(
+                    //     SCREENS.CompletedTaskDetails.identifier,
+                    //     {
+                    //       item: item,
+                    //     },
+                    //   );
+                    // }
+                    props.navigation.navigate(
+                      SCREENS.ProfessionalTaskDetails.identifier,
+                      {
+                        item: item,
+                      },
+                    );
+                  }}
+                  onPressStatus={() => {
+                    props.navigation.navigate(SCREENS.TaskStatus.identifier, {
+                      item: item,
+                    });
+                  }}
+                  onPressChat={() => {
+                    getServiceDetails(item?.service_request_id);
+                  }}
+                />
+              );
+            })}
+          </>
+        ) }
+        </View>
+        {/* Explore Quotes */}
         <View
           style={[
             styles(theme).directionView,
             {marginBottom: getScaleSize(24)},
           ]}>
           <Text
-            size={getScaleSize(20)}
+            size={getScaleSize(16)}
             font={FONTS.Lato.SemiBold}
-            color={theme._323232}
+            color={theme.primaryText}
             style={{
               marginTop: getScaleSize(28),
             }}>
-            {STRING.ExploreServiceRequests}
+            {"Explore Quotes"}
           </Text>
           <View style={{flex: 1}}></View>
           {serviceList?.open_services?.length > 0 && (
@@ -312,14 +440,15 @@ export default function ProfessionalHome(props: any) {
                 );
               }}>
               <Text
-                size={getScaleSize(14)}
-                font={FONTS.Lato.Medium}
+                size={getScaleSize(12)}
+                font={FONTS.Lato.Bold}
                 align="center"
-                color={theme._2C6587}
+                color={theme._404040
+                }
                 style={{
                   marginTop: getScaleSize(28),
                 }}>
-                {STRING.ViewAll}
+                {STRING.Viewall}
               </Text>
             </TouchableOpacity>
           )}
@@ -345,11 +474,11 @@ export default function ProfessionalHome(props: any) {
             }}
           />
         ))}
-        <View style={styles(theme).horizontalContainer}>
+        <View style={[styles(theme).horizontalContainer,{marginBottom:getScaleSize(24)}]}>
           <Text
-            size={getScaleSize(20)}
+            size={getScaleSize(16)}
             font={FONTS.Lato.SemiBold}
-            color={theme._323232}
+            color={theme.primaryText}
             style={{
               flex: 1.0,
             }}>
@@ -372,13 +501,13 @@ export default function ProfessionalHome(props: any) {
                 );
               }}>
               <Text
-                size={getScaleSize(14)}
-                font={FONTS.Lato.Medium}
-                color={theme._2C6587}>
-                {STRING.ViewAll}
+                size={getScaleSize(12)}
+                font={FONTS.Lato.Bold}
+                color={theme._404040}>
+                {STRING.Viewall}
               </Text>
             </TouchableOpacity>
-          )}
+          )} 
         </View>
         {serviceList?.recent_tasks?.data?.length > 0 ? (
           <>
@@ -430,9 +559,9 @@ export default function ProfessionalHome(props: any) {
             <Image style={styles(theme).emptyImage} source={IMAGES.empty} />
             <Text
               size={getScaleSize(16)}
-              font={FONTS.Lato.Regular}
+              font={FONTS.Lato.SemiBold}
               align="center"
-              color={theme._939393}
+              color={theme._404040}
               style={{
                 marginTop: getScaleSize(20),
               }}>
@@ -489,84 +618,28 @@ export default function ProfessionalHome(props: any) {
         backgroundColor={theme.white}
         barStyle={'dark-content'}
       />
-      <View style={styles(theme).headerContainer}>
-        <View style={styles(theme).verticalView}>
-          <Text
-            size={getScaleSize(16)}
-            font={FONTS.Lato.Medium}
-            color={theme._6D6D6D}
-            style={{}}>
-            {`Hello! ${
-              profile?.user?.first_name + ' ' + profile?.user?.last_name
-            }`}
-          </Text>
-          <Text
-            size={getScaleSize(24)}
-            font={FONTS.Lato.Bold}
-            color={theme._2C6587}
-            style={{}}>
-            {'Welcome to CoudPouss'}
-          </Text>
-        </View>
-        <TouchableOpacity
-          style={[
-            styles(theme).notifiationIcon,
-            {marginRight: getScaleSize(8)},
-          ]}
-          activeOpacity={1}
-          onPress={() => {
-            props.navigation.navigate(SCREENS.Notification.identifier);
-          }}>
-          <Image
-            style={styles(theme).notifiationIcon}
-            source={IMAGES.notification}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles(theme).profilePic}
-          activeOpacity={1}
-          onPress={() => {
-            props.navigation.navigate(SCREENS.MyProfileProfessional.identifier);
-          }}>
-          {profile?.user?.profile_photo_url ? (
-            <Image
-              style={styles(theme).profilePic}
-              source={{uri: profile?.user?.profile_photo_url}}
-            />
-          ) : (
-            <>
-              {profile?.user?.first_name && profile?.user?.last_name ? (
-                <View style={styles(theme).EmptyProfileContainer}>
-                  <Text
-                    size={getScaleSize(12)}
-                    font={FONTS.Lato.Medium}
-                    align="center"
-                    color={theme._262B43E5}>
-                    {(
-                      profile?.user?.first_name?.charAt(0) ?? ''
-                    ).toUpperCase() +
-                      (profile?.user?.last_name?.charAt(0) ?? '').toUpperCase()}
-                  </Text>
-                </View>
-              ) : (
-                <Image
-                  style={styles(theme).profilePic}
-                  source={IMAGES.user_placeholder}
-                />
-              )}
-            </>
-          )}
-        </TouchableOpacity>
-      </View>
-      {/* <View style={styles(theme).searchView}>
-        <SearchComponent
-          value={searchText}
-          onChangeText={setSearchText}
-          onPressMicrophone={() => {
-            console.log('onPressMicrophone');
-          }}
-        />
-      </View> */}
+      <HomeHeader
+        bannerImg={IMAGES.homeBanner}
+        onSearchPress={() => {
+          props.navigation.navigate(SCREENS.SearchProvider.identifier);
+        }}
+        onPressNotification={() => {
+          props.navigation.navigate(SCREENS.Notification.identifier);
+        }}
+        onPressUserProfile={() => {
+          props.navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [
+                {
+                  name: SCREENS.BottomBar.identifier,
+                  params: { isProfile: true },
+                },
+              ],
+            }),
+          );
+        }}
+      />
       {locationDenied ? (
         <EmptyView
           title={STRING.location_permission_required}
@@ -580,38 +653,23 @@ export default function ProfessionalHome(props: any) {
         <ScrollView
           style={styles(theme).scrolledContainer}
           showsVerticalScrollIndicator={false}>
-          <ImageBackground
-            style={styles(theme).bannerView}
-            resizeMode="cover"
-            source={IMAGES.homeBanner}>
-            <View style={styles(theme).textView}>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <Text
-                  size={getScaleSize(40)}
-                  font={FONTS.Lato.Bold}
-                  color={theme.white}>
-                  {serviceList?.status?.verified_providers_today?.count ?? '0'}{' '}
-                </Text>
-                <Text
-                  size={getScaleSize(16)}
-                  font={FONTS.Lato.Medium}
-                  color={theme.white}>
-                  {'Professionals\nConnected Today'}
-                </Text>
-              </View>
-              <Text
-                style={{marginTop: getScaleSize(8)}}
-                size={getScaleSize(12)}
-                font={FONTS.Lato.Regular}
-                color={theme.white}>
-                {'Verified professionals ready to help you today'}
-              </Text>
-            </View>
-          </ImageBackground>
-          {renderServiceRequestView()}
+          <Image
+                    source={IMAGES.homeBanner}
+                    style={{
+                      width: '100%',
+                      height: getScaleSize(200),
+                    }}
+                    resizeMode="contain"
+                  />
+          {/* {renderServiceRequestView()} */}
+          {renderServiceRequestListView()}
         </ScrollView>
       )}
       {isLoading && <ProgressView />}
+      <VerificationModal
+      visible={isVerificationPending}
+      onPressStatus={() => {}}
+      />
     </View>
   );
 }
@@ -619,54 +677,10 @@ export default function ProfessionalHome(props: any) {
 const styles = (theme: ThemeContextType['theme']) =>
   StyleSheet.create({
     container: {flex: 1.0, backgroundColor: theme.white},
-    headerContainer: {
-      flexDirection: 'row',
-      marginHorizontal: getScaleSize(22),
-      marginTop: getScaleSize(20),
-    },
-    verticalView: {
-      alignSelf: 'center',
-      flexDirection: 'column',
-      flex: 1.0,
-    },
-    notifiationIcon: {
-      height: getScaleSize(24),
-      width: getScaleSize(24),
-      alignSelf: 'center',
-      tintColor: '#6D6D6D',
-    },
-    profilePic: {
-      height: getScaleSize(34),
-      width: getScaleSize(34),
-      borderRadius: getScaleSize(17),
-      alignSelf: 'center',
-    },
-    EmptyProfileContainer: {
-      width: getScaleSize(34),
-      height: getScaleSize(34),
-      backgroundColor: theme._F0EFF0,
-      borderRadius: getScaleSize(34),
-      alignSelf: 'center',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    searchView: {
-      marginTop: getScaleSize(23),
-      marginHorizontal: getScaleSize(22),
-    },
+    
     scrolledContainer: {
-      marginTop: getScaleSize(28),
+      // marginTop: getScaleSize(28),
       marginHorizontal: getScaleSize(22),
-    },
-    bannerView: {
-      height:
-        ((Dimensions.get('window').width - getScaleSize(44)) *
-          getScaleSize(124)) /
-        getScaleSize(386),
-      alignSelf: 'center',
-      width: Dimensions.get('window').width - getScaleSize(44),
-      borderRadius: getScaleSize(25),
-      overflow: 'hidden',
     },
     horizontalContainer: {
       marginTop: getScaleSize(3),
@@ -676,12 +690,6 @@ const styles = (theme: ThemeContextType['theme']) =>
     directionView: {
       flexDirection: 'row',
       alignItems: 'center',
-    },
-    textView: {
-      justifyContent: 'center',
-      flex: 1.0,
-      marginLeft: getScaleSize(135),
-      marginRight: getScaleSize(30),
     },
     emptyView: {
       flex: 1.0,

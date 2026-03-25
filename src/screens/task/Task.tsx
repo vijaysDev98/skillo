@@ -1,168 +1,151 @@
-import React, {useContext, useEffect, useRef, useState} from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import {
   View,
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  ActivityIndicator,
   Image,
   Platform,
 } from 'react-native';
 
 //ASSETS
-import {FONTS, IMAGES} from '../../assets';
+import { FONTS, IMAGES } from '../../assets';
 
 //CONTEXT
-import {AuthContext, ThemeContext, ThemeContextType} from '../../context';
+import { ThemeContext, ThemeContextType } from '../../context';
 
 //CONSTANT
-import {getScaleSize, SHOW_TOAST, useString} from '../../constant';
+import { getScaleSize, SHOW_TOAST, useString } from '../../constant';
 
 //COMPONENT
-import {Header, TaskItem, Text} from '../../components';
+import { Header, SearchComponent, Text } from '../../components';
 
 //PACKAGES
-import {SCREENS} from '..';
-import {API} from '../../api';
-import {useIsFocused} from '@react-navigation/native';
-import {buildThreadId} from '../../services/chat';
+import { SCREENS } from '..';
+import JobDetailBox from '../service/ui/JobDetailx';
+
+import { buildThreadId } from '../../services/chat';
+import { API } from '../../api';
+import { screenWidth } from '../../constant/scaleSize';
 
 export default function Task(props: any) {
   const STRING = useString();
-  const {theme} = useContext<any>(ThemeContext);
-  const {profile} = useContext<any>(AuthContext);
-  const requestIdRef = useRef(0);
-  const PAGE_SIZE = 5;
+  const { theme } = useContext<any>(ThemeContext);
 
-  const [quateList, setQuateList] = useState<any>({
-    allQuateList: [],
-    selectedIndex: 0,
-    page: 1,
-    hasMore: true,
-    isLoading: true,
-    hasMoreLoading: false,
-  });
+  const tabs = [
+    { id: 'all', title: 'All' },
+    { id: 'quote_sent', title: 'Quote Sent' },
+    { id: 'accepted', title: 'Accepted' },
+    { id: 'completed', title: 'Completed' },
+    { id: 'cancelled', title: 'Cancelled' },
+  ];
 
-  function getStatus() {
-    if (quateList?.selectedIndex === 0) {
-      return 'send';
-    } else if (quateList?.selectedIndex === 1) {
-      return 'accepted';
-    } else if (quateList?.selectedIndex === 2) {
-      return 'complete';
-    }
-  }
+  const [selectedTab, setSelectedTab] = useState('all');
+  const [searchValue, setSearchValue] = useState('');
 
-  const isFocused = useIsFocused();
+  const dummyTasks = useMemo(
+    () => [
+      {
+        id: '1',
+        title: 'DIY Service',
+        subtitle: 'Furniture assembly',
+        budget: 'P300 to P500',
+        jobDate: '14 Dec',
+        jobTime: '18:00 Pm',
+        tab: "quote_sent",
+        status: 'quote_sent',
+      },
+      {
+        id: '2',
+        title: 'DIY Service',
+        subtitle: 'Furniture assembly',
+        budget: 'P300 to P500',
+        jobDate: '14 Dec',
+        jobTime: '18:00 Pm',
+        tab: "accepted",
+        status: 'ongoing',
+      },
+      {
+        id: '3',
+        title: 'DIY Service',
+        subtitle: 'Furniture assembly',
+        budget: 'P300 to P500',
+        jobDate: '14 Dec',
+        jobTime: '18:00 Pm',
+        tab: "completed",
+        status: 'completed',
+      },
+      {
+        id: '4',
+        title: 'DIY Service',
+        subtitle: 'Furniture assembly',
+        budget: 'P300 to P500',
+        jobDate: '14 Dec',
+        jobTime: '18:00 Pm',
+        tab: "cancelled",
+        status: 'cancelled',
+      },
+      {
+        id: '5',
+        title: 'DIY Service',
+        subtitle: 'Furniture assembly',
+        budget: 'P300 to P500',
+        jobDate: '14 Dec',
+        jobTime: '18:00 Pm',
+        tab: "quote_sent",
+        status: 'quote_sent',
+      },
+    ],
+    [],
+  );
 
-  useEffect(() => {
-    if (isFocused) {
-      getQuateList();
-    }
-  }, [quateList?.selectedIndex, quateList?.page, isFocused]);
-
-  function getStatusByIndex(index: number) {
-    if (index === 0) return 'send';
-    if (index === 1) return 'accepted';
-    if (index === 2) return 'complete';
-  }
-
-  async function getQuateList() {
-    if (!quateList.hasMore) return;
-
-    const currentRequestId = ++requestIdRef.current;
-    const status =
-      quateList.selectedIndex === 0
-        ? 'send'
-        : quateList.selectedIndex === 1
-        ? 'accepted'
-        : 'complete';
-
-    try {
-      const result = await API.Instance.get(
-        API.API_ROUTES.getQuateList +
-          `?status=${status}&page=${quateList.page}&limit=${PAGE_SIZE}`,
-      );
-
-      // ❌ Agar ye latest request nahi hai → ignore
-      if (currentRequestId !== requestIdRef.current) return;
-
-      if (result.status) {
-        const newData = result?.data?.data?.results ?? [];
-
-        setQuateList((prev: any) => ({
-          ...prev,
-          allQuateList:
-            prev?.page === 1 ? newData : [...prev.allQuateList, ...newData],
-          hasMore: newData.length === PAGE_SIZE,
-          isLoading: false,
-          hasMoreLoading: false,
-        }));
-      }
-    } catch (error: any) {
-      if (currentRequestId === requestIdRef.current) {
-        SHOW_TOAST(error?.message ?? '', 'error');
-        setQuateList((prev: any) => ({
-          ...prev,
-          isLoading: false,
-          hasMoreLoading: false,
-        }));
-      }
-    }
-  }
-
-  const loadMore = () => {
-    if (
-      !quateList?.isLoading &&
-      !quateList?.hasMoreLoading &&
-      quateList?.hasMore
-    ) {
-      setQuateList((prev: any) => ({
-        ...prev,
-        page: prev?.page + 1,
-        hasMore: true,
-        isLoading: true,
-        hasMoreLoading: true,
-      }));
-    }
-  };
-
-  const onTabChange = (index: number) => {
-    requestIdRef.current++; // 🔥 old requests invalid
-
-    setQuateList({
-      allQuateList: [],
-      selectedIndex: index,
-      page: 1,
-      hasMore: true,
-      isLoading: true,
-      hasMoreLoading: false,
+  const filteredTasks = useMemo(() => {
+    const text = searchValue.trim().toLowerCase();
+    return dummyTasks.filter(task => {
+      const matchesTab = selectedTab === 'all' ? true : task.tab === selectedTab;
+      const matchesSearch = text ? `${task.title} ${task.subtitle}`.toLowerCase().includes(text) : true;
+      return matchesTab && matchesSearch;
     });
+  }, [dummyTasks, searchValue, selectedTab]);
+
+  const statusLabel = (status: string) => {
+    switch (status) {
+      case 'quote_sent':
+        return 'Quote Sent';
+      case 'ongoing':
+        return 'Ongoing';
+      case 'completed':
+        return 'Completed';
+      case 'cancelled':
+        return 'Cancelled';
+      default:
+        return '';
+    }
   };
 
   async function getServiceDetails(serviceRequestId: string) {
     try {
-      const result = await API.Instance.get(
-        API.API_ROUTES.getTsakDetails + `/quotes/${serviceRequestId}`,
-      );
-      if (result.status) {
-        console.log(result?.data?.data);
-        const conversationId = buildThreadId(
-          result?.data?.data?.elderly_user?.id,
-          profile?.user?.id,
-        );
-        props.navigation.navigate(SCREENS.ChatDetails.identifier, {
-          conversationId: conversationId,
-          peerUser: {
-            user_id: result?.data?.data?.elderly_user?.id,
-            name: result?.data?.data?.elderly_user?.first_name,
-            email: result?.data?.data?.elderly_user?.email,
-            avatarUrl: result?.data?.data?.elderly_user?.profile_photo_url,
-          },
-        });
-      } else {
-        SHOW_TOAST(result?.data?.message ?? '', 'error');
-      }
+      // const result = await API.Instance.get(
+      //   API.API_ROUTES.getTsakDetails + `/quotes/${serviceRequestId}`,
+      // );
+      // if (result.status) {
+      //   console.log(result?.data?.data);
+      //   const conversationId = buildThreadId(
+      //     result?.data?.data?.elderly_user?.id,
+      //     profile?.user?.id,
+      //   );
+      props.navigation.navigate(SCREENS.ChatDetails.identifier, {
+        conversationId: "12",
+        peerUser: {
+          user_id: "12",
+          name: "Joe",
+          email: "Joe@yopmail.com",
+          avatarUrl: "https://via.placeholder.com/150",
+        },
+      });
+      // } else {
+      //   SHOW_TOAST(result?.data?.message ?? '', 'error');
+      // }
     } catch (error: any) {
       SHOW_TOAST(error?.message ?? '', 'error');
       console.log(error?.message);
@@ -170,208 +153,343 @@ export default function Task(props: any) {
     }
   }
 
-  function renderFlatList() {
-    if (quateList?.allQuateList?.length > 0) {
-      return (
-        <FlatList
-          data={quateList?.allQuateList}
-          contentContainerStyle={{
-            paddingBottom: getScaleSize(50),
-            marginHorizontal: getScaleSize(22),
-          }}
-          showsVerticalScrollIndicator={false}
-          keyExtractor={(item: any, index: number) => index.toString()}
-          onEndReached={loadMore}
-          onEndReachedThreshold={0.1}
-          ListFooterComponent={
-            quateList?.hasMoreLoading ? (
-              <ActivityIndicator
-                size="large"
-                color={theme.primary}
-                style={{margin: 20}}
-              />
-            ) : null
-          }
-          renderItem={({item, index}) => {
-            return (
-              <TaskItem
-                key={index}
-                item={item}
-                onPressItem={() => {
-                  props.navigation.navigate(
-                    SCREENS.ProfessionalTaskDetails.identifier,
-                    {
-                      item: item,
-                    },
-                  );
-                }}
-                onPressStatus={() => {
-                  props.navigation.navigate(SCREENS.TaskStatus.identifier, {
-                    item: item,
-                  });
-                }}
-                onPressChat={() => {
-                  getServiceDetails(item?.service_request_id);
-                }}
-              />
-            );
-          }}
-        />
-      );
-    } else if (quateList?.isLoading) {
-      return (
-        <ActivityIndicator
-          size="large"
-          color={theme.primary}
-          style={{margin: 20}}
-        />
-      );
-    } else {
-      return (
-        <View style={styles(theme).emptyView}>
-          <Image style={styles(theme).emptyImage} source={IMAGES.empty} />
-          <Text
-            size={getScaleSize(16)}
-            font={FONTS.Lato.SemiBold}
-            align="center"
-            color={theme._939393}
-            style={{
-              marginTop: getScaleSize(20),
-            }}>
-            {
-              STRING.you_have_not_sent_any_quote_please_sent_a_quotes_to_the_service_request
-            }
-          </Text>
-        </View>
-      );
-    }
-    return null;
+  const handleViewDetails = (item: any) => {
+    props.navigation.navigate(SCREENS.ProfessionalTaskDetails.identifier, {
+      item: item,
+    });
   }
+
+  const handleManageTask = (item:any) => {
+    props.navigation.navigate(SCREENS.TaskStatus.identifier, {
+      item: item,
+    });
+  }
+
+  const handleChat = (item: any) => {
+    getServiceDetails(item.id)
+  }
+
+  const handleRaiseDispute = (item: any) => {
+
+  }
+
+  const renderTaskCard = ({ item }: any) => {
+    return (
+      <View style={styles(theme).card}>
+        <View style={styles(theme).cardHeader}>
+          <View style={styles(theme).cardTitleRow}>
+            <Image source={IMAGES.furnitureAssemblyImg} style={styles(theme).cardAvatar} />
+            <View style={{ flex: 1 }}>
+              <Text
+                size={getScaleSize(16)}
+                font={FONTS.Lato.Bold}
+                color={theme._2B2B2B}
+              >
+                {item.title}
+              </Text>
+              <Text
+                size={getScaleSize(14)}
+                font={FONTS.Lato.Medium}
+                color={theme._8C8C8C}
+                style={{ marginTop: getScaleSize(2) }}
+              >
+                {item.subtitle}
+              </Text>
+            </View>
+          </View>
+          <View style={styles(theme).statusPill}>
+            <Text
+              size={getScaleSize(12)}
+              font={FONTS.Lato.SemiBold}
+              color={theme.primary}
+            >
+              {statusLabel(item?.status)}
+            </Text>
+          </View>
+        </View>
+        <View style={{ height: 1, backgroundColor: theme._D6D6D6, marginVertical: getScaleSize(20) }} />
+        {/* <View style={styles(theme).cardDetailRow}>
+          <View style={styles(theme).detailItem}>
+            <Text size={getScaleSize(12)} font={FONTS.Lato.Medium} color={theme._8C8C8C}>
+              Budget
+            </Text>
+            <Text size={getScaleSize(14)} font={FONTS.Lato.Bold} color={theme.primary}>
+              {item.budget}
+            </Text>
+          </View>
+          <View style={styles(theme).detailItem}>
+            <Text size={getScaleSize(12)} font={FONTS.Lato.Medium} color={theme._8C8C8C}>
+              Job Date
+            </Text>
+            <Text size={getScaleSize(14)} font={FONTS.Lato.Bold} color={theme.primary}>
+              {item.jobDate}
+            </Text>
+          </View>
+          <View style={styles(theme).detailItem}>
+            <Text size={getScaleSize(12)} font={FONTS.Lato.Medium} color={theme._8C8C8C}>
+              Job Time
+            </Text>
+            <Text size={getScaleSize(14)} font={FONTS.Lato.Bold} color={theme.primary}>
+              {item.jobTime}
+            </Text>
+          </View>
+        </View> */}
+        <JobDetailBox
+          jobDetailContainer={{ marginTop: 0, elevation: 0 }}
+          isTitle={false}
+          jobBudgetValue='P300 to P500'
+          jobDate={'14 Dec'}
+          jobTime={'10:00 AM'}
+        />
+        <View style={styles(theme).cardActions}>
+          {statusLabel(item?.status) == "Quote Sent" || statusLabel(item?.status) == "Cancelled" ?
+            <>
+              <TouchableOpacity
+                onPress={() => {
+                  handleViewDetails(item)
+                }}
+                style={styles(theme).primaryButton} activeOpacity={0.9}>
+                <Text size={getScaleSize(12)} font={FONTS.Lato.SemiBold} color={theme.white}>
+                  View Details
+                </Text>
+              </TouchableOpacity>
+            </>
+            :
+            <>
+              <TouchableOpacity
+                onPress={() => {
+                  if (item.status == 'ongoing') {
+                    // TODO: Navigate to chat screen
+                    // getServiceDetails(item.id)
+                    handleViewDetails(item)
+                  }
+                  else if (item.status === "completed") {
+                    // TODO: Navigate to dispute screen
+                    handleRaiseDispute(item)
+                  } else {
+                    // TODO: Navigate to chat screen
+                    handleChat(item)
+                  }
+                }}
+                style={styles(theme).chatButton} activeOpacity={0.9}>
+                <Text size={getScaleSize(12)} font={FONTS.Lato.SemiBold} color={theme.primary}>
+                  {(item.status == 'ongoing') ? "View Details" : (item.tab === "completed") ? 'Raise Dispute' : 'Chat'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  if (item.status == 'ongoing') {
+                    handleManageTask(item)
+                  } else {
+                    handleViewDetails(item)
+                  }
+                }}
+                style={styles(theme).primaryButton} activeOpacity={0.9}>
+                <Text size={getScaleSize(12)} font={FONTS.Lato.SemiBold} color={theme.white}>
+                  {(item.status == 'ongoing') ? "Manage Task Status" : "View Details"}
+                </Text>
+              </TouchableOpacity>
+            </>
+          }
+        </View>
+      </View>
+    );
+  };
+
+  const renderEmpty = () => (
+    <View style={styles(theme).emptyView}>
+      <Image source={IMAGES.empty} style={styles(theme).emptyImage} />
+      <Text
+        size={getScaleSize(16)}
+        font={FONTS.Lato.SemiBold}
+        color={theme._939393}
+        align="center"
+        style={{ marginTop: getScaleSize(20) }}
+      >
+        {'No service requests yet.\nSubmit one now!'}
+      </Text>
+    </View>
+  );
 
   return (
     <View style={styles(theme).container}>
       <Header />
-      <Text
-        size={getScaleSize(24)}
-        font={FONTS.Lato.Bold}
-        color={theme.primary}
-        style={{
-          marginHorizontal: getScaleSize(22),
-        }}>
-        {'Task Management'}
-      </Text>
-      <View style={styles(theme).tabContainer}>
+      <View style={styles(theme).searchContainer}>
+        <SearchComponent
+          placeholder="Search for Services"
+          placeholderTextColor={theme._404040}
+          value={searchValue}
+          onChangeText={(text: string) => setSearchValue(text)}
+          onPressMicrophone={() => { }}
+          searchInputStyle={{
+            color: theme._404040,
+            fontSize: getScaleSize(16),
+            fontFamily: FONTS.Lato.Regular
+          }}
+          searchViewStyle={{ width: screenWidth - getScaleSize(110) }}
+        />
         <TouchableOpacity
-          style={styles(theme).tabItem}
-          activeOpacity={1}
-          onPress={() => {
-            onTabChange(0);
-          }}>
-          <View
-            style={[
-              styles(theme).tabItemContainer,
-              {borderBottomWidth: quateList?.selectedIndex === 0 ? 2 : 0},
-            ]}>
-            <Text
-              size={getScaleSize(14)}
-              font={FONTS.Lato.Medium}
-              color={
-                quateList?.selectedIndex === 0 ? theme._2C6587 : theme._595959
-              }
-              style={{}}>
-              {'Quote Sent'}
-            </Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles(theme).tabItem}
-          activeOpacity={1}
-          onPress={() => {
-            onTabChange(1);
-          }}>
-          <View
-            style={[
-              styles(theme).tabItemContainer,
-              {borderBottomWidth: quateList?.selectedIndex === 1 ? 2 : 0},
-            ]}>
-            <Text
-              size={getScaleSize(14)}
-              font={FONTS.Lato.Medium}
-              color={
-                quateList?.selectedIndex === 1 ? theme._2C6587 : theme._595959
-              }
-              style={{}}>
-              {'Accepted'}
-            </Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles(theme).tabItem}
-          activeOpacity={1}
-          onPress={() => {
-            onTabChange(2);
-          }}>
-          <View
-            style={[
-              styles(theme).tabItemContainer,
-              {borderBottomWidth: quateList?.selectedIndex === 2 ? 2 : 0},
-            ]}>
-            <Text
-              size={getScaleSize(14)}
-              font={FONTS.Lato.Medium}
-              color={
-                quateList?.selectedIndex === 2 ? theme._2C6587 : theme._595959
-              }
-              style={{}}>
-              {'Completed'}
-            </Text>
-          </View>
+          style={styles(theme).filterButton}
+        >
+          <Image source={IMAGES.filterIcon} style={styles(theme).filterIcon} />
         </TouchableOpacity>
       </View>
-      {renderFlatList()}
+      <View>
+        <FlatList
+          data={tabs}
+          keyExtractor={item => item.id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles(theme).tabList}
+          renderItem={({ item, index }) => (
+            <TouchableOpacity
+              style={[
+                styles(theme).tabPill,
+                {
+                  marginLeft: index === 0 ? getScaleSize(22) : getScaleSize(12),
+                  backgroundColor:
+                    selectedTab === item.id ? theme.primary : theme._F0F0F0,
+                },
+              ]}
+              activeOpacity={0.9}
+              onPress={() => setSelectedTab(item.id)}
+            >
+              <Text
+                size={getScaleSize(14)}
+                font={FONTS.Lato.SemiBold}
+                color={selectedTab === item.id ? theme.white : theme._8C8C8C}
+              >
+                {item.title}
+              </Text>
+            </TouchableOpacity>
+          )}
+          ListFooterComponent={<View style={{ width: getScaleSize(22) }} />}
+        />
+      </View>
+      <FlatList
+        data={filteredTasks}
+        keyExtractor={item => item.id}
+        renderItem={renderTaskCard}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles(theme).listContent,]}
+        ListEmptyComponent={renderEmpty}
+      />
     </View>
   );
 }
 
 const styles = (theme: ThemeContextType['theme']) =>
   StyleSheet.create({
-    container: {flex: 1, backgroundColor: theme.white},
-    tabView: {
-      marginTop: getScaleSize(24),
-      flex: 1.0,
+    container: { flex: 1, backgroundColor: theme.white },
+    searchContainer: {
       flexDirection: 'row',
+      alignItems: 'center',
       marginHorizontal: getScaleSize(22),
+      marginTop: getScaleSize(7),
+      // marginBottom: getScaleSize(24),
+      gap: getScaleSize(10)
     },
-    itemView: {
-      flex: 1.0,
-      alignSelf: 'center',
+    filterButton: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.white,
+      borderRadius: getScaleSize(10),
+      padding: getScaleSize(13),
+      elevation: 1
     },
-    tabContainer: {
-      marginTop: getScaleSize(25),
+    filterIcon: {
+      height: getScaleSize(24),
+      width: getScaleSize(24)
+    },
+    tabList: {
+      paddingVertical: getScaleSize(14),
+      // height: getScaleSize(70),
+    },
+    tabPill: {
+      paddingHorizontal: getScaleSize(16),
+      paddingVertical: getScaleSize(12),
+      borderRadius: getScaleSize(12),
+    },
+    listContent: {
+      paddingHorizontal: getScaleSize(22),
+      paddingBottom: getScaleSize(30),
+    },
+    card: {
+      backgroundColor: theme.white,
+      borderRadius: getScaleSize(14),
+      padding: getScaleSize(16),
+      marginBottom: getScaleSize(16),
+      // shadowColor: '#000',
+      // shadowOpacity: 0.08,
+      // shadowRadius: 8,
+      // shadowOffset: { width: 0, height: 2 },
+      // elevation: Platform.OS === 'android' ? 2 : 0,
+      borderWidth: 0.5,
+      borderColor: theme._D9D9D9,
+    },
+    cardHeader: {
       flexDirection: 'row',
-      borderBottomColor: '#EAF0F3',
-      borderBottomWidth: 1,
-    },
-    tabItem: {
-      flex: 1.0,
-      justifyContent: 'center',
+      justifyContent: 'space-between',
       alignItems: 'center',
     },
-    tabItemContainer: {
+    cardTitleRow: {
+      flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center',
-      borderBottomColor: theme._2C6587,
-      paddingBottom: getScaleSize(14),
+      flex: 1,
+    },
+    cardAvatar: {
+      height: getScaleSize(44),
+      width: getScaleSize(44),
+      borderRadius: getScaleSize(6),
+      marginRight: getScaleSize(10),
+    },
+    statusPill: {
+      paddingHorizontal: getScaleSize(10),
+      paddingVertical: getScaleSize(6),
+      borderRadius: getScaleSize(10),
+      backgroundColor: theme._FDEFEC ?? '#FDECEC',
+    },
+    cardDetailRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: getScaleSize(16),
+    },
+    detailItem: {
+      flex: 1,
+      gap: getScaleSize(4),
+    },
+    cardActions: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: getScaleSize(16),
+      gap: getScaleSize(12),
+    },
+    chatButton: {
+      flex: 1,
+      borderWidth: 1,
+      borderColor: theme.primary,
+      paddingVertical: getScaleSize(10),
+      borderRadius: getScaleSize(10),
+      alignItems: 'center',
+      backgroundColor: theme.white,
+    },
+    primaryButton: {
+      flex: 1,
+      paddingVertical: getScaleSize(10),
+      borderRadius: getScaleSize(10),
+      alignItems: 'center',
+      backgroundColor: theme.primary,
     },
     emptyView: {
-      flex: 1.0,
-      alignSelf: 'center',
-      justifyContent: 'center',
-      marginTop: getScaleSize(26),
+      alignItems: 'center',
+      marginTop: getScaleSize(60),
+      paddingHorizontal: getScaleSize(24),
     },
     emptyImage: {
-      height: getScaleSize(217),
-      width: getScaleSize(184),
-      alignSelf: 'center',
+      height: getScaleSize(200),
+      width: getScaleSize(200),
+      resizeMode: 'contain',
     },
   });
+

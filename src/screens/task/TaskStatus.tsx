@@ -16,7 +16,7 @@ import { FONTS, IMAGES } from '../../assets';
 import { ThemeContext, ThemeContextType } from '../../context';
 
 // CONSTANT
-import { getScaleSize, SHOW_TOAST, useString, requestLocationPermission } from '../../constant';
+import { getScaleSize, SHOW_TOAST, useString, requestLocationPermission, DummyData } from '../../constant';
 
 // COMPONENT
 import {
@@ -64,6 +64,9 @@ export default function TaskStatus(props: any) {
     isServiceFinalized: false,
     isPaymentReceived: false,
   });
+
+  const [isStatus, setIsStatus] = useState(false)
+
   const bottomSheetRef = useRef<any>(null);
   const mapViewRef = useRef<any>(null);
   const renegotiationSheetRef = useRef<any>(null);
@@ -346,6 +349,8 @@ export default function TaskStatus(props: any) {
 
   console.log('serviceFlags.isServiceFinalized==>', serviceFlags.isServiceFinalized, taskStatusData?.is_otp_verifed?.status == 'false');
 
+  const statusData = DummyData?.taskDetailsOngoingDummyData.task_status
+
   return (
     <View style={styles(theme).container}>
       <Header
@@ -357,15 +362,14 @@ export default function TaskStatus(props: any) {
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={styles(theme).scrolledContainer}>
-        <View style={styles(theme).informationContainer}>
-          <Text
+        {/* <Text
             style={{ flex: 1 }}
             size={getScaleSize(16)}
-            font={FONTS.Lato.Medium}
-            color={theme.primary}>
+            font={FONTS.Lato.Regular}
+            color={theme._8C8C8C}>
             {STRING.TaskStatus}
           </Text>
-          <View style={styles(theme).devider} />
+        <View style={styles(theme).informationContainer}>
           <View style={{ marginTop: getScaleSize(32) }}>
             {taskStatus?.map(
               (item: any, index: number) => (
@@ -380,7 +384,68 @@ export default function TaskStatus(props: any) {
               ),
             )}
           </View>
-        </View>
+        </View> */}
+        <TouchableOpacity
+          style={{
+            borderColor: theme._D9D9D9,
+            paddingVertical: getScaleSize(17),
+            paddingHorizontal: getScaleSize(16),
+            borderWidth: 1,
+            borderRadius: getScaleSize(16),
+            marginTop: getScaleSize(24),
+            flexDirection: 'row'
+          }}
+          activeOpacity={1}
+          onPress={() => {
+            setIsStatus(!isStatus);
+          }}>
+          <Text
+            style={{
+              flex: 1,
+            }}
+            size={getScaleSize(16)}
+            font={FONTS.Lato.Medium}
+            color={theme._8C8C8C}>
+            {"Task Status"}
+          </Text>
+          <Image
+            style={{
+              height: getScaleSize(25),
+              width: getScaleSize(24),
+              tintColor: theme._8C8C8C,
+            }}
+            source={isStatus ? IMAGES.up : IMAGES.down}
+          />
+
+        </TouchableOpacity>
+        {
+          isStatus && (
+            <View style={{
+              backgroundColor: theme.white,
+              padding: getScaleSize(20),
+              borderWidth: 1,
+              borderColor: theme._D9D9D9,
+              borderRadius: getScaleSize(10),
+              marginTop: getScaleSize(8),
+            }}>
+              {statusData.map(
+                (item: any, index: number) => (
+                  <StatusItem
+                    statusItemContainer={{
+                      marginVertical: getScaleSize(20),
+                    }}
+                    key={index}
+                    item={item}
+                    index={index}
+                    isLast={
+                      index === statusData.length - 1
+                    }
+                  />
+                ),
+              )}
+            </View>
+          )
+        }
         {taskStatusData?.is_otp_verifed?.status === true && (
           <View style={styles(theme).lastInformationContainer}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: getScaleSize(10) }}>

@@ -13,6 +13,7 @@ import { CommonActions } from '@react-navigation/native';
 import { SCREENS } from '../screens';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { userRoles } from '../constant/utils';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -194,7 +195,7 @@ function Tabbar(props: any) {
   let images: any = [];
   let names: any = [];
 
-  if (userType === 'service_provider') {
+  if (userType === userRoles.Service_Provider_individual || userRoles.Service_Provider_business) {
     images = [
       IMAGES.home_unselected,
       IMAGES.request_unselected,
@@ -230,7 +231,7 @@ function Tabbar(props: any) {
   function renderView() {
     return (
       <View style={[
-        userType === 'service_provider'
+        userType === userRoles.Service_Seeker_business || userType === userRoles.Service_Seeker_individual
           ? styles(theme).tabContainer
           : styles(theme).tabContainerServiceProvider,
         // { paddingBottom: insets.bottom }
@@ -250,8 +251,8 @@ function Tabbar(props: any) {
       </View>
     )
   }
-
-  if (userType === 'service_provider') {
+  console.log("userType======>>>>>", userType)
+  if (userType === userRoles.Service_Provider_individual || userType === userRoles.Service_Provider_business) {
     return (
       // <SafeAreaView style={{ backgroundColor: 'transparent' }}>
       <View style={[styles(theme).mainContainer]}>
@@ -308,7 +309,7 @@ const Item = (props: any) => {
   let images: any = [];
   let names: any = [];
 
-  if (userType === 'service_provider') {
+  if (userType === userRoles.Service_Provider_individual || userType === userRoles.Service_Provider_business) {
     images = [
       IMAGES.home_unselected,
       IMAGES.request_unselected,
@@ -328,9 +329,9 @@ const Item = (props: any) => {
 
     names = ['Home', 'Request', '', 'Chat', 'Profile'];
   }
-
   const STRING = useString();
-  if (userType === 'service_provider') {
+
+  if (userType === userRoles.Service_Provider_individual || userType === userRoles.Service_Provider_business) {
     return (
       <TouchableOpacity
         onPress={props.onPress}
@@ -373,7 +374,7 @@ const Item = (props: any) => {
                 style={{ marginTop: getScaleSize(8) }}
                 size={getScaleSize(12)}
                 font={FONTS.Lato.Medium}
-                color={'#E6E6E6'}
+                color={theme._8C8C8C}
                 align="center">
                 {names[props.index]}
               </Text>

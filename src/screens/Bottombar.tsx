@@ -26,6 +26,7 @@ import PushNotification from 'react-native-push-notification';
 
 //API
 import { API } from '../api';
+import { userRoles } from '../constant/utils';
 
 const Tab = createBottomTabNavigator();
 
@@ -251,7 +252,7 @@ function BottomBar(props: any) {
     }
   };
 
-  if (userType === 'service_provider') {
+  if (userType === userRoles.Service_Provider_individual || userType === userRoles.Service_Provider_business) {
     return (
       <>
         <Tab.Navigator
@@ -259,6 +260,7 @@ function BottomBar(props: any) {
             headerShown: false,
           }}
           initialRouteName={getProfessionalRouteName()}
+          // initialRouteName={TABS.ProfessionalHome.identifier}
           tabBar={props => {
             return <Tabbar {...props} />;
           }}>
