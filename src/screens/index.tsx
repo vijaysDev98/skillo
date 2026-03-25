@@ -9,6 +9,7 @@ import SignupSelect from './auth/SignupSelect';
 import Signup from './auth/Signup';
 import CreatePassword from './auth/CreatePassword';
 import AddPersonalDetails from './auth/AddPersonalDetails';
+import PrivacyDetails from './auth/PrivacyDetails';
 import ChooseYourSubscription from './subscription/ChooseYourSubscription';
 import SelectedPlanDetails from './subscription/SelectedPlanDetails';
 import PaymentMethod from './subscription/PaymentMethod';
@@ -124,6 +125,10 @@ export const SCREENS = {
   AddPersonalDetails: {
     identifier: 'AddPersonalDetails',
     component: AddPersonalDetails,
+  },
+  PrivacyDetails: {
+    identifier: 'PrivacyDetails',
+    component: PrivacyDetails,
   },
   VerificationDetails: {
     identifier: 'VerificationDetails',

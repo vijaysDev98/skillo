@@ -15,8 +15,9 @@ interface AppSafeAreaViewProps {
   children: ReactNode;
   style?: ViewStyle;
   isTopMargin?: boolean;
-  isBottomMargin?:boolean;
+  isBottomMargin?: boolean;
   isLight?: boolean;
+  isFullScreen?: boolean;
 }
 
 const AppSafeAreaView = ({
@@ -24,11 +25,12 @@ const AppSafeAreaView = ({
   style,
   isTopMargin = true,
   isBottomMargin = true,
+  isFullScreen = false,
   isLight,
 }: AppSafeAreaViewProps) => {
 
-    const {theme}= useContext(ThemeContext)
-    const insets= useSafeAreaInsets()
+  const { theme } = useContext(ThemeContext)
+  const insets = useSafeAreaInsets()
 
   return Platform.OS === "ios" ? (
     <SafeAreaView
@@ -37,34 +39,42 @@ const AppSafeAreaView = ({
         {
           flex: 1,
           // paddingTop: 40,
-        //   paddingTop: 10,
+          //   paddingTop: 10,
         },
         style,
       ]}
     >
       <StatusBar translucent={false} />
-          {children}
+      {children}
     </SafeAreaView>
   ) : (
-    <SafeAreaView style={[{flex:1,
-        // paddingTop:isTopMargin ? insets.top : 0,
-        // paddingBottom:isBottomMargin? insets.bottom:0
-    }, style]}>
-      <StatusBar
-        translucent
-        backgroundColor={theme.white}
-        // backgroundColor={
-        //   statusColor
-        //     ? statusColor
-        //     : isSecond
-        //     ? colors.transparent
-        //     : colors.mainBg
-        // }
-        barStyle={isLight ? "light-content" : "dark-content"}
-      />
-     
-          {children}
-    </SafeAreaView>
+
+    isFullScreen ? (
+      <View style={[
+        {
+          flex: 1,
+        },
+        style,
+      ]}>
+        {children}
+      </View>
+    ) : (
+      <SafeAreaView
+        style={[
+          {
+            flex: 1,
+          },
+          style,
+        ]}
+      >
+        <StatusBar
+          translucent
+          backgroundColor={theme.white}
+          barStyle={isLight ? "light-content" : "dark-content"}
+        />
+        {children}
+      </SafeAreaView>
+    )
   );
 };
 

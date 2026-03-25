@@ -33,7 +33,7 @@ interface InputProps {
   isError?: string;
   inputTitle?: string;
   inputColor?: boolean;
-  inputTitleSize?:number;
+  inputTitleSize?: number;
   countryCode?: string;
   countryFlag?: string;
   onPressCountryCode?: () => void;
@@ -44,7 +44,7 @@ interface InputProps {
   isDropDown?: boolean;
   onDropDownPress?: () => void;
   mainContinerStyle?: StyleProp<ViewStyle>;
-  isRightComponent?:any
+  isRightComponent?: any
 }
 
 function Input(props: InputProps & TextInputProps) {
@@ -69,7 +69,7 @@ function Input(props: InputProps & TextInputProps) {
     isDropDown,
     onDropDownPress,
     inputTitleSize,
-isRightComponent
+    isRightComponent
   } = props;
 
   const { theme } = useContext<any>(ThemeContext);
@@ -91,7 +91,7 @@ isRightComponent
             onPress={onPressCountryCode}
             style={[styles(theme).container,
             {
-              borderColor: isError ? theme._EF5350 : theme._8C8C8C,
+              borderColor: isError ? theme._EF5350 : theme._B3B3B3,
               height: Platform.OS == 'ios' ? getScaleSize(56) : getScaleSize(56),
               flexDirection: 'row',
               alignItems: 'center',
@@ -117,6 +117,7 @@ isRightComponent
             <Image
               source={IMAGES.ic_down}
               style={styles(theme).downIcon}
+              tintColor={theme._8C8C8C}
               resizeMode={'contain'}
             />
           </Pressable>
@@ -151,7 +152,7 @@ isRightComponent
               style={{
                 width: 16,
                 height: 16,
-                tintColor: "#999"
+                tintColor: theme._8C8C8C
               }}
             />
           </Pressable>
@@ -230,10 +231,10 @@ isRightComponent
                 />
               </Pressable>
             )}
-             {isRightComponent && isRightComponent()}
+            {isRightComponent && isRightComponent()}
           </Pressable>
         }
-     
+
       </View>
       {isError && (
         <Text
@@ -279,7 +280,7 @@ const styles = (theme: ThemeContextType['theme']) =>
       width: getScaleSize(20),
       height: getScaleSize(20),
       marginLeft: getScaleSize(5),
-      tintColor:theme._8C8C8C
+      tintColor: theme._8C8C8C
     },
     flexView: {
       flexDirection: 'row',

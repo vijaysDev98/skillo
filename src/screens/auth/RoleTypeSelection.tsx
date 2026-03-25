@@ -7,17 +7,20 @@ import {
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import { FONTS, IMAGES } from "../../assets";
-import { getScaleSize } from "../../constant";
+import { getScaleSize, useString } from "../../constant";
 import { screenHeight, screenWidth } from "../../constant/scaleSize";
 import { AuthContext, ThemeContext, ThemeContextType } from "../../context";
-import { Text } from "../../components";
+import { Button, Text } from "../../components";
 import { SCREENS } from "..";
 import { userRoles } from "../../constant/utils";
+import { AppSafeAreaView } from "../../components/AppSafeAreaView";
 
 
 export default function RoleTypeSelection(props: any) {
 
     const { isFromSignup } = props.route.params || "";
+
+    const STRING = useString();
 
     const { theme } = useContext(ThemeContext)
     const { setUserType, setUserRole, userType } =
@@ -43,7 +46,7 @@ export default function RoleTypeSelection(props: any) {
     }
 
     return (
-        <View style={styles(theme).container}>
+        <AppSafeAreaView isFullScreen={true} style={styles(theme).container}>
             <View style={styles(theme).imageContainer}>
                 <Image
                     source={IMAGES.role_selection_bgImg}
@@ -160,17 +163,23 @@ export default function RoleTypeSelection(props: any) {
 
                 </View>
 
-                <TouchableOpacity
-                    onPress={handleContinue}
-                    style={styles(theme).button}>
-                    <Text
-                        font={FONTS.Lato.SemiBold}
-                        size={getScaleSize(20)}
-                        color={theme.white}
-                    >Continue</Text>
-                </TouchableOpacity>
             </View>
-        </View>
+
+            <Button
+                title={STRING.continue}
+                style={styles(theme).button}
+                onPress={handleContinue}
+            />
+            {/* <TouchableOpacity
+                onPress={handleContinue}
+                style={styles(theme).button}>
+                <Text
+                    font={FONTS.Lato.SemiBold}
+                    size={getScaleSize(20)}
+                    color={theme.white}
+                >Continue</Text>
+            </TouchableOpacity> */}
+        </AppSafeAreaView>
     );
 }
 
@@ -243,9 +252,11 @@ const styles = (theme: ThemeContextType['theme']) =>
             marginBottom: getScaleSize(10),
         },
         button: {
-            marginTop: getScaleSize(60),
+            marginTop: 'auto',
+            marginBottom: getScaleSize(24),
+            marginHorizontal: getScaleSize(24),
             backgroundColor: theme.primary,
-            paddingVertical: getScaleSize(14),
+            paddingVertical: getScaleSize(18),
             borderRadius: getScaleSize(10),
             alignItems: "center",
         },

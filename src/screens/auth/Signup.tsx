@@ -124,7 +124,7 @@ export default function Signup(props: any) {
                 keyboardShouldPersistTaps="handled"
                 contentContainerStyle={{
                     paddingBottom: 20,
-                     flexGrow: 1,
+                    flexGrow: 1,
                 }}
             >
                 <View style={styles(theme).mainContainer}>
@@ -141,8 +141,9 @@ export default function Signup(props: any) {
                         size={getScaleSize(16)}
                         font={FONTS.Lato.SemiBold}
                         color={theme._404040}
+                        style={{ marginBottom: getScaleSize(32) }}
                         align="center"
-                        >
+                    >
                         {STRING.SingUp.subText}
                     </Text>
                     {/* {isPhoneNumber ? (
@@ -168,10 +169,10 @@ export default function Signup(props: any) {
                         />
                     ) : ( */}
                     <Input
-                        placeholder={STRING.placeHolders.enter_email_or_mobile_number}
+                        placeholder={STRING.placeHolders.enter_email}
                         placeholderTextColor={theme._B3B3B3}
                         inputColor={emailError ? true : false}
-                        inputTitle={STRING.inputTitle.email_or_mobile_number}
+                        inputTitle={STRING.inputTitle.email}
                         continerStyle={{ marginTop: getScaleSize(32) }}
                         value={email}
                         maxLength={100}
@@ -206,7 +207,7 @@ export default function Signup(props: any) {
                             size={getScaleSize(20)}
                             font={FONTS.Lato.SemiBold}
                             color={theme.mainText}
-                             style={{textDecorationLine:'underline'}}
+                            style={{ textDecorationLine: 'underline' }}
                             onPress={() => {
                                 props.navigation.navigate(SCREENS.Login.identifier);
                             }}>
