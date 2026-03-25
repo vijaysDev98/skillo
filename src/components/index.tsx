@@ -87,6 +87,6 @@ export {
   AppDropdown,
   AccountCreatedModal,
   ServiceCard,
-  GenderSelection,,
+  GenderSelection,
   VerificationModal
 }
