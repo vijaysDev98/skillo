@@ -37,6 +37,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { SCREENS } from '..';
 import { Rating } from 'react-native-ratings';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 export default function MyProfileProfessional(props: any) {
 
@@ -51,7 +52,7 @@ export default function MyProfileProfessional(props: any) {
   const overallRating = Number(profile?.customer_ratings?.average_rating ?? 0);
 
   return (
-    <View style={styles(theme).container}>
+    <AppSafeAreaView style={styles(theme).container}>
       <Header
         icon={IMAGES.ic_edit}
         onPress={() => {
@@ -96,33 +97,26 @@ export default function MyProfileProfessional(props: any) {
                 <Text
                   size={getScaleSize(16)}
                   font={FONTS.Lato.Bold}
-                  color={'#1D7885'}
+                  color={theme.primary}
                   style={{ alignSelf: 'center' }}>
                   {profile?.customer_ratings?.average_rating ?? '0.0'}
                 </Text>
                 <Text
                   size={getScaleSize(12)}
                   font={FONTS.Lato.Medium}
-                  color={'#214C65'}
+                  color={theme.primary}
                   style={{ alignSelf: 'center', marginTop: getScaleSize(4) }}>
                   {STRING.Overallrating}
                 </Text>
               </View>
             </View>
-            <View
+            {/* <View
               style={[
                 styles(theme).itemContainer,
                 { marginHorizontal: getScaleSize(16) },
               ]}>
 
               <View>
-                {/* <Text
-                  size={getScaleSize(16)}
-                  font={FONTS.Lato.Bold}
-                  color={'#1D7885'}
-                  style={{alignSelf: 'center'}}>
-                  {'4.6'}
-                </Text> */}
                 {profile?.provider_info?.is_docs_verified && (
                   <Image
                     style={{
@@ -142,20 +136,20 @@ export default function MyProfileProfessional(props: any) {
                   {profile?.provider_info?.is_docs_verified === true ? STRING.Certified : 'Not\ncertified'}
                 </Text>
               </View>
-            </View>
+            </View> */}
             <View style={styles(theme).itemContainer}>
               <View>
                 <Text
                   size={getScaleSize(16)}
                   font={FONTS.Lato.Bold}
-                  color={'#1D7885'}
+                  color={theme.primary}
                   style={{ alignSelf: 'center' }}>
                   {profile?.unique_clients_count ?? '0'}
                 </Text>
                 <Text
                   size={getScaleSize(12)}
                   font={FONTS.Lato.Medium}
-                  color={'#214C65'}
+                  color={theme.primary}
                   style={{ alignSelf: 'center', marginTop: getScaleSize(4) }}>
                   {STRING.Clients}
                 </Text>
@@ -167,8 +161,8 @@ export default function MyProfileProfessional(props: any) {
           <Text
             size={getScaleSize(16)}
             font={FONTS.Lato.Medium}
-            color={'#2C6587'}>
-            {STRING.about_me}
+            color={theme._8C8C8C}>
+            {STRING.Bio}
           </Text>
           <Text
             size={getScaleSize(14)}
@@ -182,7 +176,7 @@ export default function MyProfileProfessional(props: any) {
           <Text
             size={getScaleSize(16)}
             font={FONTS.Lato.Medium}
-            color={'#2C6587'}>
+            color={theme._8C8C8C}>
             {STRING.ExperienceSpecialities}
           </Text>
           <Text
@@ -209,7 +203,7 @@ export default function MyProfileProfessional(props: any) {
           <Text
             size={getScaleSize(16)}
             font={FONTS.Lato.Medium}
-            color={'#2C6587'}>
+            color={theme._8C8C8C}>
             {STRING.Achievements}
           </Text>
           <Text
@@ -224,7 +218,7 @@ export default function MyProfileProfessional(props: any) {
           <Text
             size={getScaleSize(16)}
             font={FONTS.Lato.Medium}
-            color={'#2C6587'}>
+            color={theme._8C8C8C}>
             {STRING.Photosofpastwork}
           </Text>
           <FlatList
@@ -254,7 +248,7 @@ export default function MyProfileProfessional(props: any) {
           <Text
             size={getScaleSize(16)}
             font={FONTS.Lato.Medium}
-            color={'#2C6587'}>
+            color={theme._8C8C8C}>
             {STRING.CustomerRatings}
           </Text>
           <View
@@ -290,7 +284,7 @@ export default function MyProfileProfessional(props: any) {
                 size={getScaleSize(12)}
                 style={{ marginTop: getScaleSize(3) }}
                 font={FONTS.Lato.Medium}
-                color={theme._323232}>
+                color={theme._8C8C8C}>
                 {`Based on ${profile?.customer_ratings?.total_ratings ?? 0} ratings`}
               </Text>
             </View>
@@ -341,7 +335,7 @@ export default function MyProfileProfessional(props: any) {
             <Text
               size={getScaleSize(16)}
               font={FONTS.Lato.Medium}
-              color={'#2C6587'}>
+              color={theme._8C8C8C}>
               {STRING.RecentWorksReviews}
             </Text>
             {profile?.recent_reviews?.map((item: any, index: number) => {
@@ -362,7 +356,7 @@ export default function MyProfileProfessional(props: any) {
         }
         <View style={{ height: getScaleSize(32) }} />
       </ScrollView>
-    </View>
+    </AppSafeAreaView>
   );
 }
 
@@ -409,6 +403,7 @@ const styles = (theme: ThemeContextType['theme']) =>
       borderColor: '#D5D5D5',
       borderRadius: getScaleSize(6),
       marginTop: getScaleSize(20),
+      marginHorizontal: getScaleSize(5)
     },
     photosView: {
       height: getScaleSize(144),

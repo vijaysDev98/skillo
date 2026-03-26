@@ -1,7 +1,10 @@
 import {
     ActivityIndicator,
+    Dimensions,
     FlatList,
     Image,
+    ImageBackground,
+    Modal,
     Platform,
     Pressable,
     ScrollView,
@@ -31,6 +34,68 @@ import {
 import { SCREENS } from '..';
 import { API } from '../../api';
 import { CommonActions, useIsFocused } from '@react-navigation/native';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
+import LinearGradient from 'react-native-linear-gradient';
+
+
+const { width } = Dimensions.get('window');
+
+interface SubCategoryProps {
+    item: any;
+    index: number;
+    theme: any;
+    selectedCategoryId: any;
+    services: any;
+    navigation: any;
+    setSelectedServiceId: (id: any) => void;
+    setShowDeleteModal: (show: boolean) => void;
+}
+
+const SubCategoryGridItem = ({ item, index, theme, selectedCategoryId, services, navigation, setSelectedServiceId, setShowDeleteModal }: SubCategoryProps) => {
+    const height = getScaleSize(188);
+    const imageUri = item?.image;
+
+    return (
+        <Pressable
+            style={[
+                styles(theme).cardContainer,
+                {
+                    height: height,
+                    marginTop: getScaleSize(20),
+                },
+            ]}
+        >
+            <ImageBackground
+                source={{ uri: imageUri }}
+                style={[styles(theme).imageView, { overflow: "hidden", }]}
+            >
+                <TouchableOpacity
+                    style={styles(theme).deleteButton}
+                    onPress={() => {
+                        setSelectedServiceId(item.sub_category_id);
+                        setShowDeleteModal(true);
+                    }}
+                >
+                    <View style={styles(theme).deleteIconContainer}>
+                        <Image source={IMAGES.trash2} style={styles(theme).deleteIcon} />
+                    </View>
+                </TouchableOpacity>
+                <LinearGradient
+                    colors={["transparent", "#ffffff", "#ffffff"]}
+                    locations={[0.6, 0.9, 1]}
+                    style={styles(theme).listItemLinearContainer}
+                >
+                    <Text
+                        size={getScaleSize(12)}
+                        font={FONTS.Lato.Bold}
+                        align='center'
+                        color={theme.primaryText}
+                    >{item?.subcategory_name}</Text>
+                </LinearGradient>
+            </ImageBackground>
+        </Pressable>
+    )
+}
 
 export default function ManageServices(props: any) {
 
@@ -38,13 +103,15 @@ export default function ManageServices(props: any) {
     const { theme } = useContext<any>(ThemeContext);
     const STRING = useString();
     const bottomSheetRef = useRef<any>(null);
-    const deleteServicePopupRef = useRef<any>(null);
     const { profile } = useContext<any>(AuthContext);
+
+    const has_purchased = profile?.has_purchased;
 
     const [isLoading, setLoading] = useState(false);
     const [services, setServices] = useState<any>([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState<any>(null);
     const [selectedServiceId, setSelectedServiceId] = useState<any>(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const isFocused = useIsFocused();
 
@@ -53,12 +120,6 @@ export default function ManageServices(props: any) {
             getServices(false);
         }
     }, [isFocused]);
-
-    useEffect(() => {
-        if (selectedServiceId) {
-            deleteServicePopupRef.current.open();
-        }
-    }, [selectedServiceId]);
 
     /* ================= GET SERVICES ================= */
     async function getServices(keepSelection = true) {
@@ -105,18 +166,18 @@ export default function ManageServices(props: any) {
 
             if (result.status) {
                 SHOW_TOAST(result?.data?.message ?? '', 'success');
-                getServices(true); 
+                getServices(true);
                 setSelectedServiceId(null);
-                deleteServicePopupRef.current.close();
+                setShowDeleteModal(false);
             } else {
                 SHOW_TOAST(result?.data?.message ?? '', 'error');
                 setSelectedServiceId(null);
-                deleteServicePopupRef.current.close();
+                setShowDeleteModal(false);
             }
         } catch (error: any) {
             SHOW_TOAST(error?.message ?? '', 'error');
             setSelectedServiceId(null);
-            deleteServicePopupRef.current.close();
+            setShowDeleteModal(false);
         } finally {
             setLoading(false);
         }
@@ -127,39 +188,25 @@ export default function ManageServices(props: any) {
         (i: any) => i.category_id === selectedCategoryId
     );
 
-    console.log('services==>', services, services?.services?.length > 1)
-
     function renderSubCategories() {
         if (selectedService?.subcategories?.length > 0) {
             return (
                 <FlatList
                     data={selectedService?.subcategories ?? []}
+                    numColumns={2}
                     keyExtractor={(item) => item.sub_category_id.toString()}
                     showsVerticalScrollIndicator={false}
-                    renderItem={({ item }) => (
-                        <ServiceItem
+                    columnWrapperStyle={{ paddingLeft: getScaleSize(8) }}
+                    renderItem={({ item, index }) => (
+                        <SubCategoryGridItem
                             item={item}
-                            itemContainer={
-                                styles(theme).itemContainerStyle
-                            }
-                            isManage={true}
-                            onRemove={() => {
-                                setSelectedServiceId(item.sub_category_id)
-                            }}
-
-                            onEdit={(item: any) => {
-
-                                const subCategoryIds = services?.services?.flatMap((service: any) =>
-                                    service.subcategories.map((sub: any) => sub.sub_category_id)
-                                ) || [];
-
-                                props.navigation.navigate(SCREENS.AddServices.identifier, {
-                                    isFromManageServices: true,
-                                    isEdit: true,
-                                    categoryId: selectedCategoryId,
-                                    disableServicesIds: subCategoryIds,
-                                });
-                            }}
+                            index={index}
+                            theme={theme}
+                            selectedCategoryId={selectedCategoryId}
+                            services={services}
+                            navigation={props.navigation}
+                            setSelectedServiceId={setSelectedServiceId}
+                            setShowDeleteModal={setShowDeleteModal}
                         />
                     )}
                 />
@@ -180,7 +227,7 @@ export default function ManageServices(props: any) {
     }
 
     return (
-        <View style={styles(theme).container}>
+        <AppSafeAreaView style={styles(theme).container}>
             <Header
                 onBack={() => {
                     if (isFromSelectServices) {
@@ -199,20 +246,20 @@ export default function ManageServices(props: any) {
                 }}
                 screenName={STRING.manage_services}
             />
-            {profile?.has_purchased ? (
+            {has_purchased ? (
                 <View style={styles(theme).mainContainer}>
                     <Text
                         size={getScaleSize(18)}
                         font={FONTS.Lato.Medium}
                         color={theme._737373}
-                        style={{ marginHorizontal: getScaleSize(24) }}>
+                        style={{ marginHorizontal: getScaleSize(24), marginBottom: getScaleSize(16) }}>
                         {profile?.user?.service_provider_type === 'professional' ?
                             STRING.all_service_categories_are_included_in_your_plan_Add_as_many_as_you_need_all_included_in_subscription_plan
                             : STRING.here_you_can_easily_manage_your_service_categories_each_additional_category_you_add_will_incur_a_monthly_fee_of}
                     </Text>
                     {services?.services?.length > 0 && (
                         <>
-                            <View style={styles(theme).divider} />
+                            {/* <View style={styles(theme).divider} /> */}
                             <View style={styles(theme).serviceContainer}>
                                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                                     {(services?.services ?? []).map((item: any, index: number) => {
@@ -227,34 +274,30 @@ export default function ManageServices(props: any) {
                                                     )
                                                 }
                                                 style={[
-                                                    styles(theme).serviceItemContainer,
+                                                    styles(theme).itemContainer,
                                                     {
-                                                        marginRight: isLast ? getScaleSize(24) : 0,
-                                                        marginLeft: index === 0 ? getScaleSize(24) : getScaleSize(16),
+                                                        marginLeft: index === 0 ? getScaleSize(24) : getScaleSize(8),
                                                         backgroundColor: isSelected
-                                                            ? theme._2C6587
-                                                            : theme._F7F7F7,
+                                                            ? theme.activeTabBg
+                                                            : theme.inActiveTabBg,
                                                     },
-                                                ]}>
+                                                ]}
+                                                activeOpacity={0.8}
+                                            >
                                                 <Image
-                                                    source={arrayIcons[item?.category_name?.toLowerCase() as keyof typeof arrayIcons] ?? arrayIcons['diy'] as any}
-                                                    style={[
-                                                        styles(theme).itemIcon,
-                                                        {
-                                                            tintColor: isSelected
-                                                                ? theme.white
-                                                                : theme._C1C1C1,
-                                                        },
-                                                    ]}
+                                                    source={item?.category_logo ? { uri: item.category_logo } : (arrayIcons[item?.category_name?.toLowerCase() as keyof typeof arrayIcons] ?? arrayIcons['diy'] as any)}
+                                                    resizeMode="cover"
+                                                    style={styles(theme).categoryImage}
                                                 />
                                                 <Text
+                                                    style={{
+                                                        marginLeft: getScaleSize(14),
+                                                        alignSelf: 'center',
+                                                    }}
                                                     size={getScaleSize(16)}
-                                                    font={FONTS.Lato.SemiBold}
-                                                    color={
-                                                        isSelected
-                                                            ? theme.white
-                                                            : theme._818285
-                                                    }>
+                                                    font={FONTS.Lato.Regular}
+                                                    color={isSelected ? theme.primary : theme._8C8C8C}
+                                                >
                                                     {item?.category_name ?? ''}
                                                 </Text>
                                             </TouchableOpacity>
@@ -280,12 +323,12 @@ export default function ManageServices(props: any) {
                     }}
                 />
             )}
-            {profile?.has_purchased && (
+            {has_purchased && (
                 <Button
                     title={services?.services?.length > 0 ? STRING.add_more_services : STRING.add_service}
                     style={{
                         marginHorizontal: getScaleSize(24),
-                        marginBottom: getScaleSize(24),
+                        marginBottom: getScaleSize(10),
                     }}
                     onPress={() => {
                         if (profile?.user?.service_provider_type === 'professional') {
@@ -339,21 +382,59 @@ export default function ManageServices(props: any) {
                     bottomSheetRef.current.close();
                 }}
             />
-            <BottomSheet
-                bottomSheetRef={deleteServicePopupRef}
-                isDelete={true}
-                height={getScaleSize(290)}
-                icon={IMAGES.ic_alart}
-                title={
-                    STRING.are_you_sure_to_delete_the_service
-                }
-                onPressDelete={() => { 
-                    removeService(selectedServiceId)
+            <Modal
+                visible={showDeleteModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => {
+                    setShowDeleteModal(false);
+                    setSelectedServiceId(null);
                 }}
-            />
+            >
+                <View style={styles(theme).modalOverlay}>
+                    <View style={styles(theme).modalContainer}>
+                        <Text
+                            size={getScaleSize(18)}
+                            font={FONTS.Lato.Bold}
+                            color={theme.primaryText}
+                            align='center'
+                            style={{ marginBottom: getScaleSize(24) }}
+                        >
+                            Are you sure you want to remove this service?
+                        </Text>
+                        <View style={styles(theme).modalButtonRow}>
+                            <TouchableOpacity
+                                style={styles(theme).cancelButton}
+                                onPress={() => {
+                                    setShowDeleteModal(false);
+                                    setSelectedServiceId(null);
+                                }}
+                            >
+                                <Text
+                                    size={getScaleSize(16)}
+                                    font={FONTS.Lato.SemiBold}
+                                    color={theme.primary}
+                                    align='center'
+                                >Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles(theme).removeButton}
+                                onPress={() => removeService(selectedServiceId)}
+                            >
+                                <Text
+                                    size={getScaleSize(16)}
+                                    font={FONTS.Lato.SemiBold}
+                                    color={theme.white}
+                                    align='center'
+                                >Remove Service</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
 
             {isLoading && <ProgressView />}
-        </View>
+        </AppSafeAreaView>
     );
 }
 
@@ -368,25 +449,55 @@ const styles = (theme: ThemeContextType['theme']) =>
             marginTop: getScaleSize(18),
             marginHorizontal: getScaleSize(24),
         },
-        serviceItemContainer: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingVertical: getScaleSize(10),
-            paddingHorizontal: getScaleSize(12),
+        itemContainer: {
+            height: getScaleSize(44),
+            paddingHorizontal: getScaleSize(20),
             borderRadius: getScaleSize(10),
+            flexDirection: 'row',
         },
         serviceContainer: {
             flexDirection: 'row',
             alignItems: 'center',
         },
-        itemIcon: {
-            width: getScaleSize(24),
+        categoryImage: {
             height: getScaleSize(24),
-            marginRight: getScaleSize(14),
+            width: getScaleSize(24),
+            alignSelf: 'center',
         },
-        itemContainerStyle: {
-            marginBottom: getScaleSize(18),
-            marginHorizontal: getScaleSize(24),
+        cardContainer: {
+            borderRadius: getScaleSize(20),
+            backgroundColor: theme._EAF0F3,
+            width: (width - getScaleSize(64)) / 2,
+            marginLeft: getScaleSize(16),
+            elevation: 1
+        },
+        imageView: {
+            flex: 1.0,
+            borderRadius: getScaleSize(20),
+        },
+        listItemLinearContainer: {
+            borderRadius: getScaleSize(20), flex: 1,
+            justifyContent: 'flex-end',
+            paddingBottom: getScaleSize(16)
+        },
+        deleteButton: {
+            position: 'absolute',
+            top: getScaleSize(8),
+            right: getScaleSize(8),
+            zIndex: 10,
+        },
+        deleteIconContainer: {
+            width: getScaleSize(30),
+            height: getScaleSize(30),
+            borderRadius: getScaleSize(8),
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        deleteIcon: {
+            width: getScaleSize(18),
+            height: getScaleSize(18),
+            tintColor: '#E74C3C',
         },
         emptyImage: {
             height: getScaleSize(217),
@@ -402,5 +513,43 @@ const styles = (theme: ThemeContextType['theme']) =>
             marginHorizontal: getScaleSize(24),
             marginVertical: getScaleSize(24),
             flex: 1,
-        }
+        },
+        modalOverlay: {
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: getScaleSize(30),
+        },
+        modalContainer: {
+            backgroundColor: theme.white,
+            borderRadius: getScaleSize(16),
+            paddingHorizontal: getScaleSize(24),
+            paddingVertical: getScaleSize(30),
+            width: '100%',
+            alignItems: 'center',
+        },
+        modalButtonRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            width: '100%',
+            gap: getScaleSize(12),
+        },
+        cancelButton: {
+            flex: 1,
+            height: getScaleSize(48),
+            borderRadius: getScaleSize(10),
+            borderWidth: 1,
+            borderColor: theme.primary,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        removeButton: {
+            flex: 1,
+            height: getScaleSize(48),
+            borderRadius: getScaleSize(10),
+            backgroundColor: theme.primary,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
     });

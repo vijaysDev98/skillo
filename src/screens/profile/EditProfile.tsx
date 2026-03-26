@@ -36,6 +36,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { SCREENS } from '..';
 import { CommonActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 export default function EditProfile(props: any) {
 
@@ -342,7 +343,7 @@ export default function EditProfile(props: any) {
         return '';
     };
 
-   
+
     const validateMobile = (value: string) => {
         const trimmed = value.trim();
 
@@ -424,7 +425,7 @@ export default function EditProfile(props: any) {
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
-            <View style={styles(theme).container}>
+            <AppSafeAreaView style={styles(theme).container}>
                 <Header
                     onBack={() => {
                         props.navigation.goBack();
@@ -458,7 +459,7 @@ export default function EditProfile(props: any) {
                             size={getScaleSize(16)}
                             font={FONTS.Lato.SemiBold}
                             align="center"
-                            color={theme._2C6587}
+                            color={theme.primary}
                             style={{ marginBottom: getScaleSize(24) }}>
                             {STRING.edit_picture_or_avatar}
                         </Text>
@@ -466,7 +467,7 @@ export default function EditProfile(props: any) {
                     <Text
                         size={getScaleSize(18)}
                         font={FONTS.Lato.Medium}
-                        color={theme._2C6587}
+                        color={theme._404040}
                         style={{ marginBottom: getScaleSize(16) }}>
                         {STRING.personal_information}
                     </Text>
@@ -475,10 +476,10 @@ export default function EditProfile(props: any) {
                             placeholder={STRING.enter_name}
                             placeholderTextColor={theme._939393}
                             inputTitle={STRING.full_name}
-                            inputColor={true}
+                            inputColor={theme._404040}
                             value={name}
                             maxLength={50}
-                            continerStyle={{ marginBottom: getScaleSize(20) }}
+                            mainContinerStyle={{ marginBottom: getScaleSize(16) }}
                             onChangeText={text => {
                                 const clean = sanitizeNameInput(text);
                                 setName(clean);
@@ -487,9 +488,29 @@ export default function EditProfile(props: any) {
                             isError={nameError}
                         />
                         <Input
+                            placeholder={STRING.enter_mobile_number}
+                            placeholderTextColor={theme._939393}
+                            inputTitle={STRING.mobile_number}
+                            inputColor={true}
+                            keyboardType="numeric"
+                            mainContinerStyle={{ marginBottom: getScaleSize(16) }}
+                            value={mobileNumber}
+                            maxLength={10}
+                            countryCode={`${countryFlag} ${countryCode}`}
+                            onPressCountryCode={() => {
+                                setVisibleCountry(true);
+                            }}
+                            onChangeText={text => {
+                                const cleaned = text.replace(/[^0-9]/g, '');
+                                setMobileNumber(cleaned);
+                                setMobileNumberError('');
+                            }}
+                            isError={mobileNumberError}
+                        />
+                        <Input
                             placeholder={STRING.enter_email}
                             placeholderTextColor={theme._939393}
-                            inputTitle={STRING.e_mail_id}
+                            inputTitle={STRING.email}
                             inputColor={true}
                             value={email}
                             editable={false}
@@ -506,26 +527,6 @@ export default function EditProfile(props: any) {
                                 marginBottom: getScaleSize(20)
                             }}
                             isError={emailError}
-                        />
-                        <Input
-                            placeholder={STRING.enter_mobile_number}
-                            placeholderTextColor={theme._939393}
-                            inputTitle={STRING.mobile_number}
-                            inputColor={true}
-                            keyboardType="numeric"
-                            continerStyle={{ marginBottom: getScaleSize(20) }}
-                            value={mobileNumber}
-                            maxLength={10}
-                            countryCode={`${countryFlag} ${countryCode}`}
-                            onPressCountryCode={() => {
-                                setVisibleCountry(true);
-                            }}
-                            onChangeText={text => {
-                                const cleaned = text.replace(/[^0-9]/g, '');
-                                setMobileNumber(cleaned);
-                                setMobileNumberError('');
-                            }}
-                            isError={mobileNumberError}
                         />
                         <Input
                             placeholder={STRING.enter_address}
@@ -547,7 +548,7 @@ export default function EditProfile(props: any) {
                                 height: addressHeight,
                                 minHeight: inputHeight,
                             }}
-                            continerStyle={{ marginBottom: getScaleSize(20) }}
+                            mainContinerStyle={{ marginBottom: getScaleSize(20) }}
                             onChangeText={text => {
                                 const clean = sanitizeAddressInput(text);
                                 setAddress(clean);
@@ -570,19 +571,19 @@ export default function EditProfile(props: any) {
                     <Text
                         size={getScaleSize(18)}
                         font={FONTS.Lato.Medium}
-                        color={theme._2C6587}
+                        color={theme._404040}
                         style={{ marginBottom: getScaleSize(16) }}>
                         {STRING.public_profile_details}
                     </Text>
-                    <View style={styles(theme).mainContainer}>
+                    <View style={styles(theme).publicProfileDetailsContainer}>
                         <Input
                             inputTitle={STRING.Bio}
-                            inputColor={true}
+                            inputColor={theme._404040}
                             value={bio}
                             inputContainer={styles(theme).inputContainerHeight}
                             multiline={true}
                             numberOfLines={8}
-                            continerStyle={{ marginBottom: getScaleSize(20) }}
+                            mainContinerStyle={{ marginBottom: getScaleSize(20) }}
                             onChangeText={text => {
                                 const clean = sanitizeOptionalText(text);
                                 setBio(clean);
@@ -593,12 +594,12 @@ export default function EditProfile(props: any) {
                         />
                         <Input
                             inputTitle={STRING.ExperienceSpecialities}
-                            inputColor={true}
+                            inputColor={theme._404040}
                             value={experienceSpecialities}
                             inputContainer={styles(theme).inputContainerHeight}
                             multiline={true}
                             numberOfLines={8}
-                            continerStyle={{ marginBottom: getScaleSize(20) }}
+                            mainContinerStyle={{ marginBottom: getScaleSize(20) }}
                             onChangeText={text => {
                                 const clean = sanitizeOptionalText(text);
                                 setExperienceSpecialities(clean);
@@ -609,12 +610,12 @@ export default function EditProfile(props: any) {
                         />
                         <Input
                             inputTitle={STRING.Achievements}
-                            inputColor={true}
+                            inputColor={theme._404040}
                             value={achievements}
                             inputContainer={styles(theme).inputContainerHeight}
                             multiline={true}
                             numberOfLines={8}
-                            continerStyle={{ marginBottom: getScaleSize(20) }}
+                            mainContinerStyle={{ marginBottom: getScaleSize(20) }}
                             onChangeText={text => {
                                 const clean = sanitizeOptionalText(text);
                                 setAchievements(clean);
@@ -626,7 +627,7 @@ export default function EditProfile(props: any) {
                         <Text
                             size={getScaleSize(17)}
                             font={FONTS.Lato.Medium}
-                            color={theme._858686}>
+                            color={theme._404040}>
                             {STRING.upload_images_of_past_works}
                         </Text>
                         <View style={styles(theme).imageUploadContent}>
@@ -725,7 +726,7 @@ export default function EditProfile(props: any) {
                         setVisibleCountry(false);
                     }}
                 />
-            </View>
+            </AppSafeAreaView>
         </KeyboardAvoidingView>
     );
 }
@@ -757,6 +758,13 @@ const styles = (theme: ThemeContextType['theme']) =>
         },
         mainContainer: {
             marginBottom: getScaleSize(24),
+            // borderWidth: 1,
+            // borderColor: theme._E6E6E6,
+            borderRadius: getScaleSize(12),
+            // padding: getScaleSize(24),
+        },
+        publicProfileDetailsContainer: {
+            marginBottom: getScaleSize(24),
             borderWidth: 1,
             borderColor: theme._E6E6E6,
             borderRadius: getScaleSize(12),
@@ -783,11 +791,12 @@ const styles = (theme: ThemeContextType['theme']) =>
         },
         updateButton: {
             marginHorizontal: getScaleSize(24),
-            marginVertical: getScaleSize(24),
+            marginVertical: getScaleSize(10),
         },
         inputContainerHeight: {
             height: getScaleSize(190),
-            textAlignVertical: 'top'
+            textAlignVertical: 'top',
+            color: theme._111111
         },
         inputContainerHeight90: {
             height: getScaleSize(90),

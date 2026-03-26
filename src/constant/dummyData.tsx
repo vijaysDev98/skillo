@@ -1,5 +1,84 @@
 import { IMAGES } from "../assets";
 
+export const dummyChartData = {
+  "month": "2026-03",
+  "start_date": "2026-03-01",
+  "end_date": "2026-03-31",
+  "weeks": [
+    {
+      "week_index": 1,
+      "label": "Week 1",
+      "range": "1–7",
+      "total": 420,
+      "days": [
+        { "day": 1, "date": "2026-03-01", "amount": 20 },
+        { "day": 2, "date": "2026-03-02", "amount": 35 },
+        { "day": 3, "date": "2026-03-03", "amount": 50 },
+        { "day": 4, "date": "2026-03-04", "amount": 60 },
+        { "day": 5, "date": "2026-03-05", "amount": 80 },
+        { "day": 6, "date": "2026-03-06", "amount": 90 },
+        { "day": 7, "date": "2026-03-07", "amount": 85 }
+      ]
+    },
+    {
+      "week_index": 2,
+      "label": "Week 2",
+      "range": "8–14",
+      "total": 760,
+      "days": [
+        { "day": 8, "date": "2026-03-08", "amount": 70 },
+        { "day": 9, "date": "2026-03-09", "amount": 85 },
+        { "day": 10, "date": "2026-03-10", "amount": 95 },
+        { "day": 11, "date": "2026-03-11", "amount": 110 },
+        { "day": 12, "date": "2026-03-12", "amount": 120 },
+        { "day": 13, "date": "2026-03-13", "amount": 140 },
+        { "day": 14, "date": "2026-03-14", "amount": 140 }
+      ]
+    },
+    {
+      "week_index": 3,
+      "label": "Week 3",
+      "range": "15–21",
+      "total": 980,
+      "days": [
+        { "day": 15, "date": "2026-03-15", "amount": 120 },
+        { "day": 16, "date": "2026-03-16", "amount": 135 },
+        { "day": 17, "date": "2026-03-17", "amount": 150 },
+        { "day": 18, "date": "2026-03-18", "amount": 160 },
+        { "day": 19, "date": "2026-03-19", "amount": 170 },
+        { "day": 20, "date": "2026-03-20", "amount": 130 },
+        { "day": 21, "date": "2026-03-21", "amount": 115 }
+      ]
+    },
+    {
+      "week_index": 4,
+      "label": "Week 4",
+      "range": "22–28",
+      "total": 720,
+      "days": [
+        { "day": 22, "date": "2026-03-22", "amount": 110 },
+        { "day": 23, "date": "2026-03-23", "amount": 105 },
+        { "day": 24, "date": "2026-03-24", "amount": 95 },
+        { "day": 25, "date": "2026-03-25", "amount": 90 },
+        { "day": 26, "date": "2026-03-26", "amount": 85 },
+        { "day": 27, "date": "2026-03-27", "amount": 120 },
+        { "day": 28, "date": "2026-03-28", "amount": 115 }
+      ]
+    },
+    {
+      "week_index": 5,
+      "label": "Week 5",
+      "range": "29–31",
+      "total": 260,
+      "days": [
+        { "day": 29, "date": "2026-03-29", "amount": 70 },
+        { "day": 30, "date": "2026-03-30", "amount": 90 },
+        { "day": 31, "date": "2026-03-31", "amount": 100 }
+      ]
+    }
+  ]
+};
+
 export const categoryList = [
   {
     id: "1",
@@ -1147,11 +1226,11 @@ export const taskDetailsDummyData = {
 
   job_photos: [{
     id: 1, type: "photo",
-    url:IMAGES.furnitureAssemblyImg
+    url: IMAGES.furnitureAssemblyImg
   },
   {
     id: 1, type: "photo",
-    url:IMAGES.furnitureAssemblyImg
+    url: IMAGES.furnitureAssemblyImg
   }
   ],
 };

@@ -60,7 +60,7 @@ export default function RatingsReviewsItem(props: any) {
                         color={theme._6D6D6D}
                     >
                         {/* {formatDaysAgo(item?.days_ago)} */}
-                       { moment(item.days_ago).fromNow()}
+                        {moment(item.days_ago).fromNow()}
                     </Text>
 
                 </View>
