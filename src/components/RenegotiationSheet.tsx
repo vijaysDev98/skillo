@@ -20,6 +20,7 @@ import RBSheet from 'react-native-raw-bottom-sheet';
 import Button from './Button';
 import Input from './Input';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import KeyBoardAware from './KeyBoardAware';
 
 
 interface RenegotiationProps {
@@ -65,60 +66,60 @@ export default function RenegotiationSheet(props: RenegotiationProps) {
             closeOnPressMask={true}>
             <View style={[styles(theme).content, {
             }]}>
-                <Image style={styles(theme).icon} source={type == 'accept' ? IMAGES.ic_like : IMAGES.renegotiationIcon} />
+                <Image style={styles(theme).icon} source={ IMAGES.renegotiationIcon} />
                 {type == 'accept' ? (
                     <Text
-                        size={getScaleSize(20)}
-                        font={FONTS.Lato.Regular}
-                        color={theme._939393}
+                        size={getScaleSize(16)}
+                        font={FONTS.Lato.Bold}
+                        color={theme.secondaryText}
                         align="center"
-                        style={{ marginTop: getScaleSize(24), marginHorizontal: getScaleSize(40) }}>
+                        style={{ marginTop: getScaleSize(16) }}>
                         {STRING.the_client_has_approved_your_request_Would_you_like_to_proceed_with_the_next_steps}
                     </Text>
                 ) : (
                     <>
                         <Text
-                            size={getScaleSize(22)}
+                            size={getScaleSize(16)}
                             font={FONTS.Lato.SemiBold}
-                            color={theme.primary}
-                            style={{ alignSelf: 'center', marginTop: getScaleSize(24) }}>
+                            color={theme.primaryText}
+                            style={{ alignSelf: 'center',marginTop:getScaleSize(16),marginBottom:getScaleSize(8) }}>
                             {STRING.renegotiate}
                         </Text>
                         <Text
-                            size={getScaleSize(12)}
-                            font={FONTS.Lato.Regular}
-                            color={theme._555555}
+                            size={getScaleSize(16)}
+                            font={FONTS.Lato.Bold}
+                            color={theme.secondaryText}
                             align="center"
                             style={{
                                 alignSelf: 'center',
-                                marginTop: getScaleSize(16),
-                                marginHorizontal: getScaleSize(50),
-                            }}>
+                            }}
+                            >
                             {STRING.renegotiate_message}
                         </Text>
                     </>
                 )}
-                <View style={styles(theme).informationContainer}>
-                    <Text
+                <Text
                         size={getScaleSize(18)}
                         font={FONTS.Lato.SemiBold}
                         color={theme._323232}
-                        style={{ marginBottom: getScaleSize(8) }}>
+                        style={{ marginBottom: getScaleSize(12),marginTop:getScaleSize(32) }}>
                         {STRING.current_payment_breakdown}
                     </Text>
+                <View style={styles(theme).informationContainer}>
+                    
                     <View style={styles(theme).horizontalView}>
                         <Text
                             style={{ flex: 1.0 }}
                             size={getScaleSize(14)}
                             font={FONTS.Lato.SemiBold}
-                            color={'#595959'}>
+                            color={theme._8C8C8C}>
                             {STRING.FinalizedQuoteAmount}
                         </Text>
                         <Text
                             size={getScaleSize(14)}
                             font={FONTS.Lato.SemiBold}
-                            color={'#595959'}>
-                            {`€${item?.finalized_quote_amount ?? '0'}`}
+                            color={theme.secondaryText}>
+                            {`P${item?.finalized_quote_amount ?? '0'}`}
                         </Text>
                     </View>
                     <View style={styles(theme).horizontalView}>
@@ -126,61 +127,46 @@ export default function RenegotiationSheet(props: RenegotiationProps) {
                             style={{ flex: 1.0 }}
                             size={getScaleSize(14)}
                             font={FONTS.Lato.SemiBold}
-                            color={'#595959'}>
+                            color={theme._8C8C8C}>
                             {STRING.Platform_Fee_15}
                         </Text>
                         <Text
                             size={getScaleSize(14)}
                             font={FONTS.Lato.SemiBold}
-                            color={'#595959'}>
-                            {`€${item?.platform_fee ?? '0'}`}
-                        </Text>
-                    </View>
-                    <View style={styles(theme).horizontalView}>
-                        <Text
-                            style={{ flex: 1.0 }}
-                            size={getScaleSize(14)}
-                            font={FONTS.Lato.SemiBold}
-                            color={'#595959'}>
-                            {STRING.Taxes}
-                        </Text>
-                        <Text
-                            size={getScaleSize(14)}
-                            font={FONTS.Lato.SemiBold}
-                            color={'#595959'}>
-                            {`€${item?.taxes ?? '0'}`}
+                            color={theme.secondaryText}>
+                            {`P${item?.platform_fee ?? '0'}`}
                         </Text>
                     </View>
                     <View style={styles(theme).dotView} />
-                    <View style={styles(theme).horizontalView}>
+                    <View style={[styles(theme).horizontalView,{marginTop:0}]}>
                         <Text
                             style={{ flex: 1.0 }}
                             size={getScaleSize(20)}
                             font={FONTS.Lato.SemiBold}
-                            color={'#0F232F'}>
+                            color={theme.primaryText}>
                             {STRING.Total}
-                            <Text
+                            {/* <Text
                                 size={getScaleSize(11)}
                                 font={FONTS.Lato.Regular}
                                 color={theme._424242}>
                                 {'  (final amount you will get)'}
-                            </Text>
+                            </Text> */}
                         </Text>
                         <Text
                             size={getScaleSize(20)}
                             font={FONTS.Lato.SemiBold}
                             color={theme.primary}>
-                            {`€${item?.total ?? '0'}`}
+                            {`P${item?.total ?? '0'}`}
                         </Text>
                     </View>
                 </View>
                 {type !== 'accept' && (
-                    <View style={{ flex: 1.0, marginTop: getScaleSize(20), marginHorizontal: getScaleSize(24) }}>
+                    <View style={{ flex: 1.0, marginTop: getScaleSize(20), }}>
                         <Text
-                            size={getScaleSize(14)}
+                            size={getScaleSize(16)}
                             font={FONTS.Lato.SemiBold}
-                            color={theme._323232}
-                            style={{ marginBottom: getScaleSize(8) }}>
+                            color={theme.primaryText}
+                            style={{ marginBottom: getScaleSize(12) }}>
                             {STRING.enter_requested_adjustment}
                         </Text>
                         <View style={{
@@ -192,12 +178,13 @@ export default function RenegotiationSheet(props: RenegotiationProps) {
                         }}>
                             <TextInput
                                 style={styles(theme).input}
-                                placeholder={STRING.Enter_Requested_Adjustment}
-                                placeholderTextColor={theme._818285}
-                                value={newQuoteAmount ? `€${newQuoteAmount}` : ''}
+                                placeholder={"Enter amount"}
+                                placeholderTextColor={theme._8C8C8C}
+                                value={newQuoteAmount ? `P${newQuoteAmount}` : ''}
                                 keyboardType="numeric"
                                 onChangeText={onChangeNewQuoteAmount}
                             />
+                           
                         </View>
                         {newQuoteAmountError &&
                             <Text
@@ -218,19 +205,31 @@ export default function RenegotiationSheet(props: RenegotiationProps) {
                             onPress={onClose}>
                             <Text
                                 size={getScaleSize(19)}
-                                font={FONTS.Lato.Bold}
-                                color={theme._214C65}
+                                font={FONTS.Lato.SemiBold}
+                                color={theme.mainText}
                                 style={{ alignSelf: 'center' }}>
                                 {STRING.cancel}
                             </Text>
                         </TouchableOpacity>
                     }
-                    {type != 'accept' && <View style={{ width: getScaleSize(16) }} />}
-                    <Button
+                    {/* {type != 'accept' && <View style={{ width: getScaleSize(16) }} />} */}
+                      {/* <Button
                         style={{ flex: 1.0 }}
                         title={STRING.proceed}
                         onPress={onProcessPress}
-                    />
+                    /> */}
+                   <TouchableOpacity
+                            style={[styles(theme).backButtonContainer,{backgroundColor:theme.primary,borderColor:theme.primary}]}
+                            activeOpacity={1}
+                            onPress={onProcessPress}>
+                            <Text
+                                size={getScaleSize(19)}
+                                font={FONTS.Lato.SemiBold}
+                                color={theme.white}
+                                style={{ alignSelf: 'center' }}>
+                                {STRING.proceed}
+                            </Text>
+                        </TouchableOpacity>
                 </View>
             </View>
         </RBSheet>
@@ -240,7 +239,7 @@ export default function RenegotiationSheet(props: RenegotiationProps) {
 const styles = (theme: ThemeContextType['theme']) =>
     StyleSheet.create({
         content: {
-            paddingVertical: getScaleSize(24),
+            padding: getScaleSize(24),
             flex: 1.0,
         },
         icon: {
@@ -265,16 +264,16 @@ const styles = (theme: ThemeContextType['theme']) =>
         },
         buttonContainer: {
             flexDirection: 'row',
-            marginHorizontal: getScaleSize(22),
             marginTop: getScaleSize(24),
+            gap:getScaleSize(10)
         },
         backButtonContainer: {
             flex: 1.0,
             justifyContent: 'center',
             borderWidth: 1,
-            borderColor: theme._214C65,
+            borderColor: theme.primary,
             borderRadius: getScaleSize(12),
-            paddingVertical: getScaleSize(18)
+            paddingVertical: getScaleSize(12)
         },
         nextButtonContainer: {
             flex: 1.0,
@@ -287,13 +286,11 @@ const styles = (theme: ThemeContextType['theme']) =>
             marginRight: getScaleSize(8),
         },
         informationContainer: {
-            marginTop: getScaleSize(20),
             borderWidth: 1,
-            borderColor: '#D5D5D5',
+            borderColor: theme._D9D9D9,
             borderRadius: getScaleSize(16),
             paddingHorizontal: getScaleSize(16),
-            paddingVertical: getScaleSize(28),
-            marginHorizontal: getScaleSize(24),
+            paddingVertical: getScaleSize(13),
         },
         horizontalView: {
             flexDirection: 'row',
@@ -302,10 +299,9 @@ const styles = (theme: ThemeContextType['theme']) =>
         dotView: {
             // flex:1.0,
             borderStyle: 'dashed',
-            borderColor: theme.primary,
+            borderColor: theme._D9D9D9,
             borderWidth: 1,
-            marginTop: getScaleSize(16),
-            marginBottom: getScaleSize(8),
+            marginVertical:getScaleSize(16)
         },
         input: {
             fontSize: getScaleSize(16),

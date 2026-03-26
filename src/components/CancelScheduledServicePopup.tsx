@@ -25,7 +25,15 @@ interface CancelScheduledServicePopupProps {
     onCancel: (item: any) => void;
     onRef: any;
     height?: number;
-    cancelType?:string | undefined
+    cancelType?:string | undefined;
+    isProviderCancel?:boolean | undefined;
+    handleConfirmCancel: () => void;
+    handleKeepWorking: () => void;
+    isSecondBtn?:boolean;
+    buttonTitle?:string;
+       title?:string
+        discription?:string
+        subDiscription?:string
 }
 
 const rejectReasons = [
@@ -91,7 +99,14 @@ export default function CancelScheduledServicePopup(props: CancelScheduledServic
     const STRING = useString();
     const { onRef, 
         // cancelServiceDetails,
-         onClose, onCancel, height } = props;
+        title,
+        discription,
+        subDiscription,
+        isSecondBtn,
+        buttonTitle,
+        handleKeepWorking,
+        handleConfirmCancel,
+         onClose, onCancel, height,isProviderCancel } = props;
     console.log('cancelServiceDetails sdasd==>', cancelServiceDetails?.cancellation_allowed)
 
     const [selectedId, setSelectedId] = useState(1);
@@ -130,13 +145,10 @@ export default function CancelScheduledServicePopup(props: CancelScheduledServic
         }
     }
 
-
-
-
     return (
         <RBSheet
             ref={onRef}
-            height={sheetHeight}
+            height={height? height : sheetHeight}
             customModalProps={{
                 animationType: 'fade',
                 statusBarTranslucent: true,
@@ -156,7 +168,79 @@ export default function CancelScheduledServicePopup(props: CancelScheduledServic
             draggable={false}
             closeOnPressMask={true}>
             <View style={[styles(theme).content, { flexGrow: 1 }]}>
-                {(cancelServiceDetails?.cancellation_allowed && props.cancelType !== "Reject Reason") && (
+              {
+                isProviderCancel ? (
+                   <View>
+                    <Image
+                    source={IMAGES.reject_icon}
+                    style={{height:getScaleSize(56),width:getScaleSize(56),marginBottom:getScaleSize(10),alignSelf:'center'}}
+                    />
+                    <Text
+                    align='center'
+                    size={getScaleSize(16)}
+                    font={FONTS.Lato.Bold}
+                    color={theme.primaryText}
+                    >{title}</Text>
+                    <Text 
+                    size={getScaleSize(14)}
+                    font={FONTS.Lato.Medium}
+                    color={theme._8C8C8C}
+                    align='center'
+                    style={{marginVertical:getScaleSize(16)}}
+                    >
+                        {discription}
+                        </Text>
+                         {subDiscription && ( <Text 
+                    size={getScaleSize(14)}
+                    font={FONTS.Lato.Medium}
+                    color={theme._8C8C8C}
+                     align='center'
+                    >
+                        {"Since you are cancelling more than 48 hours ahead of time, your provider rating will not be affected."}
+                        </Text>)}
+                        <View style={{
+                            marginTop:getScaleSize(32),
+                            flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:getScaleSize(16)}}>
+                            <TouchableOpacity
+                            onPress={handleKeepWorking}
+                            style={{
+                                backgroundColor:theme.primary,
+                                alignItems:'center',
+                                paddingVertical:getScaleSize(16),
+                                flex:1,
+                                 borderRadius:getScaleSize(10),
+                                // paddingHorizontal:getScaleSize(16)
+                            }}
+                            >
+                                <Text
+                                size={getScaleSize(16)}
+                                font={FONTS.Lato.SemiBold}
+                                color={theme.white}
+                                >{buttonTitle}</Text>
+                            </TouchableOpacity>
+                          {isSecondBtn &&  <TouchableOpacity
+                            onPress={handleConfirmCancel}
+                            style={{
+                                backgroundColor:theme.white,
+                                alignItems:'center',
+                                paddingVertical:getScaleSize(16),
+                                borderWidth:1,
+                                borderColor:theme.primary,
+                                borderRadius:getScaleSize(10),
+                                paddingHorizontal:getScaleSize(24)
+                            }}
+                            >
+                                <Text
+                                size={getScaleSize(16)}
+                                font={FONTS.Lato.SemiBold}
+                                color={theme.primary}
+                                >{"Confirm Cancellation"}</Text>
+                            </TouchableOpacity>}
+                        </View>
+                    </View>
+                ):(
+                    <>
+             {(cancelServiceDetails?.cancellation_allowed && props.cancelType !== "Reject Reason") && (
                     <>
                     <Image
                     source={IMAGES.reject_icon}
@@ -262,7 +346,7 @@ export default function CancelScheduledServicePopup(props: CancelScheduledServic
                         {cancelServiceDetails?.message ?? ''}
                     </Text>
                 )}
-                <View style={{ flex: 1.0 }} />
+                 <View style={{ flex: 1.0 }} />
                 {(cancelServiceDetails?.cancellation_allowed == true && props.cancelType !== "Reject Reason") && (
                     <View style={styles(theme).buttonContainer}>
                         <TouchableOpacity
@@ -297,7 +381,7 @@ export default function CancelScheduledServicePopup(props: CancelScheduledServic
                         </TouchableOpacity>
                     </View>
                 ) }
-                {props.cancelType == "Reject Reason"?   
+                {props.cancelType == "Reject Reason" &&  
                    ( <>
                     <Image style={styles(theme).icon} source={IMAGES.serviceCancelledIcon} />
                 <Text
@@ -371,16 +455,21 @@ export default function CancelScheduledServicePopup(props: CancelScheduledServic
                 </View>
                 </>
                 )
-                    : (
-                        <></>
-                    // <Button
-                    //     title={STRING.back}
-                    //     style={{ marginHorizontal: getScaleSize(24) }}
-                    //     onPress={() => {
-                    //         onClose()
-                    //     }}
-                    // />
-                )}
+                //     : (
+                //         <></>
+                //     // <Button
+                //     //     title={STRING.back}
+                //     //     style={{ marginHorizontal: getScaleSize(24) }}
+                //     //     onPress={() => {
+                //     //         onClose()
+                //     //     }}
+                //     // />
+                // )
+                }
+                </>
+                )
+              }  
+               
             </View>
         </RBSheet>
     )

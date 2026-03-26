@@ -89,8 +89,8 @@ export default function BottomSheet(props: BottomSheetProps) {
                             font={FONTS.Lato.Bold}
                             align="center"
                             color={theme.primaryText}
-                            // style={{ lineHeight: getScaleSize(30) }}
-                            >
+                        style={{ lineHeight: getScaleSize(30) }}
+                        >
                             {title}
                         </Text>
                     </View>
@@ -189,13 +189,15 @@ export default function BottomSheet(props: BottomSheetProps) {
                     </View>
                 )}
                 {type === 'out_of_service' && (
-                    <View style={[styles(theme).mainContainer, { marginHorizontal: getScaleSize(50) }]}>
-                        <Image source={image} style={[styles(theme).alartIcon, { marginBottom: getScaleSize(12) }]} />
+                    <View style={[styles(theme).mainContainer,
+                    { marginHorizontal: getScaleSize(45) }
+                    ]}>
+                        <Image source={image} style={[styles(theme).alartIcon, { marginBottom: getScaleSize(24) }]} />
                         <Text
-                            size={getScaleSize(22)}
-                            font={FONTS.Lato.SemiBold}
+                            size={getScaleSize(16)}
+                            font={FONTS.Lato.Bold}
                             align="center"
-                            color={theme._555555}>
+                            color={theme.primaryText}>
                             {title}
                         </Text>
                     </View>
@@ -204,8 +206,8 @@ export default function BottomSheet(props: BottomSheetProps) {
                     <View style={styles(theme).mainContainer}>
                         <Image source={icon} style={[styles(theme).alartIcon, { marginBottom: getScaleSize(12) }]} />
                         <Text
-                            size={getScaleSize(14)}
-                            font={FONTS.Lato.Medium}
+                            size={getScaleSize(16)}
+                            font={FONTS.Lato.Bold}
                             align="center"
                             color={theme.primaryText}>
                             {title}
@@ -256,10 +258,10 @@ export default function BottomSheet(props: BottomSheetProps) {
                             </Text>
                         </View>
                         <Text
-                            size={getScaleSize(22)}
-                            font={FONTS.Lato.SemiBold}
+                            size={getScaleSize(16)}
+                            font={FONTS.Lato.Bold}
                             align="center"
-                            color={theme._555555}>
+                            color={theme._404040}>
                             {description}
                         </Text>
                     </View>
@@ -302,10 +304,10 @@ export default function BottomSheet(props: BottomSheetProps) {
                     <View style={styles(theme).mainContainer}>
                         <Image source={image} style={[styles(theme).alartIcon, { marginBottom: getScaleSize(24) }]} />
                         <Text
-                            size={getScaleSize(18)}
-                            font={FONTS.Lato.SemiBold}
+                            size={getScaleSize(16)}
+                            font={FONTS.Lato.Bold}
                             align="center"
-                            color={theme._565656}>
+                            color={theme.primaryText}>
                             {title}
                         </Text>
                     </View>
@@ -339,18 +341,33 @@ export default function BottomSheet(props: BottomSheetProps) {
                             style={styles(theme).btnStyle}
                         >
                             <Text
-                                size={getScaleSize(19)}
+                                size={getScaleSize(20)}
                                 font={FONTS.Lato.Bold}
                                 align="center"
                                 color={theme.primary}>
                                 {secondButtonTitle}
                             </Text>
                         </TouchableOpacity>
-                        <Button
+
+                        <TouchableOpacity
+                            onPress={onPressButton}
+                            style={[styles(theme).btnStyle, { backgroundColor: theme.primary }]}
+                        >
+                            <Text
+                                size={getScaleSize(20)}
+                                font={FONTS.Lato.Bold}
+                                align="center"
+                                color={theme.white}>
+                                {buttonTitle}
+                            </Text>
+                        </TouchableOpacity>
+                        {/* <Button
+                            buttonTitleFont={FONTS.Lato.Bold}
+                            buttonTitleSize={getScaleSize(19)}
                             style={{ flex: 1.0 }}
                             title={buttonTitle}
                             onPress={onPressButton}
-                        />
+                        /> */}
                     </View>
                     :
                     <>
@@ -414,7 +431,7 @@ const styles = (theme: ThemeContextType['theme']) =>
             borderWidth: 1,
             borderColor: theme.primary,
             borderRadius: getScaleSize(12),
-            paddingVertical: getScaleSize(18),
+            paddingVertical: getScaleSize(14),
             alignItems: 'center',
             justifyContent: 'center',
             flex: 1.0,

@@ -73,6 +73,7 @@ export default function Task(props: any) {
         jobDate: '14 Dec',
         jobTime: '18:00 Pm',
         tab: "completed",
+        isDisputed:false,
         status: 'completed',
       },
       {
@@ -94,6 +95,17 @@ export default function Task(props: any) {
         jobTime: '18:00 Pm',
         tab: "quote_sent",
         status: 'quote_sent',
+      },
+      {
+        id: '6',
+        title: 'DIY Service',
+        subtitle: 'Furniture assembly',
+        budget: 'P300 to P500',
+        jobDate: '14 Dec',
+        jobTime: '18:00 Pm',
+        tab: "completed",
+        isDisputed:true,
+        status: 'completed',
       },
     ],
     [],
@@ -154,8 +166,10 @@ export default function Task(props: any) {
   }
 
   const handleViewDetails = (item: any) => {
+    console.log("item",item)
     props.navigation.navigate(SCREENS.ProfessionalTaskDetails.identifier, {
       item: item,
+      isDisputedShow: item?.tab == "completed" ? true : false,
     });
   }
 
@@ -170,7 +184,7 @@ export default function Task(props: any) {
   }
 
   const handleRaiseDispute = (item: any) => {
-
+props.navigation.navigate(SCREENS.ProviderRaiseDispute.identifier)
   }
 
   const renderTaskCard = ({ item }: any) => {
@@ -242,7 +256,7 @@ export default function Task(props: any) {
           jobTime={'10:00 AM'}
         />
         <View style={styles(theme).cardActions}>
-          {statusLabel(item?.status) == "Quote Sent" || statusLabel(item?.status) == "Cancelled" ?
+          {statusLabel(item?.status) == "Quote Sent" || statusLabel(item?.status) == "Cancelled" || (statusLabel(item?.status) == "Completed" && item?.isDisputed == true) ?
             <>
               <TouchableOpacity
                 onPress={() => {
@@ -265,7 +279,9 @@ export default function Task(props: any) {
                   }
                   else if (item.status === "completed") {
                     // TODO: Navigate to dispute screen
-                    handleRaiseDispute(item)
+                    if(!item.isDisputed){
+                      handleRaiseDispute(item)
+                    }
                   } else {
                     // TODO: Navigate to chat screen
                     handleChat(item)

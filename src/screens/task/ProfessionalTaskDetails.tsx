@@ -40,12 +40,15 @@ export default function ProfessionalTaskDetails(props: any) {
 
   const item = props?.route?.params?.item ?? {};
   const serviceId = props?.route?.params?.serviceId ?? '';
+  const {isDisputedShow} = props?.route?.params ?? ""
   const { profile } = useContext<any>(AuthContext);
   const [isStatus, setIsStatus] = useState(false);
   const [visibleTaskDetails, setVisibleTaskDetails] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [taskDetails, setTaskDetails] = useState<any>({});
   const [attachments, setAttachments] = useState<any>([]);
+
+  console.log("isDisputedShow",isDisputedShow)
 
   // useEffect(() => {
   //   if (item) {
@@ -161,6 +164,7 @@ export default function ProfessionalTaskDetails(props: any) {
       <ScrollView
         style={styles(theme).scrolledContainer}
         showsVerticalScrollIndicator={false}>
+          <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
         <Text
           size={getScaleSize(20)}
           color={theme.primaryText}
@@ -168,6 +172,21 @@ export default function ProfessionalTaskDetails(props: any) {
         >
           {"Office Cleaning"}
         </Text>
+       {isDisputedShow && <View
+        style={{flexDirection:'row',alignItems:'center',gap:getScaleSize(8)}}
+        >
+          <Image
+          source={IMAGES.infoIcon}
+          style={{height:getScaleSize(20),width:getScaleSize(20)}}
+          />
+          <Text
+          size={getScaleSize(12)}
+          font={FONTS.Lato.SemiBold}
+          color={theme.primary}
+          style={{textDecorationLine:'underline'}}
+          >{"Raised Dispute"}</Text>
+        </View>}
+        </View>
         <RecentSearchCard
           onPress={() => { }}
           containerStyle={styles(theme).recentCard}
@@ -179,7 +198,7 @@ export default function ProfessionalTaskDetails(props: any) {
           jobDate={"2025-10-15"}
           jobTime={"10:00 AM"}
         />
-        {item?.tab === 'accepted' && (
+        {(item?.tab === 'accepted' || isDisputedShow) && (
           <>
             <Text
               style={styles(theme).finalQuoteLabel}
@@ -203,7 +222,7 @@ export default function ProfessionalTaskDetails(props: any) {
           </>
         )}
 
-        {item?.tab === 'accepted' && (
+        {(item?.tab === 'accepted' || isDisputedShow) && (
           <View style={styles(theme).securityContainer}>
             <Text
               style={styles(theme).flexFill}
@@ -213,7 +232,9 @@ export default function ProfessionalTaskDetails(props: any) {
               {STRING.SecurityCode}
             </Text>
             <View style={styles(theme).codeViewDirection}>
-              {taskDetails?.task?.displayed_service_code
+              {
+              // taskDetails?.task?.displayed_service_code
+              "123456789"
                 ?.toString()
                 ?.split('')
                 ?.map((digit: string, index: number) => (
@@ -227,7 +248,7 @@ export default function ProfessionalTaskDetails(props: any) {
                       size={getScaleSize(18)}
                       font={FONTS.Lato.Medium}
                       color={theme._323232}>
-                      {digit}
+                      {index < 6 ? digit : "*"}
                     </Text>
                   </View>
                 ))}
@@ -281,7 +302,7 @@ export default function ProfessionalTaskDetails(props: any) {
             </TouchableOpacity>
           </View>
         </View>
-        {item?.tab === 'accepted' && (
+        {(item?.tab === 'accepted' || isDisputedShow) && (
           <>
             <Text
               style={styles(theme).addressLabel}
@@ -303,7 +324,7 @@ export default function ProfessionalTaskDetails(props: any) {
           </>
         )}
 
-        {item?.tab === 'accepted' && (
+        {(item?.tab === 'accepted'  || isDisputedShow)&& (
           <>
             <Text
               style={styles(theme).paymentTitle}

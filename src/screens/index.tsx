@@ -79,6 +79,8 @@ import HomeAddServices from './home/HomeAddServices';
 import ProvideRequest from './request/ProvideRequest';
 import RaiseDispute from './request/RaiseDispute';
 import SearchProvider from './home/SearchProvider';
+import ProviderServiceCancel from './task/ProviderServiceCencel';
+import ProviderRaiseDispute from './task/ProviderRaiseDispute';
 
 export const SCREENS = {
   Splash: {
@@ -365,6 +367,14 @@ export const SCREENS = {
   SearchProvider:{
     identifier: 'SearchProvider',
     component: SearchProvider,
+  },
+  ProviderServiceCancel:{
+    identifier: 'ProviderServiceCancel',
+    component: ProviderServiceCancel,
+  },
+  ProviderRaiseDispute:{
+    identifier: 'ProviderRaiseDispute',
+    component: ProviderRaiseDispute,
   }
 };
 

@@ -25,8 +25,6 @@ import { ThemeContext, ThemeContextType } from '../../../context';
       </View>
     )
   }
-
-
   return (
     <>
      {isTitle && (

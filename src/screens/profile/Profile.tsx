@@ -74,7 +74,7 @@ export default function Profile(props: any) {
   ]
 
   function getProfileItems() {
-    if (userType === 'service_provider') {
+    if (userType === userRoles.Service_Provider_business || userType === userRoles.Service_Provider_individual) {
       return profieItemsProfessional;
     }
     else if (userType == userRoles.Service_Seeker_business) {

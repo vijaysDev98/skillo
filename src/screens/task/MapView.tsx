@@ -15,6 +15,8 @@ import MapView, { Marker, PROVIDER_GOOGLE, Polyline } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
 import { IMAGES } from '../../assets';
 import { API } from '../../api';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SCREENS } from '..';
 
 export default function MapViewScreen(props: any) {
 
@@ -241,6 +243,8 @@ export default function MapViewScreen(props: any) {
         }
     }
 
+    const insets = useSafeAreaInsets();
+
     return (
         <View style={styles(theme).container}>
             <View style={styles(theme).statusBarContainer}>
@@ -251,7 +255,9 @@ export default function MapViewScreen(props: any) {
             </View>
             <SafeAreaView />
             <View style={styles(theme).mapViewContainer}>
-                <TouchableOpacity style={styles(theme).backContainer} onPress={() => props.navigation.goBack()}>
+                <TouchableOpacity style={[styles(theme).backContainer,{
+                    top:insets.top + 10
+                }]} onPress={() => props.navigation.goBack()}>
                     <Image
                         source={IMAGES.ic_back}
                         style={styles(theme).backIcon}
@@ -309,7 +315,7 @@ export default function MapViewScreen(props: any) {
                 </MapView>
 
             </View>
-            {isReachedClient && (
+            {/* {isReachedClient && ( */}
                 <Button
                     style={{ position: 'absolute', bottom: getScaleSize(16), left: getScaleSize(24), right: getScaleSize(100) }}
                     title={taskStatusLastItem?.stage == "accepted" ? STRING.show_security_code : STRING.reached_client_location}
@@ -321,17 +327,18 @@ export default function MapViewScreen(props: any) {
                         }
                     }}
                 />
-            )
-            }
+            {/* )
+            } */}
             <BottomSheet
                 type='out_of_service'
                 bottomSheetRef={bottomSheetRef}
-                height={getScaleSize(330)}
+                height={getScaleSize(300)}
                 image={IMAGES.location_map}
                 title={STRING.we_have_detected_that_you_are_at_your_clients_address_do_you_confirm_the_start_of_the_service}
                 buttonTitle={STRING.proceed}
                 onPressButton={() => {
-                    onProceedFurther()
+                    // onProceedFurther()
+mapViewRef?.current?.open()
                 }}
             />
             <BottomSheet
@@ -367,9 +374,9 @@ export default function MapViewScreen(props: any) {
                 icon={IMAGES.pinIcon}
                 isNotCloseable={true}
                 bottomSheetRef={mapViewRef}
-                height={getScaleSize(560)}
+                height={getScaleSize(500)}
                 description={STRING.security_code_text}
-                title={STRING.we_have_detected_that_you_are_at_your_clients_address_do_you_confirm_the_start_of_the_service}
+                title={"Please request the client to provide their security code to confirm the start of the service. "}
                 buttonTitle={STRING.Yes}
                 secondButtonTitle={STRING.No}
                 security_Code={taskStatusData?.displayed_service_code?.replace(/\*/g, '') ?? '0'}
@@ -377,12 +384,15 @@ export default function MapViewScreen(props: any) {
                     mapViewRef.current?.close();
                 }}
                 onPressButton={() => {
-                    if (taskStatusLastItem?.stage == "accepted") {
-                        onVerifySecurityCode()
-                    }
-                    else {
-                        mapViewRef.current?.close();
-                    }
+                    // if (taskStatusLastItem?.stage == "accepted") {
+                    //     onVerifySecurityCode()
+                    // }
+                    // else {
+                    //     mapViewRef.current?.close();
+                    // }
+                    props.navigation.navigate(SCREENS.TaskStatus.identifier,{
+                        serviceCompleted:true
+                    })
                 }}
             />
         </View >

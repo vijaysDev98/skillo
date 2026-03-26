@@ -45,7 +45,7 @@ export default function EnterSecurityCodeSheet(props: EnterSecurityCodeProps) {
     const { theme } = useContext<any>(ThemeContext);
 
     const STRING = useString();
-    const { onRef, onProcessPress, onClose, otpInput, onChangeOtp, otpError, security_Code, otp } = props;
+    const { onRef, onProcessPress, onClose, otpInput, onChangeOtp, otpError, security_Code, otp,height } = props;
 
     const formattedSecurityCode = security_Code ? security_Code.slice(0, 3) + '-' + security_Code.slice(3) : '';
 
@@ -62,7 +62,7 @@ export default function EnterSecurityCodeSheet(props: EnterSecurityCodeProps) {
                     backgroundColor: theme._77777733,
                 },
                 container: {
-                    height: getScaleSize(530),
+                    height:height?height: getScaleSize(530),
                     borderTopLeftRadius: getScaleSize(24),
                     borderTopRightRadius: getScaleSize(24),
                     backgroundColor: theme.white,
@@ -73,21 +73,20 @@ export default function EnterSecurityCodeSheet(props: EnterSecurityCodeProps) {
             <View style={styles(theme).content}>
                 <Image style={styles(theme).icon} source={IMAGES.pinIcon} />
                 <Text
-                    size={getScaleSize(22)}
-                    font={FONTS.Lato.SemiBold}
-                    color={theme.primary}
+                    size={getScaleSize(16)}
+                    font={FONTS.Lato.Bold}
+                    color={theme.primaryText}
                     style={{ alignSelf: 'center', marginTop: getScaleSize(24) }}>
                     {STRING.enter_security_code}
                 </Text>
                 <Text
-                    size={getScaleSize(14)}
+                    size={getScaleSize(16)}
                     font={FONTS.Lato.Medium}
-                    color={theme._737373}
+                    color={theme._404040}
                     align="center"
                     style={{
                         alignSelf: 'center',
                         marginTop: getScaleSize(16),
-                        marginHorizontal: getScaleSize(50),
                     }}>
                     {STRING.enter_security_code_message}
                 </Text>
@@ -127,7 +126,8 @@ export default function EnterSecurityCodeSheet(props: EnterSecurityCodeProps) {
                 </View>
                 <Button
                     disabled={!otp}
-                    style={{margin: getScaleSize(24), }}
+                    style={{margin: getScaleSize(24), backgroundColor:otp ? theme.primary :theme._F0F0F0 }}
+                    titleColor={otp ?  theme.white :theme._8C8C8C}
                     title={STRING.validate}
                     onPress={onProcessPress}
                 />

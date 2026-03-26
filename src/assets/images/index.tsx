@@ -166,5 +166,6 @@ export const IMAGES = {
   verificationImg: require('./verificationImg.png'),
   homeIcon: require('./homeIcon.png'),
   addQuoteSuccessImg: require('./addQuotoSuccessImg.png'),
-  filterIcon: require('./filterIcon.png')
+  filterIcon: require('./filterIcon.png'),
+  infoIcon: require('./infoIcon.png')
 };

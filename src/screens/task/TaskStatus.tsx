@@ -22,6 +22,7 @@ import { getScaleSize, SHOW_TOAST, useString, requestLocationPermission, DummyDa
 import {
   BottomSheet,
   Button,
+  CancelScheduledServicePopup,
   EnterSecurityCodeSheet,
   Header,
   ProgressView,
@@ -39,6 +40,8 @@ import BottomBar from '../Bottombar';
 import Geolocation from 'react-native-geolocation-service';
 import { } from '../../constant';
 import { SCREENS } from '..';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TaskStatus(props: any) {
 
@@ -46,6 +49,10 @@ export default function TaskStatus(props: any) {
   const { theme } = useContext<any>(ThemeContext);
 
   const item = props?.route?.params?.item ?? {};
+
+  const {serviceCompleted } = props?.route?.params ?? {}
+
+  const insets = useSafeAreaInsets();
 
   const [isLoading, setLoading] = useState(false);
   const [taskStatus, setTaskStatus] = useState<any>([]);
@@ -58,9 +65,10 @@ export default function TaskStatus(props: any) {
   const [otp, setOtp] = useState('');
   const [otpError, setOtpError] = useState('');
   const [serviceFlags, setServiceFlags] = useState({
-    isOutForService: false,
+    isOutForService: serviceCompleted ? false :true,
     isExpertConfirmed: false,
-    isServiceCompleted: false,
+    isServiceCompleted: serviceCompleted ? serviceCompleted : false,
+    isMarkCompleted:false,
     isServiceFinalized: false,
     isPaymentReceived: false,
   });
@@ -76,6 +84,8 @@ export default function TaskStatus(props: any) {
   const enterSecurityCodeSheetRef = useRef<any>(null);
   const otpInput = useRef<any>(null);
   const successBottomSheetRef = useRef<any>(null);
+  const cancelScheduledServicePopupRef = useRef<any>(null);
+  const cancelScheduledNoPossibleServicePopupRef = useRef<any>(null);
 
   useEffect(() => {
     if (isFocused) {
@@ -467,9 +477,15 @@ export default function TaskStatus(props: any) {
         )}
       </ScrollView>
       {serviceFlags.isOutForService && (
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: getScaleSize(24), marginBottom: getScaleSize(24) }}>
-          {/* <TouchableOpacity
-            onPress={() => { }}
+        <View style={{ 
+          flexDirection: 'row', 
+          alignItems: 'center', 
+          gap:getScaleSize(16),
+                   marginHorizontal: getScaleSize(24), marginBottom: getScaleSize(24) }}>
+          <TouchableOpacity
+            onPress={() => {
+              cancelScheduledServicePopupRef?.current?.open()
+            }}
             style={[styles(theme).outForServiceContainer, { borderColor: theme._EF5350 }]}>
             <Text
               size={getScaleSize(16)}
@@ -477,32 +493,139 @@ export default function TaskStatus(props: any) {
               color={theme._EF5350}>
               {STRING.Cancel}
             </Text>
-          </TouchableOpacity> */}
-          {/* <View style={{ width: getScaleSize(16) }} /> */}
-          <Button
-            style={{ flex: 1 }}
-            title={STRING.OutForService}
-            onPress={() => {
+          </TouchableOpacity>
+          
+           <TouchableOpacity
+            onPress={() => { 
+              setServiceFlags(prev => ({...prev,isOutForService:false}))
               bottomSheetRef.current?.open();
             }}
-          />
+            style={{
+              backgroundColor:theme.primary,
+              // flex:1, 
+              width:"48%",
+              paddingVertical:getScaleSize(14), 
+              borderRadius:10, 
+              alignItems:'center', 
+              justifyContent:'center'
+            }}>
+            <Text
+              size={getScaleSize(16)}
+              font={FONTS.Lato.Bold}
+              color={theme.white}>
+              {STRING.OutForService}
+            </Text>
+          </TouchableOpacity>
         </View>
-      )}
+        )}
       {serviceFlags.isExpertConfirmed && (
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: getScaleSize(24), marginBottom: getScaleSize(24) }}>
-          <Button
-            style={{ flex: 1 }}
-            title={STRING.map_view}
-            onPress={() => {
-              props.navigation.navigate(SCREENS.MapView.identifier, { item: item });
+        // <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: getScaleSize(24), marginBottom: getScaleSize(24) }}>
+        //   <Button
+        //     style={{ flex: 1 }}
+        //     buttonTitleSize={getScaleSize()}
+        //     title={STRING.map_view}
+        //     onPress={() => {
+        //       props.navigation.navigate(SCREENS.MapView.identifier, { item: item });
+        //     }}
+        //   />
+        // </View>
+           <TouchableOpacity
+            onPress={() => { 
+              // bottomSheetRef.current?.open();
+               props.navigation.navigate(SCREENS.MapView.identifier, { item: item });
             }}
-          />
+            style={{
+              backgroundColor:theme.primary,
+              paddingVertical:getScaleSize(14), 
+              borderRadius:10, 
+              alignItems:'center', 
+              justifyContent:'center',
+              marginHorizontal:getScaleSize(24),
+              marginBottom:insets.bottom + getScaleSize(10)
+            }}>
+            <Text
+              size={getScaleSize(16)}
+              font={FONTS.Lato.Bold}
+              color={theme.white}>
+              {STRING.map_view}
+            </Text>
+          </TouchableOpacity>
+      )}
+        {serviceFlags.isServiceCompleted && (
+        // <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: getScaleSize(24), marginBottom: getScaleSize(24) }}>
+        //   {taskStatusData?.is_renegotiated == 'no_record' &&
+        //     <TouchableOpacity
+        //       onPress={() => {
+        //         getRenegotiationDetails()
+        //       }}
+        //       style={[styles(theme).outForServiceContainer, { borderColor: theme._214C65 }]}>
+        //       <Text
+        //         size={getScaleSize(16)}
+        //         font={FONTS.Lato.Bold}
+        //         color={theme._214C65}>
+        //         {STRING.renegotiate}
+        //       </Text>
+        //     </TouchableOpacity>
+        //   }
+        //   {taskStatusData?.is_renegotiated == 'no_record' && <View style={{ width: getScaleSize(16) }} />}
+        //   <Button
+        //     style={{ flex: 1 }}
+        //     title={STRING.mark_as_completed}
+        //     onPress={() => {
+        //       onMarkAsCompleted()
+        //     }}
+        //   />
+        // </View>
+         <View style={{ 
+          flexDirection: 'row', 
+          alignItems: 'center', 
+          gap:getScaleSize(16),
+                   marginHorizontal: getScaleSize(24), marginBottom: getScaleSize(24) }}>
+          <TouchableOpacity
+            onPress={() => { 
+              // getRenegotiationDetails()
+              renegotiationSheetRef.current?.open();
+              setServiceFlags((prev)=>({...prev,isMarkCompleted:false, isServiceCompleted:false}))
+            }}
+            style={[styles(theme).outForServiceContainer, { borderColor: theme._EF5350 }]}>
+            <Text
+              size={getScaleSize(16)}
+              font={FONTS.Lato.Bold}
+              color={theme._EF5350}>
+             {STRING.renegotiate}
+            </Text>
+          </TouchableOpacity>
+          
+           <TouchableOpacity
+            onPress={() => { 
+              // onMarkAsCompleted()
+               enterSecurityCodeSheetRef?.current?.open()
+            }}
+            style={{
+              backgroundColor:theme.primary,
+              // flex:1, 
+              width:"48%",
+              paddingVertical:getScaleSize(14), 
+              borderRadius:10, 
+              alignItems:'center', 
+              justifyContent:'center'
+            }}>
+            <Text
+              size={getScaleSize(16)}
+              font={FONTS.Lato.Bold}
+              color={theme.white}>
+              {"Service Completed"}
+            </Text>
+          </TouchableOpacity>
         </View>
       )}
-      {serviceFlags.isServiceCompleted && (
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: getScaleSize(24), marginBottom: getScaleSize(24) }}>
-          {taskStatusData?.is_renegotiated == 'no_record' &&
-            <TouchableOpacity
+      {serviceFlags.isMarkCompleted && (
+        <View style={{
+           flexDirection: 'row',
+           gap:getScaleSize(16),
+            alignItems: 'center', marginHorizontal: getScaleSize(24), marginBottom: getScaleSize(24) }}>
+          {/* {taskStatusData?.is_renegotiated == 'no_record' && */}
+            {/* <TouchableOpacity
               onPress={() => {
                 getRenegotiationDetails()
               }}
@@ -511,18 +634,47 @@ export default function TaskStatus(props: any) {
                 size={getScaleSize(16)}
                 font={FONTS.Lato.Bold}
                 color={theme._214C65}>
-                {STRING.renegotiate}
+                 {STRING.renegotiate}
               </Text>
-            </TouchableOpacity>
-          }
-          {taskStatusData?.is_renegotiated == 'no_record' && <View style={{ width: getScaleSize(16) }} />}
-          <Button
+            </TouchableOpacity> */}
+            <TouchableOpacity
+            onPress={() => {
+cancelScheduledServicePopupRef?.current?.open()
+             }}
+            style={[styles(theme).outForServiceContainer, { borderColor: theme._EF5350 }]}>
+            <Text
+              size={getScaleSize(16)}
+              font={FONTS.Lato.Bold}
+              color={theme._EF5350}>
+              {STRING.Cancel}
+            </Text>
+          </TouchableOpacity>
+          {/* } */}
+          {/* {taskStatusData?.is_renegotiated == 'no_record' && <View style={{ width: getScaleSize(16) }} />} */}
+          {/* <Button
             style={{ flex: 1 }}
+            buttonTitleFont={getScaleSize(20)}
             title={STRING.mark_as_completed}
             onPress={() => {
-              onMarkAsCompleted()
+              // onMarkAsCompleted()
+              enterSecurityCodeSheetRef?.current?.open()
             }}
-          />
+          /> */}
+
+           <TouchableOpacity
+            onPress={() => {
+
+             }}
+            style={[styles(theme).outForServiceContainer, { borderColor: theme._EF5350 ,backgroundColor:theme.primary}]}>
+            <Text
+              size={getScaleSize(16)}
+              font={FONTS.Lato.SemiBold}
+              color={theme.white}
+              align='center'
+              >
+              {STRING.mark_as_completed}
+            </Text>
+          </TouchableOpacity>
         </View>
       )}
       {serviceFlags.isServiceFinalized && (
@@ -540,12 +692,11 @@ export default function TaskStatus(props: any) {
           )}
         </>
       )}
-
       <BottomSheet
         type='out_of_service'
         bottomSheetRef={bottomSheetRef}
         image={IMAGES.location_map}
-        height={getScaleSize(330)}
+        height={getScaleSize(300)}
         title={STRING.out_for_service_message}
         secondButtonTitle={STRING.No}
         buttonTitle={STRING.Yes}
@@ -553,18 +704,23 @@ export default function TaskStatus(props: any) {
           bottomSheetRef.current?.close();
         }}
         onPressButton={() => {
-          getCurrentLocation()
+          // getCurrentLocation()
+          bottomSheetRef.current?.close();
+          setTimeout(()=>{
+          mapViewRef.current?.open();
+          },100)
         }}
       />
       <BottomSheet
         type='out_of_service'
         bottomSheetRef={mapViewRef}
-        height={getScaleSize(330)}
+        height={getScaleSize(300)}
         image={IMAGES.location_map}
         title={STRING.location_permission}
         secondButtonTitle={STRING.task_status}
         buttonTitle={STRING.map_view}
         onPressSecondButton={() => {
+          setServiceFlags(prev => ({ ...prev, isOutForService: false ,isExpertConfirmed:true }));
           mapViewRef.current?.close();
         }}
         onPressButton={() => {
@@ -586,24 +742,30 @@ export default function TaskStatus(props: any) {
           renegotiationSheetRef.current?.close();
         }}
         onProcessPress={() => {
-          onProcessPress()
+          // onProcessPress()
+          renegotiationSheetRef.current?.close();
+          setTimeout(()=>{
+            renegotiatioAcceptSheetRef.current?.open();
+          },100)
         }}
       />
       <RenegotiationSheet
         onRef={renegotiatioAcceptSheetRef}
         type='accept'
-        height={getScaleSize(600)}
+        height={getScaleSize(500)}
         item={renegotiationDetails}
         onClose={() => {
           renegotiatioAcceptSheetRef.current?.close();
         }}
         onProcessPress={() => {
           renegotiatioAcceptSheetRef.current?.close();
+          setServiceFlags((prev)=>({...prev,isMarkCompleted:true, isServiceCompleted:false}))
         }}
         
       />
       <EnterSecurityCodeSheet
         onRef={enterSecurityCodeSheetRef}
+        height={getScaleSize(500)}
         otpInput={otpInput}
         onChangeOtp={(text: string) => {
           setOtp(text);
@@ -611,7 +773,8 @@ export default function TaskStatus(props: any) {
         }}
         otpError={otpError}
         otp={otp}
-        security_Code={taskStatusData?.displayed_service_code?.replace(/\*/g, '') ?? '0'}
+        // security_Code={taskStatusData?.displayed_service_code?.replace(/\*/g, '') ?? '0'}
+        security_Code={"123456"}
         onClose={() => {
           enterSecurityCodeSheetRef.current?.close();
         }}
@@ -620,7 +783,11 @@ export default function TaskStatus(props: any) {
             setOtpError('Please enter Valid Code');
             return;
           } else {
-            onVerifySecurityCode();
+            // onVerifySecurityCode();
+            enterSecurityCodeSheetRef.current?.close();
+            setTimeout(()=>{
+            successBottomSheetRef?.current?.open();
+            },100)
           }
         }}
       />
@@ -629,7 +796,7 @@ export default function TaskStatus(props: any) {
         isNotCloseable={true}
         bottomSheetRef={successBottomSheetRef}
         height={getScaleSize(260)}
-        image={IMAGES.ic_succes}
+        image={IMAGES.pinIcon}
         title={STRING.security_code_validated_successfully}
         buttonTitle={STRING.proceed}
         onPressButton={() => {
@@ -639,6 +806,45 @@ export default function TaskStatus(props: any) {
           }, 500);
         }}
       />
+        <CancelScheduledServicePopup
+        isSecondBtn={true}
+        height={getScaleSize(360)}
+        onRef={cancelScheduledServicePopupRef}
+        onClose={()=>cancelScheduledServicePopupRef?.current?.close()}
+        onCancel={()=>cancelScheduledServicePopupRef?.current?.close()}
+        isProviderCancel={true}
+        buttonTitle={"Keep Working"}
+        handleKeepWorking={()=>{
+          cancelScheduledServicePopupRef?.current?.close();
+          setTimeout(()=>{
+            cancelScheduledNoPossibleServicePopupRef?.current?.open()
+          },100)
+        }}
+        isSecondBtn={true}
+        handleConfirmCancel={()=>{
+          cancelScheduledServicePopupRef?.current?.close();
+          props.navigation.navigate(SCREENS.ProviderServiceCancel.identifier, {
+            serviceDetails: props.route.params.serviceDetails,
+          });
+        }}
+         title={"Cancel Scheduled Service"}
+        discription={"Are you sure you want to cancel your scheduled service with the Customer?"}
+        subDiscription={"Since you are cancelling more than 48 hours ahead of time, your provider rating will not be affected."}
+        />
+         <CancelScheduledServicePopup
+        height={getScaleSize(360)}
+        onRef={cancelScheduledNoPossibleServicePopupRef}
+        onClose={()=>cancelScheduledNoPossibleServicePopupRef?.current?.close()}
+        onCancel={()=>cancelScheduledNoPossibleServicePopupRef?.current?.close()}
+        isProviderCancel={true}
+        buttonTitle={"Back"}
+        handleKeepWorking={()=>{
+          
+        }}
+        title={"Cancellation Not Possible"}
+        discription={"The scheduled service is already within its execution period or completed. At this stage, cancellation is no longer possible. if you still wish to cancel, no charges will be provided and It will affect on your rating."}
+       
+        />
       {isLoading && <ProgressView />}
     </View>
   );
@@ -674,8 +880,9 @@ const styles = (theme: ThemeContextType['theme']) =>
       marginRight: getScaleSize(8),
     },
     outForServiceContainer: {
-      flex: 1,
-      paddingVertical: getScaleSize(18),
+      // flex: 1,
+      width:"48%",
+      paddingVertical: getScaleSize(14),
       borderWidth: 1,
       borderRadius: getScaleSize(12),
       alignItems: 'center',
