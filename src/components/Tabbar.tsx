@@ -173,7 +173,7 @@ function Tabbar(props: any) {
 
   useEffect(() => {
     EventRegister.addEventListener('onInvalidToken', () => {
-      onLogout();
+      // onLogout();
     });
     return () => {
       EventRegister.removeEventListener('onInvalidToken');

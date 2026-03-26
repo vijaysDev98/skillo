@@ -10,6 +10,7 @@ import { FONTS, IMAGES } from '../../assets';
 import { AuthContext } from '../../context';
 import { SCREENS } from '..';
 import { useIsFocused } from '@react-navigation/native';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 const dummysavedAddresses = [
     {
@@ -79,7 +80,7 @@ export default function Address(props: any) {
     }
 
     return (
-        <View style={styles(theme).container}>
+        <AppSafeAreaView style={styles(theme).container}>
             <Header
                 onBack={() => {
                     props.navigation.goBack();
@@ -177,9 +178,11 @@ export default function Address(props: any) {
             )}
             <Button
                 title={STRING.add_new_address}
-                style={{ margin: getScaleSize(24) }}
+                style={{ marginHorizontal: getScaleSize(24), marginBottom: getScaleSize(10) }}
                 onPress={() => {
-                    props.navigation.navigate(SCREENS.AddressMapScreen.identifier);
+                    props.navigation.navigate(SCREENS.AddAdress.identifier, {
+                        fromChangeAddress: true,
+                    });
                 }}
             />
             <Modal
@@ -232,7 +235,7 @@ export default function Address(props: any) {
                     </View>
                 </View>
             </Modal>
-        </View>
+        </AppSafeAreaView>
     )
 }
 

@@ -30,6 +30,7 @@ import {
     ProgressView,
 } from '../../components';
 import { API } from '../../api';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 export default function EditAddress(props: any) {
 
@@ -37,6 +38,8 @@ export default function EditAddress(props: any) {
     const { theme } = useContext<any>(ThemeContext);
 
     const addressData = props?.route?.params?.addressData || {};
+    console.log("addressData", addressData);
+
     const myLocationData = props?.route?.params?.myLocation ?? ''
     const isFromAddressMap = props?.route?.params?.isFromAddressMap ?? false;
 
@@ -63,11 +66,12 @@ export default function EditAddress(props: any) {
 
     useEffect(() => {
         if (addressData) {
-            setAddress(addressData.banglo);
+            setAddress(addressData.addressLine1);
+            setAddress2(addressData.addressLine2)
             setCity(addressData.city);
             setState(addressData.state);
             setCountry(addressData.country);
-            setPostalCode(addressData.postal_code);
+            setPostalCode(addressData.postalCode);
             setMyLocation({ latitude: addressData.latitude, longitude: addressData.longitude });
         }
     }, []);
@@ -151,7 +155,7 @@ export default function EditAddress(props: any) {
     }
 
     return (
-        <View style={styles(theme).container}>
+        <AppSafeAreaView style={styles(theme).container}>
             <Header
                 onBack={() => {
                     props.navigation.goBack();
@@ -276,7 +280,7 @@ export default function EditAddress(props: any) {
             <Button
                 title={STRING.save_address}
                 style={{
-                    marginVertical: getScaleSize(24),
+                    marginVertical: getScaleSize(10),
                     marginHorizontal: getScaleSize(24),
                 }}
                 onPress={() => {
@@ -290,7 +294,7 @@ export default function EditAddress(props: any) {
             />
             {/* <SafeAreaView /> */}
             {isLoading && <ProgressView />}
-        </View>
+        </AppSafeAreaView>
     );
 }
 
