@@ -302,8 +302,8 @@ export default function Transactions(props: any) {
           </Tooltip>
         </View>
 
-{/* Payment Method */}
-<View style={[styles(theme).filterView,{backgroundColor:'red'}]}>
+        {/* Payment Method */}
+        <View style={styles(theme).filterView}>
           <Text size={14} font={FONTS.Lato.Medium} color={theme._2B2B2B}>
             {"Payment Method"}
           </Text>
@@ -340,15 +340,15 @@ export default function Transactions(props: any) {
         renderSectionHeader={({ section }: any) => (
           <View style={styles(theme).sectionHeaderContainer}>
             <View style={{ flex: 1 }}>
-              <Text size={16} font={FONTS.Lato.Medium} color={theme._2C6587}>
+              <Text size={16} font={FONTS.Lato.Medium} color={theme.primary}>
                 {section.title.year}
               </Text>
-              <Text size={24} font={FONTS.Lato.Bold} color={theme._2C6587}>
+              <Text size={24} font={FONTS.Lato.Bold} color={theme.primary}>
                 {section.title.month}
               </Text>
             </View>
-            <Text size={24} font={FONTS.Lato.Bold} color={theme._2C6587}>
-              {section.title.total.toFixed(2)}
+            <Text size={24} font={FONTS.Lato.Bold} color={theme.primary}>
+              P{section.title.total.toFixed(2)}
             </Text>
           </View>
         )}
@@ -412,7 +412,7 @@ const styles = (theme: ThemeContextType['theme']) => StyleSheet.create({
   sectionHeaderContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme._EAF0F3,
+    backgroundColor: theme._FDEFEC,
     paddingVertical: getScaleSize(13),
     paddingHorizontal: getScaleSize(22),
     marginTop: getScaleSize(20),

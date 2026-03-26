@@ -48,7 +48,7 @@ export default function MoneyWithdrawal(props: any) {
     }
 
     async function onWithdrawal() {
-        if(!amount) {
+        if (!amount) {
             setAmountError(STRING.please_Enter_the_amount_to_withdraw);
             return;
         }
@@ -104,7 +104,7 @@ export default function MoneyWithdrawal(props: any) {
                         placeholderTextColor={theme._939393}
                         inputTitle={STRING.funds_transfer}
                         inputColor={true}
-                        continerStyle={{ marginBottom: getScaleSize(16) }}
+                        mainContinerStyle={{ marginBottom: getScaleSize(16) }}
                         value={amount ? `€${amount}` : ""}
                         onChangeText={text => {
                             const cleanedText = text.replace('€', '');
@@ -128,14 +128,14 @@ export default function MoneyWithdrawal(props: any) {
                         }}
                         isError={amountError}
                     />
-                    {/* <Text
+                    <Text
                         size={getScaleSize(17)}
                         font={FONTS.Lato.Medium}
                         color={theme._424242}
                         style={{ marginBottom: getScaleSize(8) }}>
                         {STRING.transfer_to}
-                    </Text> */}
-                    {/* <View style={[styles(theme).transferToContainer, { padding: visiblePaymentMethod ? getScaleSize(24) : getScaleSize(17) }]}>
+                    </Text>
+                    <View style={[styles(theme).transferToContainer, { padding: visiblePaymentMethod ? getScaleSize(24) : getScaleSize(17) }]}>
                         <TouchableOpacity
                             style={{ flexDirection: 'row', alignItems: 'center' }}
                             onPress={() => {
@@ -263,13 +263,13 @@ export default function MoneyWithdrawal(props: any) {
                                 </TouchableOpacity>
                             </View>
                         )}
-                    </View> */}
+                    </View>
                     <Button
                         title={STRING.request_withdrawal}
                         style={{ marginTop: visiblePaymentMethod ? getScaleSize(24) : getScaleSize(40) }}
                         onPress={() => {
                             onWithdrawal()
-                            
+
                         }}
                     />
                 </View>

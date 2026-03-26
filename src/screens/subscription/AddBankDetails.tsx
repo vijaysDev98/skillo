@@ -40,7 +40,7 @@ export default function AddBankDetails(props: any) {
                 onBack={() => {
                     props.navigation.goBack();
                 }}
-                screenName={ isEdit ? STRING.edit_bank_details : STRING.add_bank_details}
+                screenName={isEdit ? STRING.edit_bank_details : STRING.add_bank_details}
             />
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles(theme).mainContainer}>
@@ -54,7 +54,7 @@ export default function AddBankDetails(props: any) {
                         placeholder={STRING.enter_name}
                         inputTitle={STRING.account_holder_name}
                         inputColor={true}
-                        continerStyle={{ marginBottom: getScaleSize(16) }}
+                        mainContinerStyle={{ marginBottom: getScaleSize(16) }}
                         value={accountHolderName}
                         onChangeText={(text) => {
                             setAccountHolderName(text);
@@ -66,7 +66,7 @@ export default function AddBankDetails(props: any) {
                         placeholder={STRING.enter_account_number}
                         inputTitle={STRING.account_number}
                         inputColor={true}
-                        continerStyle={{ marginBottom: getScaleSize(16) }}
+                        mainContinerStyle={{ marginBottom: getScaleSize(16) }}
                         value={accountNumber}
                         onChangeText={(text) => {
                             setAccountNumber(text);
@@ -78,7 +78,7 @@ export default function AddBankDetails(props: any) {
                         placeholder={STRING.re_enter_account_number}
                         inputTitle={STRING.confirm_account_number}
                         inputColor={true}
-                        continerStyle={{ marginBottom: getScaleSize(16) }}
+                        mainContinerStyle={{ marginBottom: getScaleSize(16) }}
                         value={confirmAccountNumber}
                         onChangeText={(text) => {
                             setConfirmAccountNumber(text);
@@ -91,7 +91,7 @@ export default function AddBankDetails(props: any) {
                         placeholder={STRING.enter_ifsc_code}
                         inputTitle={STRING.ifsc_code}
                         inputColor={true}
-                        continerStyle={{ marginBottom: getScaleSize(16) }}
+                        mainContinerStyle={{ marginBottom: getScaleSize(16) }}
                         value={ifscCode}
                         onChangeText={(text) => {
                             setIfscCode(text);
@@ -103,7 +103,7 @@ export default function AddBankDetails(props: any) {
                         placeholder={STRING.enter_bank_name}
                         inputTitle={STRING.bank_name}
                         inputColor={true}
-                        continerStyle={{ marginBottom: getScaleSize(16) }}
+                        mainContinerStyle={{ marginBottom: getScaleSize(16) }}
                         value={bankName}
                         onChangeText={(text) => {
                             setBankName(text);
@@ -123,12 +123,12 @@ export default function AddBankDetails(props: any) {
                         font={FONTS.Lato.Bold}
                         color={theme._214C65}
                         align="center">
-                        { isEdit ? STRING.cancel : STRING.skip}
+                        {isEdit ? STRING.cancel : STRING.skip}
                     </Text>
                 </TouchableOpacity>
                 <View style={{ width: getScaleSize(16) }} />
                 <Button
-                    title={ isEdit ? STRING.save : STRING.add}
+                    title={isEdit ? STRING.save : STRING.add}
                     style={{ flex: 1.0 }}
                     onPress={() => {
                         if (isEdit) {

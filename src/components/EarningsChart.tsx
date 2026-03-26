@@ -22,6 +22,7 @@ const PADDING = getScaleSize(30);
 
 const EarningsChart = ({ data, onMonthPress }: any) => {
     const { theme } = useContext<any>(ThemeContext);
+    console.log("chartdata", data);
 
     if (!data || !data.weeks || data.weeks.length === 0) {
         return (
@@ -91,8 +92,8 @@ const EarningsChart = ({ data, onMonthPress }: any) => {
             <Svg width={WIDTH} height={HEIGHT}>
                 <Defs>
                     <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                        <Stop offset="0%" stopColor="#4CAF50" stopOpacity="0.55" />
-                        <Stop offset="100%" stopColor="#4CAF50" stopOpacity="0" />
+                        <Stop offset="0%" stopColor="#10B981" stopOpacity="0.55" />
+                        <Stop offset="100%" stopColor="#10B981" stopOpacity="0" />
                     </LinearGradient>
                 </Defs>
 
@@ -120,7 +121,7 @@ const EarningsChart = ({ data, onMonthPress }: any) => {
                 {/* Line */}
                 <Path
                     d={linePath!}
-                    stroke="#4CAF50"
+                    stroke="#10B981"
                     strokeWidth={2.5}
                     fill="none"
                 />
