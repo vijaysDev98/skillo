@@ -430,7 +430,7 @@ export default function EditProfile(props: any) {
                     onBack={() => {
                         props.navigation.goBack();
                     }}
-                    rightIcon={{ icon: IMAGES.ic_delete_profile, title: STRING.delete_profile }}
+                    rightIcon={{ icon: IMAGES.ic_delete_profile, title: STRING.delete_account }}
                     onPress={() => { bottomSheetRef.current.open() }}
                     screenName={STRING.edit_profile}
                 />
@@ -704,7 +704,7 @@ export default function EditProfile(props: any) {
                     isInfo={true}
                     title={STRING.are_you_sure_you_want_to_delete_your_account}
                     description={STRING.delete_account_message}
-                    buttonTitle={STRING.delete_profile}
+                    buttonTitle={STRING.delete_account}
                     secondButtonTitle={STRING.cancel}
                     onPressSecondButton={() => {
                         bottomSheetRef.current.close();

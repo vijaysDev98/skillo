@@ -36,7 +36,7 @@ export default function Splash(props: any) {
   const { setUser, setUserType, setProfile, userType } = useContext<any>(AuthContext);
 
 
-  console.log("Splash userType=====>>>",userType)
+  console.log("Splash userType=====>>>", userType)
   useEffect(() => {
     checkUserDetails();
   }, []);
@@ -100,7 +100,7 @@ export default function Splash(props: any) {
     if (userData && userData?.user_data?.role) {
       setUser(userData);
       // setUserType(userData?.user_data?.role);
-      setUserType(userRoles.Service_Provider_individual)
+      setUserType(userRoles.Service_Seeker_individual)
       getProfileData();
     } else {
       setTimeout(() => {
@@ -128,17 +128,17 @@ export default function Splash(props: any) {
   }
 
   async function getProfileData() {
-    setUserType(userRoles.Service_Provider_business)
-      props.navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [
-              {
-                name: SCREENS.BottomBar.identifier,
-              },
-            ],
-          }),
-        );
+    setUserType(userRoles.Service_Seeker_individual)
+    props.navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: SCREENS.BottomBar.identifier,
+          },
+        ],
+      }),
+    );
     // try {
     //   const result = await API.Instance.get(
     //     API.API_ROUTES.getUserDetails + `?platform=app`,
@@ -186,8 +186,8 @@ export default function Splash(props: any) {
       <StatusBar
         translucent={true}
         backgroundColor="transparent"
-        // barStyle={'light-content'} 
-        />
+      // barStyle={'light-content'} 
+      />
       <LinearGradient
         colors={['#E94675', '#EC613D']}
         start={{ x: 0, y: -1 }}

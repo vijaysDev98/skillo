@@ -72,7 +72,8 @@ export default function Login(props: any) {
     } else {
       setEmailError('');
       setPasswordError('');
-      onLogin();
+      setShowRoleModal(true);
+      // onLogin();
     }
   }
 
@@ -132,7 +133,7 @@ export default function Login(props: any) {
         Storage.save(Storage.USER_DETAILS, JSON.stringify(result?.data?.data));
         setUser(result?.data?.data);
         // setUserType(result?.data?.data?.user_data?.role);
-        setUserType(userRoles.Service_Provider_individual)
+        setUserType(userRoles.Service_Seeker_individual)
         getProfileData();
       } else {
         SHOW_TOAST(result?.data?.message, 'error');
@@ -351,29 +352,29 @@ export default function Login(props: any) {
       /> */}
       {isLoading && <ProgressView />}
 
-      {/* {showRoleModal && (
+      {showRoleModal && (
         <UserRoleModal
-  visible={showRoleModal}
-  onClose={() => setShowRoleModal(false)}
-  onSelect={(role) => {
-    console.log("Selected Role:", role);
-    setTimeout(()=>{
-      setUserType(role);
-    props.navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [
-              {
-                name: SCREENS.BottomBar.identifier,
-              },
-            ],
-          }),
-        );
-    },100)
-    
-  }}
-/>)
-      } */}
+          visible={showRoleModal}
+          onClose={() => setShowRoleModal(false)}
+          onSelect={(role) => {
+            console.log("Selected Role:", role);
+            setTimeout(() => {
+              setUserType(role);
+              props.navigation.dispatch(
+                CommonActions.reset({
+                  index: 0,
+                  routes: [
+                    {
+                      name: SCREENS.BottomBar.identifier,
+                    },
+                  ],
+                }),
+              );
+            }, 100)
+
+          }}
+        />)
+      }
     </View>
   );
 }
