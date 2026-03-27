@@ -338,6 +338,7 @@ export const useString = () => {
     notifications: 'Notifications',
     edit_picture_or_avatar: 'Edit picture or avatar',
     delete_profile: 'Delete Profile',
+    delete_account: 'Delete Account',
     personal_information: 'Personal Information',
     full_name: 'Full Name',
     e_mail_id: 'E-mail id',

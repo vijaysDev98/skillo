@@ -58,6 +58,7 @@ import { PERMISSIONS, request, RESULTS } from 'react-native-permissions';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Collapsible from 'react-native-collapsible';
 import { RecentSearchCard } from '../home/Search';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 const { width } = Dimensions.get('window');
 const cellSize = (width - 30) / 7;
@@ -1658,13 +1659,13 @@ export default function CreateRequest(props: any) {
   const insets = useSafeAreaInsets()
 
   return (
-    <View style={[styles(theme).container, { paddingTop: insets.top + 20 }]}>
-      <View
-        style={[styles(theme).container, {}]}>
+    <AppSafeAreaView style={styles(theme).container}>
+      <AppSafeAreaView
+        style={styles(theme).container}>
         <>
           {selectedCategory == 'professional' ? renderProfessional() : renderNonProfessional()}
         </>
-      </View>
+      </AppSafeAreaView>
       <View style={styles(theme).buttonContainer}>
         <TouchableOpacity
           style={styles(theme).backButtonContainer}
@@ -1717,7 +1718,7 @@ export default function CreateRequest(props: any) {
         isGoToHome
         discription={"Great job! Your request is now submitted successfully."}
       />
-    </View>
+    </AppSafeAreaView>
   );
 }
 
@@ -1732,7 +1733,7 @@ const styles = (theme: ThemeContextType['theme']) =>
     buttonContainer: {
       flexDirection: 'row',
       marginHorizontal: getScaleSize(22),
-      marginVertical: getScaleSize(17),
+      marginVertical: getScaleSize(10),
     },
     backButtonContainer: {
       flex: 1.0,

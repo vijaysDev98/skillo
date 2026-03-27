@@ -11,6 +11,7 @@ import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 const AddAdress = (props: any) => {
     const { data } = props.route.params ?? "";
+    const fromChangeAddress = props.route.params?.fromChangeAddress ?? "";
 
     const STRING = useString();
 
@@ -182,6 +183,10 @@ const AddAdress = (props: any) => {
     // }
 
     const handleAddAddress = () => {
+        if (fromChangeAddress) {
+            props.navigation.navigate(SCREENS.AddressMapScreen.identifier)
+            return;
+        }
         if (userType == userRoles.Service_Seeker_individual) {
             // TODO: Add address for service seeker individual
             props.navigation.dispatch(
@@ -218,7 +223,7 @@ const AddAdress = (props: any) => {
                     <Input
                         placeholder={""}
                         inputTitle={STRING.inputTitle.address_line_1}
-                        continerStyle={{ marginBottom: getScaleSize(16) }}
+                        mainContinerStyle={{ marginBottom: getScaleSize(16) }}
                         value={state?.addressLine1}
                         onChangeText={text => {
                             setState((prev) => ({ ...prev, addressLine1: text }));
@@ -227,7 +232,7 @@ const AddAdress = (props: any) => {
                     <Input
                         placeholder={""}
                         inputTitle={STRING.inputTitle.address_line_2}
-                        continerStyle={{ marginBottom: getScaleSize(16) }}
+                        mainContinerStyle={{ marginBottom: getScaleSize(16) }}
                         value={state?.addressLine2}
                         onChangeText={text => {
                             setState((prev) => ({ ...prev, addressLine2: text }));
@@ -236,7 +241,7 @@ const AddAdress = (props: any) => {
                     <Input
                         placeholder={""}
                         inputTitle={STRING.inputTitle.city}
-                        continerStyle={{ marginBottom: getScaleSize(16) }}
+                        mainContinerStyle={{ marginBottom: getScaleSize(16) }}
                         value={state?.city}
                         onChangeText={text => {
                             setState((prev) => ({ ...prev, city: text }));
@@ -244,17 +249,8 @@ const AddAdress = (props: any) => {
                     />
                     <Input
                         placeholder={""}
-                        inputTitle={STRING.inputTitle.country}
-                        continerStyle={{ marginBottom: getScaleSize(16) }}
-                        value={state?.country}
-                        onChangeText={text => {
-                            setState((prev) => ({ ...prev, country: text }));
-                        }}
-                    />
-                    <Input
-                        placeholder={""}
                         inputTitle={STRING.inputTitle.state}
-                        continerStyle={{ marginBottom: getScaleSize(16) }}
+                        mainContinerStyle={{ marginBottom: getScaleSize(16) }}
                         value={state?.state}
                         onChangeText={text => {
                             setState((prev) => ({ ...prev, state: text }));
@@ -262,8 +258,17 @@ const AddAdress = (props: any) => {
                     />
                     <Input
                         placeholder={""}
+                        inputTitle={STRING.inputTitle.country}
+                        mainContinerStyle={{ marginBottom: getScaleSize(16) }}
+                        value={state?.country}
+                        onChangeText={text => {
+                            setState((prev) => ({ ...prev, country: text }));
+                        }}
+                    />
+                    <Input
+                        placeholder={""}
                         inputTitle={STRING.inputTitle.postal_code}
-                        continerStyle={{ marginBottom: getScaleSize(16) }}
+                        mainContinerStyle={{ marginBottom: getScaleSize(16) }}
                         value={state?.postalCode}
                         onChangeText={text => {
                             setState((prev) => ({ ...prev, postalCode: text }));

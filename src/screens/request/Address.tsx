@@ -1,4 +1,4 @@
-import { ActivityIndicator, FlatList, Image, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, FlatList, Image, Modal, StyleSheet, TouchableOpacity, View } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import { ThemeContext, ThemeContextType } from '../../context/ThemeProvider';
 import { getScaleSize } from '../../constant/scaleSize';
@@ -10,6 +10,7 @@ import { FONTS, IMAGES } from '../../assets';
 import { AuthContext } from '../../context';
 import { SCREENS } from '..';
 import { useIsFocused } from '@react-navigation/native';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 const dummysavedAddresses = [
     {
@@ -35,6 +36,8 @@ export default function Address(props: any) {
 
     const [savedAddresses, setSavedAddresses] = useState<any>(dummysavedAddresses || []);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedDeleteId, setSelectedDeleteId] = useState<any>(null);
 
     const isFocused = useIsFocused();
 
@@ -60,8 +63,24 @@ export default function Address(props: any) {
         }
     }
 
+    async function deleteAddress(id: any) {
+        try {
+            setIsLoading(true);
+            // TODO: Replace with actual API call
+            // const result = await API.Instance.delete(API.API_ROUTES.deleteAddress + `/${id}`);
+            setSavedAddresses((prev: any) => prev.filter((addr: any) => addr.id !== id));
+            SHOW_TOAST('Address deleted successfully', 'success');
+        } catch (error: any) {
+            SHOW_TOAST(error?.message ?? 'Failed to delete address', 'error');
+        } finally {
+            setIsLoading(false);
+            setShowDeleteModal(false);
+            setSelectedDeleteId(null);
+        }
+    }
+
     return (
-        <View style={styles(theme).container}>
+        <AppSafeAreaView style={styles(theme).container}>
             <Header
                 onBack={() => {
                     props.navigation.goBack();
@@ -128,16 +147,27 @@ export default function Address(props: any) {
                                         {"(480) 555-0103"}
                                     </Text>
                                 </View>
-                                <TouchableOpacity
-                                    activeOpacity={1}
-                                    onPress={() => {
-                                        props.navigation.navigate(SCREENS.EditAddress.identifier, {
-                                            addressData: item
-                                        });
-                                    }}
-                                >
-                                    <Image source={IMAGES.edit} style={styles(theme).editIcon} />
-                                </TouchableOpacity>
+                                <View style={styles(theme).actionButtons}>
+                                    <TouchableOpacity
+                                        activeOpacity={1}
+                                        onPress={() => {
+                                            props.navigation.navigate(SCREENS.EditAddress.identifier, {
+                                                addressData: item
+                                            });
+                                        }}
+                                    >
+                                        <Image source={IMAGES.edit} style={styles(theme).editIcon} />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        activeOpacity={1}
+                                        onPress={() => {
+                                            setSelectedDeleteId(item.id);
+                                            setShowDeleteModal(true);
+                                        }}
+                                    >
+                                        <Image source={IMAGES.trash2} style={styles(theme).deleteIcon} />
+                                    </TouchableOpacity>
+                                </View>
                             </View>
                         )}
                     />
@@ -148,12 +178,64 @@ export default function Address(props: any) {
             )}
             <Button
                 title={STRING.add_new_address}
-                style={{ margin: getScaleSize(24) }}
+                style={{ marginHorizontal: getScaleSize(24), marginBottom: getScaleSize(10) }}
                 onPress={() => {
-                    props.navigation.navigate(SCREENS.AddressMapScreen.identifier);
+                    props.navigation.navigate(SCREENS.AddAdress.identifier, {
+                        fromChangeAddress: true,
+                    });
                 }}
             />
-        </View>
+            <Modal
+                visible={showDeleteModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => {
+                    setShowDeleteModal(false);
+                    setSelectedDeleteId(null);
+                }}
+            >
+                <View style={styles(theme).modalOverlay}>
+                    <View style={styles(theme).modalContainer}>
+                        <Text
+                            size={getScaleSize(18)}
+                            font={FONTS.Lato.Bold}
+                            color={theme.primaryText}
+                            align='center'
+                            style={{ marginBottom: getScaleSize(24) }}
+                        >
+                            Are you sure you want to delete this address?
+                        </Text>
+                        <View style={styles(theme).modalButtonRow}>
+                            <TouchableOpacity
+                                style={styles(theme).cancelButton}
+                                onPress={() => {
+                                    setShowDeleteModal(false);
+                                    setSelectedDeleteId(null);
+                                }}
+                            >
+                                <Text
+                                    size={getScaleSize(16)}
+                                    font={FONTS.Lato.SemiBold}
+                                    color={theme.primary}
+                                    align='center'
+                                >Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles(theme).removeButton}
+                                onPress={() => deleteAddress(selectedDeleteId)}
+                            >
+                                <Text
+                                    size={getScaleSize(16)}
+                                    font={FONTS.Lato.SemiBold}
+                                    color={theme.white}
+                                    align='center'
+                                >Delete</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+        </AppSafeAreaView>
     )
 }
 
@@ -181,7 +263,56 @@ const styles = (theme: ThemeContextType['theme']) => StyleSheet.create({
     editIcon: {
         width: getScaleSize(20),
         height: getScaleSize(20),
-        marginLeft: getScaleSize(10),
         tintColor: theme.primary
-    }
+    },
+    deleteIcon: {
+        width: getScaleSize(20),
+        height: getScaleSize(20),
+        tintColor: '#E74C3C',
+    },
+    actionButtons: {
+        flexDirection: 'row',
+        alignSelf: 'flex-start',
+        alignItems: 'center',
+        gap: getScaleSize(12),
+        marginLeft: getScaleSize(10),
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: getScaleSize(30),
+    },
+    modalContainer: {
+        backgroundColor: theme.white,
+        borderRadius: getScaleSize(16),
+        paddingHorizontal: getScaleSize(24),
+        paddingVertical: getScaleSize(30),
+        width: '100%',
+        alignItems: 'center',
+    },
+    modalButtonRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+        gap: getScaleSize(12),
+    },
+    cancelButton: {
+        flex: 1,
+        height: getScaleSize(48),
+        borderRadius: getScaleSize(10),
+        borderWidth: 1,
+        borderColor: theme.primary,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    removeButton: {
+        flex: 1,
+        height: getScaleSize(48),
+        borderRadius: getScaleSize(10),
+        backgroundColor: theme.primary,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
 })

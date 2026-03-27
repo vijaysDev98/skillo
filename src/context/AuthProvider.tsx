@@ -1,5 +1,5 @@
-import React, {createContext, useEffect, useState} from 'react';
-import {API} from '../api';
+import React, { createContext, useEffect, useState } from 'react';
+import { API } from '../api';
 import { userRoles } from '../constant/utils';
 
 interface AuthProviderProps {
@@ -30,7 +30,7 @@ export function AuthProvider(props: Readonly<AuthProviderProps>): any {
       const result = await API.Instance.get(API.API_ROUTES.getUserDetails + `?platform=app`);
       if (result.status) {
         const userDetail = result?.data?.data;
-        console.log('PRO',JSON.stringify(userDetail))
+        console.log('PRO', JSON.stringify(userDetail))
         setProfile(userDetail);
         return userDetail;
       }

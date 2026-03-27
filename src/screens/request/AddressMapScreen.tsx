@@ -9,6 +9,7 @@ import Geolocation from 'react-native-geolocation-service';
 import { getScaleSize } from '../../constant/scaleSize';
 import { BottomSheet, Button } from '../../components';
 import { SCREENS } from '..';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 export default function AddressMapScreen(props: any) {
     const { theme } = useContext<any>(ThemeContext);
@@ -33,7 +34,7 @@ export default function AddressMapScreen(props: any) {
     }, []);
 
     return (
-        <View style={styles(theme).container}>
+        <AppSafeAreaView isFullScreen style={styles(theme).container}>
             <View style={styles(theme).statusBarContainer}>
                 <StatusBar
                     translucent={true}
@@ -145,9 +146,10 @@ export default function AddressMapScreen(props: any) {
                 }}
                 onPressButton={() => {
                     mapViewRef.current?.close();
+                    props.navigation.pop(2);
                 }}
             />
-        </View>
+        </AppSafeAreaView>
     )
 }
 

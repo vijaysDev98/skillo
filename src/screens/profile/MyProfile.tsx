@@ -300,7 +300,7 @@ export default function MyProfile(props: any) {
         <View style={styles(theme).container}>
             <View style={{ marginTop: getScaleSize(10) }}>
                 <Header
-                    rightIcon={{ icon: IMAGES.ic_delete_profile, title: STRING.delete_profile }}
+                    rightIcon={{ icon: IMAGES.ic_delete_profile, title: STRING.delete_account }}
                     rightIconContainerStyle={{ backgroundColor: theme.white, padding: getScaleSize(8), borderRadius: getScaleSize(6) }}
                     onPress={() => { bottomSheetRef.current.open() }}
                     onBack={() => { props.navigation.goBack() }}
@@ -410,75 +410,75 @@ export default function MyProfile(props: any) {
                                 setEmailError('');
                             }}
                             isError={emailError}
-                            // isRightComponent={isEmailChange && (() => 
-                            //     {!isEmailVerified ?
-                            //         (
-                            //     <Pressable
-                            //         onPress={() => {
-                            //             if (!REGEX.email.test(email.trim())) {
-                            //                 setEmailError(STRING.errorText.please_enter_valid_email);
-                            //             } else {
-                            //                 props.navigation.navigate(SCREENS.Otp.identifier, {
-                            //                     type: "emailChange",
-                            //                     email: email
-                            //                 });
-                            //                 setIsEmailVerified(true)
-                            //             }
+                        // isRightComponent={isEmailChange && (() => 
+                        //     {!isEmailVerified ?
+                        //         (
+                        //     <Pressable
+                        //         onPress={() => {
+                        //             if (!REGEX.email.test(email.trim())) {
+                        //                 setEmailError(STRING.errorText.please_enter_valid_email);
+                        //             } else {
+                        //                 props.navigation.navigate(SCREENS.Otp.identifier, {
+                        //                     type: "emailChange",
+                        //                     email: email
+                        //                 });
+                        //                 setIsEmailVerified(true)
+                        //             }
 
-                            //         }}
-                            //         style={styles(theme).changeEmailBtn}>
-                            //         <Text
-                            //             size={getScaleSize(12)}
-                            //             color={theme.white}
-                            //         >{"Change Email"}</Text>
-                            //     </Pressable>)
-                            //     :
-                            // <Text
-                            // size={getScaleSize(16)}
-                            // color={theme.success}
-                            // font={FONTS.Lato.SemiBold}
-                            // >{"Verified"}</Text>    
-                            // }
-                            // )}
+                        //         }}
+                        //         style={styles(theme).changeEmailBtn}>
+                        //         <Text
+                        //             size={getScaleSize(12)}
+                        //             color={theme.white}
+                        //         >{"Change Email"}</Text>
+                        //     </Pressable>)
+                        //     :
+                        // <Text
+                        // size={getScaleSize(16)}
+                        // color={theme.success}
+                        // font={FONTS.Lato.SemiBold}
+                        // >{"Verified"}</Text>    
+                        // }
+                        // )}
 
-                            isRightComponent={
-                                isEmailChange &&
-                                (() => {
-                                    if (!isEmailVerified) {
-                                        return (
-                                            <Pressable
-                                                onPress={() => {
-                                                    if (!REGEX.email.test(email.trim())) {
-                                                        setEmailError(STRING.errorText.please_enter_valid_email);
-                                                    } else {
-                                                        props.navigation.navigate(SCREENS.Otp.identifier, {
-                                                            type: "emailChange",
-                                                            email: email,
-                                                        });
-                                                        setIsEmailVerified(true);
-                                                    }
-                                                }}
-                                                style={styles(theme).changeEmailBtn}
-                                            >
-                                                <Text size={getScaleSize(12)} color={theme.white}>
-                                                    {"Change Email"}
-                                                </Text>
-                                            </Pressable>
-                                        );
-                                    }
+                        // isRightComponent={
+                        //     isEmailChange &&
+                        //     (() => {
+                        //         if (!isEmailVerified) {
+                        //             return (
+                        //                 <Pressable
+                        //                     onPress={() => {
+                        //                         if (!REGEX.email.test(email.trim())) {
+                        //                             setEmailError(STRING.errorText.please_enter_valid_email);
+                        //                         } else {
+                        //                             props.navigation.navigate(SCREENS.Otp.identifier, {
+                        //                                 type: "emailChange",
+                        //                                 email: email,
+                        //                             });
+                        //                             setIsEmailVerified(true);
+                        //                         }
+                        //                     }}
+                        //                     style={styles(theme).changeEmailBtn}
+                        //                 >
+                        //                     <Text size={getScaleSize(12)} color={theme.white}>
+                        //                         {"Change Email"}
+                        //                     </Text>
+                        //                 </Pressable>
+                        //             );
+                        //         }
 
-                                    return (
-                                        <Text
-                                            size={getScaleSize(16)}
-                                            color={theme.successText}
-                                            font={FONTS.Lato.SemiBold}
-                                            style={{ marginRight: getScaleSize(20) }}
-                                        >
-                                            {"Verified"}
-                                        </Text>
-                                    );
-                                })
-                            }
+                        //         return (
+                        //             <Text
+                        //                 size={getScaleSize(16)}
+                        //                 color={theme.successText}
+                        //                 font={FONTS.Lato.SemiBold}
+                        //                 style={{ marginRight: getScaleSize(20) }}
+                        //             >
+                        //                 {"Verified"}
+                        //             </Text>
+                        //         );
+                        //     })
+                        // }
                         />
                         {/* <Input
                         placeholder={STRING.enter_address}
@@ -529,7 +529,7 @@ export default function MyProfile(props: any) {
                 title={STRING.are_you_sure_you_want_to_delete_your_account}
                 // description={STRING.delete_account_message}
                 description={'Once deleted, your account and all associated data are permanently erased. No refunds will be issued.'}
-                buttonTitle={STRING.delete_profile}
+                buttonTitle={STRING.delete_account}
                 secondButtonTitle={STRING.cancel}
                 onPressSecondButton={() => {
                     bottomSheetRef.current.close();

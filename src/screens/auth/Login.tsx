@@ -72,7 +72,8 @@ export default function Login(props: any) {
     } else {
       setEmailError('');
       setPasswordError('');
-      onLogin();
+      setShowRoleModal(true);
+      // onLogin();
     }
   }
 
@@ -353,26 +354,26 @@ export default function Login(props: any) {
 
       {showRoleModal && (
         <UserRoleModal
-  visible={showRoleModal}
-  onClose={() => setShowRoleModal(false)}
-  onSelect={(role) => {
-    console.log("Selected Role:", role);
-    setTimeout(()=>{
-      setUserType(role);
-    props.navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [
-              {
-                name: SCREENS.BottomBar.identifier,
-              },
-            ],
-          }),
-        );
-    },100)
-    
-  }}
-/>)
+          visible={showRoleModal}
+          onClose={() => setShowRoleModal(false)}
+          onSelect={(role) => {
+            console.log("Selected Role:", role);
+            setTimeout(() => {
+              setUserType(role);
+              props.navigation.dispatch(
+                CommonActions.reset({
+                  index: 0,
+                  routes: [
+                    {
+                      name: SCREENS.BottomBar.identifier,
+                    },
+                  ],
+                }),
+              );
+            }, 100)
+
+          }}
+        />)
       }
     </View>
   );
