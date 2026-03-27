@@ -218,12 +218,11 @@ function Tabbar(props: any) {
 
   const STRING = useString();
 
-
-
   function onPress(name: string) {
     if (name === 'plus') {
       props.navigation.navigate(SCREENS.CreateRequest.identifier);
     } else {
+      console.log("name====>>",name)
       props.navigation.navigate(name);
     }
   }
@@ -237,6 +236,7 @@ function Tabbar(props: any) {
         // { paddingBottom: insets.bottom }
       ]}>
         {props.state.routes.map((route: any, index: number) => {
+          console.log("name====>>",route.name)
           return (
             <Item
               key={index}
@@ -392,7 +392,7 @@ const Item = (props: any) => {
           }}
           style={{
             alignSelf: 'center',
-            transform: [{ translateY: -getScaleSize(30) }],
+            transform: [{ translateY: -getScaleSize(20) }],
             zIndex: 10,
           }}>
           <Image
@@ -476,8 +476,9 @@ const styles = (theme: ThemeContextType['theme']) =>
     },
     tabContainer: {
       flexDirection: 'row',
-      height: TABBAR_HEIGHT - getScaleSize(20),
+      height: TABBAR_HEIGHT,
       alignItems: 'center',
+// paddingBottom:20
     },
     tabContainerServiceProvider: {
       flexDirection: 'row',

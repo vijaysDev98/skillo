@@ -37,10 +37,6 @@ export default function Profile(props: any) {
   const [isLoading, setLoading] = useState(false);
   const bottomSheetRef = useRef<any>(null);
 
-  console.log('user', insets.bottom)
-
-  props.navigation.navigate(SCREENS.MyProfile.identifier)
-
   const profileSeekerIndividualItems = [
     { id: 1, title: STRING.my_profile, icon: IMAGES.ic_my_profile, onPress: () => { props.navigation.navigate(SCREENS.MyProfile.identifier) } },
     { id: 2, title: STRING.transactions, icon: IMAGES.ic_transactions, onPress: () => { props.navigation.navigate(SCREENS.TransactionsElder.identifier) } },
@@ -57,6 +53,7 @@ export default function Profile(props: any) {
     { id: 4, title: STRING.manage_subscription, icon: IMAGES.ic_manage_subscription, onPress: () => { props.navigation.navigate(SCREENS.ManageSubscription.identifier) }, isRightIcon: false },
     { id: 5, title: STRING.ratings_reviews, icon: IMAGES.ic_ratings_reviews, onPress: () => { props.navigation.navigate(SCREENS.RatingsReviews.identifier) } },
     { id: 6, title: STRING.notifications, icon: IMAGES.ic_notifications, onPress: () => { props.navigation.navigate(SCREENS.Notification.identifier) } },
+    // { id: 7, title: STRING.prefered_language, icon: IMAGES.ic_language, onPress: SCREENS.Language.identifier }
     { id: 7, title: STRING.logout, icon: IMAGES.ic_logout, onPress: () => { bottomSheetRef.current.open() } }
   ]
 
@@ -93,8 +90,8 @@ export default function Profile(props: any) {
     props.navigation.dispatch(
       CommonActions.reset({
         index: 0,
-        routes: [{ name: SCREENS.Splash.identifier }],
-      }),
+        routes: [{ name: SCREENS.Login.identifier }],
+      })
     );
     setLoading(false);
   }
@@ -136,7 +133,7 @@ export default function Profile(props: any) {
             color={theme.primaryText}>
             {(profile?.user?.first_name ?? "") + " " + (profile?.user?.last_name ?? "")}
           </Text>
-          {userType == userRoles.Service_Seeker_business
+          {userType !== userRoles.Service_Seeker_individual
             // userType === 'service_provider' 
             && (
               <>
