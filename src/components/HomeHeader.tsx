@@ -23,6 +23,8 @@ const HomeHeader = (props: any) => {
 
   const {
     userData,
+    userName,
+    userImage,
     bannerImg,
     onPressNotification,
     onSearchPress,
@@ -43,12 +45,12 @@ const HomeHeader = (props: any) => {
         {
           paddingTop: insets.top,
           paddingBottom: getScaleSize(10)
-        },containerStyle
+        }, containerStyle
       ]}
     >
-    
-        
-{props.onBack ?
+
+
+      {props.onBack ?
         <View style={{ flexDirection: 'row', alignItems: 'center', }}>
           {props.onBack &&
             <TouchableOpacity onPress={props.onBack}>
@@ -60,65 +62,65 @@ const HomeHeader = (props: any) => {
             </TouchableOpacity>
           }
           <Text
-          size={getScaleSize(18)}
-          font={FONTS.Lato.SemiBold}
-          >{screenName ? screenName:"All Services"}</Text>
+            size={getScaleSize(18)}
+            font={FONTS.Lato.SemiBold}
+          >{screenName ? screenName : "All Services"}</Text>
         </View>
-        :         
-         <View style={styles(theme).topRow}>
-            <Pressable
-              onPress={onPressUserProfile}
-              style={styles(theme).profileRow}>
-              <View style={styles(theme).avatarWrapper}>
-                <Image
-                  source={IMAGES.ic_my_profile}
-                  style={styles(theme).avatar}
-                />
-              </View>
-              <View style={styles(theme).nameContainer}>
-                <Text
-                  color={theme._404040}
-                  size={getScaleSize(14)}
-                  font={FONTS.Lato.Bold}
-                >
-                  Hello!
-                </Text>
-                <Text
-                  color={theme.primaryText}
-                  size={getScaleSize(20)}
-                  font={FONTS.Lato.Bold}
-                >
-                  {userData?.userName ? userData?.userName : "Jhon Doe"}
-                </Text>
-              </View>
-            </Pressable>
-            <Pressable
-              onPress={onPressNotification}
-            >
+        :
+        <View style={styles(theme).topRow}>
+          <Pressable
+            onPress={onPressUserProfile}
+            style={styles(theme).profileRow}>
+            <View style={styles(theme).avatarWrapper}>
               <Image
-                source={IMAGES.ic_notifications}
-                style={styles(theme).notificationIcon}
+                source={userImage ? { uri: userImage } : IMAGES.ic_my_profile}
+                style={styles(theme).avatar}
               />
-            </Pressable>
-          </View>}
-          <View style={styles(theme).searchContainer}>
+            </View>
+            <View style={styles(theme).nameContainer}>
+              <Text
+                color={theme._404040}
+                size={getScaleSize(14)}
+                font={FONTS.Lato.Bold}
+              >
+                Hello!
+              </Text>
+              <Text
+                color={theme.primaryText}
+                size={getScaleSize(20)}
+                font={FONTS.Lato.Bold}
+              >
+                {userName || "---"}
+              </Text>
+            </View>
+          </Pressable>
+          <Pressable
+            onPress={onPressNotification}
+          >
             <Image
-              source={IMAGES.search}
-              style={styles(theme).searchIcon}
+              source={IMAGES.ic_notifications}
+              style={styles(theme).notificationIcon}
             />
-            <Pressable
-              onPress={onSearchPress}
-              style={styles(theme).searchPressable}
-            >
-              <TextInput
-                style={styles(theme).searchInput}
-                placeholderTextColor={theme.secondaryText}
-                placeholder={STRING.search_for_services}
-                editable={false}
-              />
-            </Pressable>
-          </View>
-      
+          </Pressable>
+        </View>}
+      <View style={styles(theme).searchContainer}>
+        <Image
+          source={IMAGES.search}
+          style={styles(theme).searchIcon}
+        />
+        <Pressable
+          onPress={onSearchPress}
+          style={styles(theme).searchPressable}
+        >
+          <TextInput
+            style={styles(theme).searchInput}
+            placeholderTextColor={theme.secondaryText}
+            placeholder={STRING.search_for_services}
+            editable={false}
+          />
+        </Pressable>
+      </View>
+
       {/* {bannerImg && <Image
         source={bannerImg}
         style={styles(theme).banner}

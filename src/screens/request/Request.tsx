@@ -39,6 +39,7 @@ import { API } from '../../api';
 import { debounce } from 'lodash';
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import NavigationService from '../NavigationService';
 
 const PAGE_SIZE = 10;
 export default function Request(props: any) {
@@ -183,7 +184,7 @@ export default function Request(props: any) {
           style={styles(theme).btnRequestService}
           activeOpacity={1}
           onPress={() => {
-            props.navigation.navigate(SCREENS.CreateRequest.identifier);
+            NavigationService.navigate(SCREENS.CreateRequest.identifier);
           }}>
           <Text
             size={getScaleSize(19)}
@@ -284,7 +285,7 @@ export default function Request(props: any) {
       </View>
       <FlatList
         // data={requestData?.allRequests || []}
-        data={listdata}
+        data={[]}
         contentContainerStyle={{ paddingBottom: getScaleSize(50), paddingHorizontal: getScaleSize(24), gap: getScaleSize(20) }}
         showsVerticalScrollIndicator={false}
         keyExtractor={(item: any, index: number) => index.toString()}
@@ -312,7 +313,7 @@ export default function Request(props: any) {
 
                 }
                 else if(item?.status?.toLowerCase() === 'cancelled'){
- props.navigation.navigate(SCREENS.RequestDetails.identifier, {
+ NavigationService.navigate(SCREENS.RequestDetails.identifier, {
                   item: item,
                   title: "Task Details",
                   isCanceled:true,
@@ -320,7 +321,7 @@ export default function Request(props: any) {
                 })
                 }
                 else {
-                  props.navigation.navigate(SCREENS.ProvideRequest.identifier, {
+                  NavigationService.navigate(SCREENS.ProvideRequest.identifier, {
                     item: item
                   })
                 }
@@ -331,7 +332,7 @@ export default function Request(props: any) {
               jobTime={item?.jobTime}
               address={`${item?.address?.banglo} ${item?.address?.city}, ${item?.address?.state}, ${item?.address?.country}`}
               handleRaiseDispute={() => {
-                props.navigation.navigate(SCREENS.RequestDetails.identifier, {
+                NavigationService.navigate(SCREENS.RequestDetails.identifier, {
                   item: item,
                   title: "Task Details",
                   isDisputed: false,
@@ -339,7 +340,7 @@ export default function Request(props: any) {
                 })
               }}
               handleRate={() => {
-                props.navigation.navigate(SCREENS.RequestDetails.identifier, {
+                NavigationService.navigate(SCREENS.RequestDetails.identifier, {
                   item: item,
                   title: "Task Details",
                   isDisputed: false,
@@ -347,7 +348,7 @@ export default function Request(props: any) {
                 })
               }}
               handleDisputeStatus={() => {
-                props.navigation.navigate(SCREENS.RequestDetails.identifier, {
+                NavigationService.navigate(SCREENS.RequestDetails.identifier, {
                   title: "Task Details",
                   isDisputed: true,
                   serviceStatus:item?.status
@@ -358,7 +359,7 @@ export default function Request(props: any) {
             //   if (item?.status?.toLowerCase() === 'expired') {
 
             //   } else {
-            //     props.navigation.navigate(SCREENS.RequestDetails.identifier, {
+            //     NavigationService.navigate(SCREENS.RequestDetails.identifier, {
             //       item: item
             //     })
             //   }

@@ -1,17 +1,11 @@
 import React, { useContext, useState } from 'react';
 import {
   View,
-  StatusBar,
   StyleSheet,
-  Dimensions,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  Alert,
   ScrollView,
   FlatList,
   TouchableOpacity,
   Image,
-  Platform,
 } from 'react-native';
 
 //ASSETS
@@ -28,16 +22,14 @@ import {
   Header,
   RatingsReviewsItem,
   RattingControler,
-  RequestItem,
-  SearchComponent,
   Text,
 } from '../../components';
 
 //PACKAGES
-import { useFocusEffect } from '@react-navigation/native';
 import { SCREENS } from '..';
-import { Rating } from 'react-native-ratings';
 import { AppSafeAreaView } from '../../components/AppSafeAreaView';
+import { useAppSelector } from '../../redux/hooks';
+import { screenWidth } from '../../constant/scaleSize';
 
 export default function MyProfileProfessional(props: any) {
 
@@ -45,6 +37,7 @@ export default function MyProfileProfessional(props: any) {
 
   const { theme } = useContext<any>(ThemeContext);
   const { profile } = useContext(AuthContext)
+  const { userData } = useAppSelector(state => state.auth)
 
   const [showMore, setShowMore] = useState(false);
   const [showMoreExperience, setShowMoreExperience] = useState(false);
@@ -67,10 +60,10 @@ export default function MyProfileProfessional(props: any) {
         style={styles(theme).scrolledContainer}
         showsVerticalScrollIndicator={false}>
         <View style={styles(theme).informationContainer}>
-          {profile?.user?.profile_photo_url ?
+          {userData?.profile?.profile_photo?.url ?
             <Image
               style={styles(theme).profilePic}
-              source={{ uri: profile?.user?.profile_photo_url }}
+              source={{ uri: userData?.profile?.profile_photo?.url }}
             />
             :
             <View style={styles(theme).EmptyProfileContainer}>
@@ -79,8 +72,11 @@ export default function MyProfileProfessional(props: any) {
                 font={FONTS.Lato.Regular}
                 align="center"
                 color={theme._262B43E5}>
-                {(profile?.user?.first_name?.charAt(0) ?? '').toUpperCase() +
-                  (profile?.user?.last_name?.charAt(0) ?? '').toUpperCase()}
+                {/* {(profile?.user?.first_name?.charAt(0) ?? '').toUpperCase() +
+                  (profile?.user?.last_name?.charAt(0) ?? '').toUpperCase()} */}
+                {(userData?.profile?.full_name?.charAt(0) ?? '').toUpperCase()
+                  ?? (userData?.profile?.business_name?.charAt(0) ?? '').toUpperCase()
+                }
               </Text>
             </View>
           }
@@ -88,8 +84,9 @@ export default function MyProfileProfessional(props: any) {
             size={getScaleSize(22)}
             font={FONTS.Lato.SemiBold}
             color={theme._2B2B2B}
-            style={{ alignSelf: 'center' }}>
-            {`${profile?.user?.first_name + " " + profile?.user?.last_name}`}
+            style={styles(theme).centeredText}>
+            {/* {`${profile?.user?.first_name + " " + profile?.user?.last_name}`} */}
+            {userData?.profile?.full_name ?? userData?.profile?.business_name}
           </Text>
           <View style={styles(theme).horizontalContainer}>
             <View style={styles(theme).itemContainer}>
@@ -98,14 +95,14 @@ export default function MyProfileProfessional(props: any) {
                   size={getScaleSize(16)}
                   font={FONTS.Lato.Bold}
                   color={theme.primary}
-                  style={{ alignSelf: 'center' }}>
+                  style={styles(theme).centeredText}>
                   {profile?.customer_ratings?.average_rating ?? '0.0'}
                 </Text>
                 <Text
                   size={getScaleSize(12)}
                   font={FONTS.Lato.Medium}
                   color={theme.primary}
-                  style={{ alignSelf: 'center', marginTop: getScaleSize(4) }}>
+                  style={styles(theme).centeredTextWithSpacing}>
                   {STRING.Overallrating}
                 </Text>
               </View>
@@ -143,14 +140,14 @@ export default function MyProfileProfessional(props: any) {
                   size={getScaleSize(16)}
                   font={FONTS.Lato.Bold}
                   color={theme.primary}
-                  style={{ alignSelf: 'center' }}>
+                  style={styles(theme).centeredText}>
                   {profile?.unique_clients_count ?? '0'}
                 </Text>
                 <Text
                   size={getScaleSize(12)}
                   font={FONTS.Lato.Medium}
                   color={theme.primary}
-                  style={{ alignSelf: 'center', marginTop: getScaleSize(4) }}>
+                  style={styles(theme).centeredTextWithSpacing}>
                   {STRING.Clients}
                 </Text>
               </View>
@@ -167,9 +164,10 @@ export default function MyProfileProfessional(props: any) {
           <Text
             size={getScaleSize(14)}
             font={FONTS.Lato.Medium}
-            style={{ marginTop: getScaleSize(8) }}
+            style={styles(theme).sectionTextMargin}
             color={theme._323232}>
-            {profile?.provider_info?.bio ?? '-'}
+            {/* {profile?.provider_info?.bio ?? '-'} */}
+            {userData?.profile?.business_description ?? '-'}
           </Text>
         </View>
         <View style={styles(theme).informationContainer}>
@@ -183,17 +181,17 @@ export default function MyProfileProfessional(props: any) {
             size={getScaleSize(14)}
             font={FONTS.Lato.Medium}
             numberOfLines={showMoreExperience ? undefined : 3}
-            style={{ marginTop: getScaleSize(8) }}
+            style={styles(theme).sectionTextMargin}
             color={theme._323232}>
             {profile?.provider_info?.experience_speciality ?? '-'}
           </Text>
           {profile?.provider_info?.experience_speciality?.length > 100 &&
-            <TouchableOpacity style={{ marginTop: getScaleSize(8) }}
+            <TouchableOpacity style={styles(theme).readMoreButton}
               onPress={() => setShowMoreExperience(!showMoreExperience)}>
               <Text
                 size={getScaleSize(16)}
                 font={FONTS.Lato.Medium}
-                color={'#2C6587'}>
+                color={theme.primary}>
                 {showMoreExperience ? STRING.show_less : STRING.read_more}
               </Text>
             </TouchableOpacity>
@@ -209,7 +207,7 @@ export default function MyProfileProfessional(props: any) {
           <Text
             size={getScaleSize(14)}
             font={FONTS.Lato.Medium}
-            style={{ marginTop: getScaleSize(8) }}
+            style={styles(theme).sectionTextMargin}
             color={theme._323232}>
             {profile?.provider_info?.achievements ?? '-'}
           </Text>
@@ -226,7 +224,7 @@ export default function MyProfileProfessional(props: any) {
             horizontal
             keyExtractor={(item: any, index: number) => index.toString()}
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: getScaleSize(12) }}
+            contentContainerStyle={styles(theme).photosListContent}
             renderItem={({ item, index }) => {
               return (
                 <TouchableOpacity
@@ -254,7 +252,7 @@ export default function MyProfileProfessional(props: any) {
           <View
             style={[
               styles(theme).horizontalContainer,
-              { marginTop: getScaleSize(20) },
+              styles(theme).ratingSummarySpacing,
             ]}>
             <Text
               size={getScaleSize(24)}
@@ -262,11 +260,7 @@ export default function MyProfileProfessional(props: any) {
               color={theme._323232}>
               {profile?.customer_ratings?.average_rating ?? '0.0'}
             </Text>
-            <View
-              style={{
-                marginLeft: getScaleSize(16),
-                alignSelf: 'center',
-              }}>
+            <View style={styles(theme).ratingDetailContainer}>
               <View style={styles(theme).rowView}>
                 {[...Array(5)].map((_, i) => {
                   const filled = i < Math.round(overallRating);
@@ -282,14 +276,14 @@ export default function MyProfileProfessional(props: any) {
               </View>
               <Text
                 size={getScaleSize(12)}
-                style={{ marginTop: getScaleSize(3) }}
+                style={styles(theme).ratingCountText}
                 font={FONTS.Lato.Medium}
                 color={theme._8C8C8C}>
                 {`Based on ${profile?.customer_ratings?.total_ratings ?? 0} ratings`}
               </Text>
             </View>
           </View>
-          <View style={{ marginTop: getScaleSize(15) }}>
+          <View style={styles(theme).ratingItemSpacing}>
             <RattingControler
               title={'Work quality'}
               value={profile?.customer_ratings?.criteria_averages?.overall ?? '0.0'}
@@ -297,7 +291,7 @@ export default function MyProfileProfessional(props: any) {
               totalCount={5}
             />
           </View>
-          <View style={{ marginTop: getScaleSize(15) }}>
+          <View style={styles(theme).ratingItemSpacing}>
             <RattingControler
               title={'Reliability'}
               value={profile?.customer_ratings?.criteria_averages?.reliability ?? '0.0'}
@@ -305,7 +299,7 @@ export default function MyProfileProfessional(props: any) {
               totalCount={5}
             />
           </View>
-          <View style={{ marginTop: getScaleSize(15) }}>
+          <View style={styles(theme).ratingItemSpacing}>
             <RattingControler
               title={'Punctunality'}
               value={profile?.customer_ratings?.criteria_averages?.punctuality ?? '0.0'}
@@ -313,7 +307,7 @@ export default function MyProfileProfessional(props: any) {
               totalCount={5}
             />
           </View>
-          <View style={{ marginTop: getScaleSize(15) }}>
+          <View style={styles(theme).ratingItemSpacing}>
             <RattingControler
               title={'Soluction'}
               value={profile?.customer_ratings?.criteria_averages?.solution ?? '0.0'}
@@ -321,7 +315,7 @@ export default function MyProfileProfessional(props: any) {
               totalCount={5}
             />
           </View>
-          <View style={{ marginTop: getScaleSize(15) }}>
+          <View style={styles(theme).ratingItemSpacing}>
             <RattingControler
               title={'Payout'}
               value={profile?.customer_ratings?.criteria_averages?.payout ?? '0.0'}
@@ -354,7 +348,7 @@ export default function MyProfileProfessional(props: any) {
             })}
           </View>
         }
-        <View style={{ height: getScaleSize(32) }} />
+        <View style={styles(theme).bottomSpacer} />
       </ScrollView>
     </AppSafeAreaView>
   );
@@ -369,7 +363,7 @@ const styles = (theme: ThemeContextType['theme']) =>
     informationContainer: {
       marginTop: getScaleSize(20),
       borderWidth: 1,
-      borderColor: '#D5D5D5',
+      borderColor: theme._D5D5D5,
       borderRadius: getScaleSize(16),
       paddingHorizontal: getScaleSize(24),
       paddingVertical: getScaleSize(24),
@@ -400,17 +394,20 @@ const styles = (theme: ThemeContextType['theme']) =>
       justifyContent: 'center',
       alignItems: 'center',
       borderWidth: 1,
-      borderColor: '#D5D5D5',
+      borderColor: theme._D5D5D5,
       borderRadius: getScaleSize(6),
       marginTop: getScaleSize(20),
       marginHorizontal: getScaleSize(5)
     },
     photosView: {
       height: getScaleSize(144),
-      width: (Dimensions.get('window').width - getScaleSize(108)) / 2,
+      width: (screenWidth - getScaleSize(108)) / 2,
       borderRadius: 8,
       resizeMode: 'cover',
       marginTop: getScaleSize(18),
+    },
+    photosListContent: {
+      gap: getScaleSize(12),
     },
     ratingimage: {
       resizeMode: 'contain',
@@ -421,5 +418,34 @@ const styles = (theme: ThemeContextType['theme']) =>
     rowView: {
       flexDirection: 'row',
       alignItems: 'center',
+    },
+    centeredText: {
+      alignSelf: 'center',
+    },
+    centeredTextWithSpacing: {
+      alignSelf: 'center',
+      marginTop: getScaleSize(4),
+    },
+    sectionTextMargin: {
+      marginTop: getScaleSize(8),
+    },
+    readMoreButton: {
+      marginTop: getScaleSize(8),
+    },
+    ratingDetailContainer: {
+      marginLeft: getScaleSize(16),
+      alignSelf: 'center',
+    },
+    ratingCountText: {
+      marginTop: getScaleSize(3),
+    },
+    ratingSummarySpacing: {
+      marginTop: getScaleSize(20),
+    },
+    ratingItemSpacing: {
+      marginTop: getScaleSize(15),
+    },
+    bottomSpacer: {
+      height: getScaleSize(32),
     },
   });

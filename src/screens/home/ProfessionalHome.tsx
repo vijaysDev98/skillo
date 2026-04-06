@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   View,
   StatusBar,
@@ -20,13 +20,13 @@ import {
 } from 'react-native';
 
 //ASSETS
-import {FONTS, IMAGES} from '../../assets';
+import { FONTS, IMAGES } from '../../assets';
 
 //API
-import {API} from '../../api';
+import { API } from '../../api';
 
 //CONTEXT
-import {AuthContext, ThemeContext, ThemeContextType} from '../../context';
+import { AuthContext, ThemeContext, ThemeContextType } from '../../context';
 
 //CONSTANT
 import {
@@ -58,28 +58,33 @@ import {
 } from '@react-navigation/native';
 
 //SCREENS
-import {SCREENS} from '..';
+import { SCREENS } from '..';
 import Geolocation from 'react-native-geolocation-service';
-import {PERMISSIONS, request, RESULTS} from 'react-native-permissions';
-import {EventRegister} from 'react-native-event-listeners';
-import {buildThreadId} from '../../services/chat';
+import { PERMISSIONS, request, RESULTS } from 'react-native-permissions';
+import { EventRegister } from 'react-native-event-listeners';
+import { buildThreadId } from '../../services/chat';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import VerificationModal from '../../components/VerificationModal';
+import { useAppSelector } from '../../redux/hooks';
 
 export default function ProfessionalHome(props: any) {
   const skipSubscription = props?.route?.params?.skipSubscription;
 
   const STRING = useString();
 
-  const {theme} = useContext<any>(ThemeContext);
+  const { theme } = useContext<any>(ThemeContext);
 
-  const {profile, fetchProfile, userType} = useContext(AuthContext);
+  const { profile, fetchProfile, userType } = useContext(AuthContext);
+
+  const { userData } = useAppSelector((state) => state?.auth)
+
+  console.log("userData", userData)
 
   const [isLoading, setLoading] = useState(false);
   const [serviceList, setServiceList] = useState<any>([]);
   const [locationDenied, setLocationDenied] = useState(false);
 
-  const [isVerificationPending,setIsVerificationPending] = useState(false)
+  const [isVerificationPending, setIsVerificationPending] = useState(false)
 
   const isFocused = useIsFocused();
 
@@ -87,44 +92,44 @@ export default function ProfessionalHome(props: any) {
 
   const insets = useSafeAreaInsets()
 
-  useEffect(() => {
-    const sub = AppState.addEventListener('change', nextState => {
-      if (currentState === 'active' && nextState === 'background') {
-        onUpdateProfile();
-      }
+  // useEffect(() => {
+  //   const sub = AppState.addEventListener('change', nextState => {
+  //     if (currentState === 'active' && nextState === 'background') {
+  //       onUpdateProfile();
+  //     }
 
-      if (currentState === 'background' && nextState === 'active') {
-        onUpdateProfile();
-      }
+  //     if (currentState === 'background' && nextState === 'active') {
+  //       onUpdateProfile();
+  //     }
 
-      currentState = nextState;
-    });
+  //     currentState = nextState;
+  //   });
 
-    return () => sub.remove();
-  }, []);
+  //   return () => sub.remove();
+  // }, []);
 
-  useEffect(() => {
-    EventRegister.addEventListener('onAccountSuccess', (data: any) => {
-      onUpdateProfile();
-    });
-  }, []);
+  // useEffect(() => {
+  //   EventRegister.addEventListener('onAccountSuccess', (data: any) => {
+  //     onUpdateProfile();
+  //   });
+  // }, []);
 
-  const onUpdateProfile = async () => {
-    setLoading(true);
-    await fetchProfile();
-    setLoading(false);
-  };
+  // const onUpdateProfile = async () => {
+  //   setLoading(true);
+  //   await fetchProfile();
+  //   setLoading(false);
+  // };
 
   useEffect(() => {
     console.log('onAccountCancel');
     EventRegister.addEventListener('onAccountCancel', (data: any) => {
-      onUpdateProfile();
+      // onUpdateProfile();
     });
   }, []);
 
   useEffect(() => {
     if (isFocused) {
-      onUpdateProfile();
+      // onUpdateProfile();
       requestPermissions();
       getLocation();
     }
@@ -152,9 +157,9 @@ export default function ProfessionalHome(props: any) {
 
     Geolocation.getCurrentPosition(
       position => {
-        const {latitude, longitude} = position.coords;
+        const { latitude, longitude } = position.coords;
         setLoading(false);
-        getAllServices({latitude, longitude});
+        // getAllServices({ latitude, longitude });
       },
       error => {
         setLoading(false);
@@ -237,10 +242,10 @@ export default function ProfessionalHome(props: any) {
       );
       setLoading(false);
       if (result?.status) {
-        console.log('resulcounttvgvt==>', result?.data?.data?.status?.verified_providers_today?.count        );
+        console.log('resulcounttvgvt==>', result?.data?.data?.status?.verified_providers_today?.count);
         setServiceList(result.data.data ?? []);
-        if(result?.data?.detail){
-          SHOW_TOAST(result?.data?.detail , 'success')
+        if (result?.data?.detail) {
+          SHOW_TOAST(result?.data?.detail, 'success')
         }
       } else {
         setLoading(false);
@@ -304,123 +309,123 @@ export default function ProfessionalHome(props: any) {
             color={theme.primaryText}
             style={{
               marginTop: getScaleSize(28),
-              marginBottom:getScaleSize(24)
+              marginBottom: getScaleSize(24)
             }}>
             {"Instant Requests"}
           </Text>
-            {serviceList?.recent_tasks?.data?.length > 0 && (
-          <>
-            {(serviceList?.recent_tasks?.data?.length > 0
-              ? serviceList?.recent_tasks?.data
-              : []
-            )?.map((item: any, index: number) => {
-              return (
-                <TaskItem
-                  key={index}
-                  item={item}
-                  status={"instant"}
-                  cardContainerStyle={{backgroundColor:theme._FDEFEC,borderColor:theme._EC613D,borderWidth:0.5}}
-                  onPressItem={() => {
-                    // if (item?.task_status === 'pending') {
-                    //   props.navigation.navigate(
-                    //     SCREENS.OpenRequestDetails.identifier,
-                    //     {
-                    //       item: item,
-                    //     },
-                    //   );
-                    // } else if (item?.task_status === 'accepted') {
-                    //   props.navigation.navigate(
-                    //     SCREENS.CompletedTaskDetails.identifier,
-                    //     {
-                    //       item: item,
-                    //     },
-                    //   );
-                    // }
-                    props.navigation.navigate(
-                      SCREENS.ProfessionalTaskDetails.identifier,
-                      {
+          {serviceList?.recent_tasks?.data?.length > 0 && (
+            <>
+              {(serviceList?.recent_tasks?.data?.length > 0
+                ? serviceList?.recent_tasks?.data
+                : []
+              )?.map((item: any, index: number) => {
+                return (
+                  <TaskItem
+                    key={index}
+                    item={item}
+                    status={"instant"}
+                    cardContainerStyle={{ backgroundColor: theme._FDEFEC, borderColor: theme._EC613D, borderWidth: 0.5 }}
+                    onPressItem={() => {
+                      // if (item?.task_status === 'pending') {
+                      //   props.navigation.navigate(
+                      //     SCREENS.OpenRequestDetails.identifier,
+                      //     {
+                      //       item: item,
+                      //     },
+                      //   );
+                      // } else if (item?.task_status === 'accepted') {
+                      //   props.navigation.navigate(
+                      //     SCREENS.CompletedTaskDetails.identifier,
+                      //     {
+                      //       item: item,
+                      //     },
+                      //   );
+                      // }
+                      props.navigation.navigate(
+                        SCREENS.ProfessionalTaskDetails.identifier,
+                        {
+                          item: item,
+                        },
+                      );
+                    }}
+                    onPressStatus={() => {
+                      props.navigation.navigate(SCREENS.TaskStatus.identifier, {
                         item: item,
-                      },
-                    );
-                  }}
-                  onPressStatus={() => {
-                    props.navigation.navigate(SCREENS.TaskStatus.identifier, {
-                      item: item,
-                    });
-                  }}
-                  onPressChat={() => {
-                    getServiceDetails(item?.service_request_id);
-                  }}
-                />
-              );
-            })}
-          </>
-        ) }
+                      });
+                    }}
+                    onPressChat={() => {
+                      getServiceDetails(item?.service_request_id);
+                    }}
+                  />
+                );
+              })}
+            </>
+          )}
         </View>
         {/* Ongoing Task */}
-         <View>
+        <View>
           <Text
             size={getScaleSize(16)}
             font={FONTS.Lato.SemiBold}
             color={theme.primaryText}
             style={{
               marginTop: getScaleSize(28),
-              marginBottom:getScaleSize(24)
+              marginBottom: getScaleSize(24)
             }}>
             {"Ongoing Task"}
           </Text>
-            {serviceList?.recent_tasks?.data?.length > 0 && (
-          <>
-            {(serviceList?.recent_tasks?.data?.length > 0
-              ? serviceList?.recent_tasks?.data
-              : []
-            )?.map((item: any, index: number) => {
-              return (
-                <TaskItem
-                  key={index}
-                  item={item}
-                  onPressItem={() => {
-                    // if (item?.task_status === 'pending') {
-                    //   props.navigation.navigate(
-                    //     SCREENS.OpenRequestDetails.identifier,
-                    //     {
-                    //       item: item,
-                    //     },
-                    //   );
-                    // } else if (item?.task_status === 'accepted') {
-                    //   props.navigation.navigate(
-                    //     SCREENS.CompletedTaskDetails.identifier,
-                    //     {
-                    //       item: item,
-                    //     },
-                    //   );
-                    // }
-                    props.navigation.navigate(
-                      SCREENS.ProfessionalTaskDetails.identifier,
-                      {
+          {serviceList?.recent_tasks?.data?.length > 0 && (
+            <>
+              {(serviceList?.recent_tasks?.data?.length > 0
+                ? serviceList?.recent_tasks?.data
+                : []
+              )?.map((item: any, index: number) => {
+                return (
+                  <TaskItem
+                    key={index}
+                    item={item}
+                    onPressItem={() => {
+                      // if (item?.task_status === 'pending') {
+                      //   props.navigation.navigate(
+                      //     SCREENS.OpenRequestDetails.identifier,
+                      //     {
+                      //       item: item,
+                      //     },
+                      //   );
+                      // } else if (item?.task_status === 'accepted') {
+                      //   props.navigation.navigate(
+                      //     SCREENS.CompletedTaskDetails.identifier,
+                      //     {
+                      //       item: item,
+                      //     },
+                      //   );
+                      // }
+                      props.navigation.navigate(
+                        SCREENS.ProfessionalTaskDetails.identifier,
+                        {
+                          item: item,
+                        },
+                      );
+                    }}
+                    onPressStatus={() => {
+                      props.navigation.navigate(SCREENS.TaskStatus.identifier, {
                         item: item,
-                      },
-                    );
-                  }}
-                  onPressStatus={() => {
-                    props.navigation.navigate(SCREENS.TaskStatus.identifier, {
-                      item: item,
-                    });
-                  }}
-                  onPressChat={() => {
-                    getServiceDetails(item?.service_request_id);
-                  }}
-                />
-              );
-            })}
-          </>
-        ) }
+                      });
+                    }}
+                    onPressChat={() => {
+                      getServiceDetails(item?.service_request_id);
+                    }}
+                  />
+                );
+              })}
+            </>
+          )}
         </View>
         {/* Explore Quotes */}
         <View
           style={[
             styles(theme).directionView,
-            {marginBottom: getScaleSize(24)},
+            { marginBottom: getScaleSize(24) },
           ]}>
           <Text
             size={getScaleSize(16)}
@@ -431,7 +436,7 @@ export default function ProfessionalHome(props: any) {
             }}>
             {"Explore Quotes"}
           </Text>
-          <View style={{flex: 1}}></View>
+          <View style={{ flex: 1 }}></View>
           {serviceList?.open_services?.length > 0 && (
             <TouchableOpacity
               onPress={() => {
@@ -474,7 +479,7 @@ export default function ProfessionalHome(props: any) {
             }}
           />
         ))}
-        <View style={[styles(theme).horizontalContainer,{marginBottom:getScaleSize(24)}]}>
+        <View style={[styles(theme).horizontalContainer, { marginBottom: getScaleSize(24) }]}>
           <Text
             size={getScaleSize(16)}
             font={FONTS.Lato.SemiBold}
@@ -486,7 +491,7 @@ export default function ProfessionalHome(props: any) {
           </Text>
           {serviceList?.recent_tasks?.data?.length > 0 && (
             <TouchableOpacity
-              style={{paddingVertical: getScaleSize(8)}}
+              style={{ paddingVertical: getScaleSize(8) }}
               onPress={() => {
                 props.navigation.dispatch(
                   CommonActions.reset({
@@ -494,7 +499,7 @@ export default function ProfessionalHome(props: any) {
                     routes: [
                       {
                         name: SCREENS.BottomBar.identifier,
-                        params: {isTask: true},
+                        params: { isTask: true },
                       },
                     ],
                   }),
@@ -507,7 +512,7 @@ export default function ProfessionalHome(props: any) {
                 {STRING.Viewall}
               </Text>
             </TouchableOpacity>
-          )} 
+          )}
         </View>
         {serviceList?.recent_tasks?.data?.length > 0 ? (
           <>
@@ -620,6 +625,8 @@ export default function ProfessionalHome(props: any) {
       />
       <HomeHeader
         bannerImg={IMAGES.homeBanner}
+        userImage={userData?.profile?.url}
+        userName={userData?.profile.full_name || userData?.profile?.business_name}
         onSearchPress={() => {
           props.navigation.navigate(SCREENS.SearchProvider.identifier);
         }}
@@ -654,21 +661,21 @@ export default function ProfessionalHome(props: any) {
           style={styles(theme).scrolledContainer}
           showsVerticalScrollIndicator={false}>
           <Image
-                    source={IMAGES.homeBanner}
-                    style={{
-                      width: '100%',
-                      height: getScaleSize(200),
-                    }}
-                    resizeMode="contain"
-                  />
+            source={IMAGES.homeBanner}
+            style={{
+              width: '100%',
+              height: getScaleSize(200),
+            }}
+            resizeMode="contain"
+          />
           {/* {renderServiceRequestView()} */}
           {renderServiceRequestListView()}
         </ScrollView>
       )}
       {isLoading && <ProgressView />}
       <VerificationModal
-      visible={isVerificationPending}
-      onPressStatus={() => {}}
+        visible={isVerificationPending}
+        onPressStatus={() => { }}
       />
     </View>
   );
@@ -676,8 +683,8 @@ export default function ProfessionalHome(props: any) {
 
 const styles = (theme: ThemeContextType['theme']) =>
   StyleSheet.create({
-    container: {flex: 1.0, backgroundColor: theme.white},
-    
+    container: { flex: 1.0, backgroundColor: theme.white },
+
     scrolledContainer: {
       // marginTop: getScaleSize(28),
       marginHorizontal: getScaleSize(22),

@@ -19,6 +19,8 @@ import OTPTextInput from 'react-native-otp-textinput';
 
 import { API } from '../../api';
 import { AppSafeAreaView } from '../../components/AppSafeAreaView';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { resendOtpAction, resetPasswordVerifyOtpAction, verifyOtpAction } from '../../actions/auth/authAction';
 
 export default function Otp(props: any) {
 
@@ -26,17 +28,16 @@ export default function Otp(props: any) {
     const isFromSignup = props?.route?.params?.isFromSignup || false;
     // const isPhoneNumber = props?.route?.params?.isPhoneNumber || false;
     // const countryCode = props?.route?.params?.countryCode || '+91';
-    const { email, type } = props?.route?.params || {};
+    const { email, type,id,isResetPassword } = props?.route?.params || {};
+    const { isLoading } = useAppSelector((state) => state.auth);
 
-    console.log("email", email);
-    console.log("type", type);
-
+    const dispatch = useAppDispatch()
     const { theme } = useContext<any>(ThemeContext);
     const otpInput = useRef<OTPTextInput>(null);
 
     const [otp, setOtp] = useState('');
     const [otpError, setOtpError] = useState('');
-    const [isLoading, setLoading] = useState(false);
+    // const [isLoading, setLoading] = useState(false);
     const [timer, setTimer] = useState(60); // seconds
     const [isResendDisabled, setIsResendDisabled] = useState(true);
 
@@ -64,163 +65,42 @@ export default function Otp(props: any) {
             props.navigation.goBack();
             return;
         }
-        // props.navigation.navigate(SCREENS.CreatePassword.identifier, {
-        //                         email: email,
-        //                     })
-        if (isFromSignup) {
-            // onSignup()
-            props.navigation.navigate(SCREENS.CreatePassword.identifier, {
-                email: email,
-                // isPhoneNumber: isPhoneNumber,
-                // countryCode: countryCode,
-            });
-        } else {
-            // onNewPassword();
-            props.navigation.navigate(SCREENS.NewPassword.identifier, {
-                email: email,
-                // isPhoneNumber: isPhoneNumber,
-                // countryCode: countryCode,
-            });
+        else {
+
         }
     }
 
-    async function onNewPassword() {
-        if (!otp) {
-            setOtpError(STRING.errorText.please_enter_your_otp);
-        } else {
-            setOtpError('');
-            // let params = {}
-            // if (isPhoneNumber) {
-            //     params = {
-            //         mobile: email,
-            //         phone_country_code: countryCode,
-            //         otp: otp,
-            //     }
-            // } else {
-            const params = {
-                email: email,
-                otp: otp,
-            }
-            // }
-            try {
-                setLoading(true);
-                const result: any = await API.Instance.post(API.API_ROUTES.verifyResetPassword, params);
-                setLoading(false);
-                console.log('result', result.status, result)
-                if (result.status) {
-                    SHOW_TOAST(result?.data?.message ?? '', 'success')
-                    props.navigation.navigate(SCREENS.NewPassword.identifier, {
-                        email: email,
-                        // isPhoneNumber: isPhoneNumber,
-                        // countryCode: countryCode,
-                    });
-                } else {
-                    SHOW_TOAST(result?.data?.message ?? '', 'error')
-                    console.log('error==>', result?.data?.message)
-                }
-            } catch (error: any) {
-                setLoading(false);
-                SHOW_TOAST(error?.message ?? '', 'error');
-                console.log(error?.message)
-            } finally {
-                setLoading(false);
-            }
-        }
-    }
-
-    async function onSignup() {
-        if (!otp) {
+    async function verifyOtp() {
+        if (!otp || otp.length !== 6) {
             setOtpError(STRING.errorText.please_enter_valid_code);
         } else {
             setOtpError('');
-            // let params = {}
-            // if (isPhoneNumber) {
-            //     params = {
-            //         mobile: email,
-            //         phone_country_code: countryCode,
-            //         otp: otp,
-            //     }
-            // } else {
             const params = {
                 email: email,
                 otp: otp,
+                id: id,
             }
-            // }
-            try {
-                setLoading(true);
-                const result: any = await API.Instance.post(API.API_ROUTES.verifyOtp, params);
-                setLoading(false);
-                console.log('result', result.status, result)
-                if (result.status) {
-                    SHOW_TOAST(result?.data?.message ?? '', 'success')
-                    props.navigation.navigate(SCREENS.CreatePassword.identifier, {
-                        email: email,
-                        // isPhoneNumber: isPhoneNumber,
-                        // countryCode: countryCode,
-                    });
-                } else {
-                    if (result?.code === 409) {
-                        if (result?.data?.message == 'OTP already verified. Redirect to Password page.') {
-                            props.navigation.navigate(SCREENS.CreatePassword.identifier, {
-                                email: email,
-                            })
-                        } else if (result?.data?.message == 'Password already set. Redirect to Details page.') {
-                            props.navigation.navigate(SCREENS.AddPersonalDetails.identifier, {
-                                email: email,
-                            })
-                        } else {
-                            SHOW_TOAST(result?.data?.message ?? '', 'error')
-                        }
-                    } else {
-                        SHOW_TOAST(result?.data?.message ?? '', 'error')
-                        console.log('error==>', result?.data?.message)
-                    }
-                }
-            } catch (error: any) {
-                setLoading(false);
-                SHOW_TOAST(error?.message ?? '', 'error');
-                console.log(error?.message)
-            } finally {
-                setLoading(false);
-            }
+if(isResetPassword){
+    dispatch(resetPasswordVerifyOtpAction(params))
+}else{
+    dispatch(verifyOtpAction(params))
+}
         }
     }
 
     async function onResendOtp() {
-        try {
-            // let params = {}
-            // if (isPhoneNumber) {
-            //     params = {
-            //         mobile: email,
-            //         phone_country_code: countryCode,
-            //     }
-            // } else {
-            const params = {
-                email: email,
-            }
-            // }
-            setLoading(true);
-            const result = await API.Instance.post(API.API_ROUTES.resendOtp, params);
-            setLoading(false);
-            console.log('result', result.status, result)
-            if (result.status) {
-                SHOW_TOAST(result?.data?.message ?? '', 'success')
-                otpInput.current?.clear();
-                setTimer(60);
-                setIsResendDisabled(true);
-            } else {
-                SHOW_TOAST(result?.data?.message ?? '', 'error')
-                console.log('error==>', result?.data?.message)
-            }
+        let params = {
+            email: email,
         }
-        catch (error: any) {
-            setLoading(false);
-            SHOW_TOAST(error?.message ?? '', 'error');
-            console.log(error?.message)
-        }
-        finally {
-            setLoading(false);
-        }
+        dispatch(resendOtpAction(params, handleResendSuccess))
+    }
+
+    function handleResendSuccess() {
+        setTimer(60);
+        setIsResendDisabled(true);
+        otpInput.current?.clear();
+        setTimer(60);
+        setIsResendDisabled(true);
     }
 
     return (
@@ -301,7 +181,9 @@ export default function Otp(props: any) {
                         font={FONTS.Lato.SemiBold}
                         color={theme.mainText}
                         size={getScaleSize(16)}
-                        align="center">
+                        align="center"
+                        style={{ marginBottom: getScaleSize(16) }}
+                    >
                         Resend -
                         <Text
                             font={FONTS.Lato.SemiBold}
@@ -330,10 +212,12 @@ export default function Otp(props: any) {
             <Button
                 // title={isFromSignup ? STRING.buttonText.verify_OTP : STRING.buttonText.continue}
                 title={STRING.buttonText.verify_OTP}
-                // disabled={!otp}
+                disabled={!otp}
+                loading={isLoading}
                 style={{ marginBottom: getScaleSize(10), marginHorizontal: getScaleSize(24) }}
                 onPress={() => {
-                    onOtp()
+                    // onOtp()
+                    verifyOtp()
                 }}
             />
         </AppSafeAreaView>

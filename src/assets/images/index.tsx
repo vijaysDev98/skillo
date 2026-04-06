@@ -167,5 +167,6 @@ export const IMAGES = {
   homeIcon: require('./homeIcon.png'),
   addQuoteSuccessImg: require('./addQuotoSuccessImg.png'),
   filterIcon: require('./filterIcon.png'),
-  infoIcon: require('./infoIcon.png')
+  infoIcon: require('./infoIcon.png'),
+  seekerChatsIcon:require('./seekerchatsIcon.png')
 };

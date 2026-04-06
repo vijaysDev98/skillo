@@ -1,32 +1,28 @@
-import { Dimensions, Image, ScrollView, StyleSheet, View } from 'react-native';
-import React, { useContext, useEffect, useState } from 'react';
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useContext, useState } from 'react';
 
 //CONTEXT
 import { ThemeContext, ThemeContextType } from '../../context';
 
 //CONSTANT & ASSETS
-import { FONTS, IMAGES } from '../../assets';
-import { getScaleSize, REGEX, SHOW_TOAST, useString } from '../../constant';
-
-//SCREENS
-import { SCREENS } from '..';
+import { FONTS } from '../../assets';
+import { getScaleSize, REGEX, useString } from '../../constant';
 
 //COMPONENTS
 import { Header, Input, Text, Button } from '../../components';
-import { API } from '../../api';
-import { CommonActions } from '@react-navigation/native';
+import { createNewPasswordAction } from '../../actions/auth/authAction';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 
 export default function NewPassword(props: any) {
 
     const STRING = useString();
 
     const { theme } = useContext<any>(ThemeContext);
+    const dispatch = useAppDispatch()
 
     const email = props?.route?.params?.email || '';
-    // const isPhoneNumber = props?.route?.params?.isPhoneNumber || false;
-    // const countryCode = props?.route?.params?.countryCode || '+91';
+    const { isLoading } = useAppSelector(state => state.auth)
 
-    const [isLoading, setLoading] = useState(false);
     const [password, setPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -79,45 +75,13 @@ export default function NewPassword(props: any) {
         else {
             setPasswordError('');
             setConfirmPasswordError('');
-            // let params = {}
-            // if (isPhoneNumber) {
-            //     params = {
-            //         mobile: email,
-            //         phone_country_code: countryCode,
-            //         password: password,
-            //         confirm_password: confirmPassword,
-            //     }
-            // } else {
             const params = {
                 email: email,
                 password: password,
                 confirm_password: confirmPassword,
             }
-            // }
-            try {
-                setLoading(true);
-                const result = await API.Instance.post(API.API_ROUTES.createNewPassword, params);
-                setLoading(false);
-                console.log('result', result.status, result)
-                if (result.status) {
-                    SHOW_TOAST(result?.data?.message ?? '', 'success')
-                    props.navigation.dispatch(
-                        CommonActions.reset({
-                            index: 0,
-                            routes: [{ name: SCREENS.Login.identifier }],
-                        }),
-                    );
-                } else {
-                    SHOW_TOAST(result?.data?.message ?? '', 'error')
-                    console.log('error==>', result?.data?.message)
-                }
-            } catch (error: any) {
-                setLoading(false);
-                SHOW_TOAST(error?.message ?? '', 'error');
-                console.log(error?.message)
-            } finally {
-                setLoading(false);
-            }
+            dispatch(createNewPasswordAction(params))
+          
         }
     }
 
@@ -139,49 +103,50 @@ export default function NewPassword(props: any) {
                         {STRING.Your_new_password_must_be_different_from_previously_used_passwords}
                     </Text>
                     <View style={{ gap: getScaleSize(16) }}>
-                    <Input
-                        placeholder={STRING.enter_new_password}
-                        placeholderTextColor={theme._939393}
-                        value={password}
-                        passwordIcon={true}
-                        secureTextEntry={show}
-                        onChnageIcon={() => {
-                            setShow(!show);
-                        }}
-                        onChangeText={text => {
-                            const trimmed = text.trimStart(); // remove leading spaces
-                            const noSpaces = trimmed.replace(/\s/g, ''); // remove all spaces
-                            const limited = noSpaces.slice(0, 12); // max 12 chars
+                        <Input
+                            placeholder={STRING.enter_new_password}
+                            placeholderTextColor={theme._939393}
+                            value={password}
+                            passwordIcon={true}
+                            secureTextEntry={show}
+                            onChnageIcon={() => {
+                                setShow(!show);
+                            }}
+                            onChangeText={text => {
+                                const trimmed = text.trimStart(); // remove leading spaces
+                                const noSpaces = trimmed.replace(/\s/g, ''); // remove all spaces
+                                const limited = noSpaces.slice(0, 12); // max 12 chars
 
-                            setPassword(limited);
-                            setPasswordError('');
-                        }}
-                        isError={passwordError}
-                    />
-                    <Input
-                        placeholder={STRING.re_enter_new_password}
-                        placeholderTextColor={theme._939393}
-                        value={confirmPassword}
-                        passwordIcon={true}
-                        secureTextEntry={confirmShow}
-                        continerStyle={{ marginTop: getScaleSize(16) }}
-                        onChnageIcon={() => {
-                            setConfirmShow(!confirmShow);
-                        }}
-                        onChangeText={text => {
-                            const trimmed = text.trimStart();
-                            const noSpaces = trimmed.replace(/\s/g, '');
-                            const limited = noSpaces.slice(0, 12);
+                                setPassword(limited);
+                                setPasswordError('');
+                            }}
+                            isError={passwordError}
+                        />
+                        <Input
+                            placeholder={STRING.re_enter_new_password}
+                            placeholderTextColor={theme._939393}
+                            value={confirmPassword}
+                            passwordIcon={true}
+                            secureTextEntry={confirmShow}
+                            continerStyle={{ marginTop: getScaleSize(16) }}
+                            onChnageIcon={() => {
+                                setConfirmShow(!confirmShow);
+                            }}
+                            onChangeText={text => {
+                                const trimmed = text.trimStart();
+                                const noSpaces = trimmed.replace(/\s/g, '');
+                                const limited = noSpaces.slice(0, 12);
 
-                            setConfirmPassword(limited);
-                            setConfirmPasswordError('');
-                        }}
-                        isError={confirmPasswordError}
-                    />
+                                setConfirmPassword(limited);
+                                setConfirmPasswordError('');
+                            }}
+                            isError={confirmPasswordError}
+                        />
                     </View>
                 </View>
             </ScrollView>
             <Button
+                loading={isLoading}
                 title={STRING.reset_password}
                 style={{ marginVertical: getScaleSize(24), marginHorizontal: getScaleSize(24) }}
                 onPress={() => {

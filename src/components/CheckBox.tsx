@@ -60,7 +60,13 @@ const CheckBox = forwardRef<any, CheckBoxProps>((props, ref) => {
                 ]}
             >
                 {isChecked && (
-                    <View style={styles(theme).innerCheck} />
+                    // <View style={styles(theme).innerCheck} />
+                    <Text
+                    size={getScaleSize(12)}
+                    color={theme.white}
+                    font={FONTS.Lato.SemiBold}
+                    align='center'
+                    >{"✓"}</Text>
                 )}
             </View>
             {label && (

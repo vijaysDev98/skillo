@@ -59,6 +59,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Collapsible from 'react-native-collapsible';
 import { RecentSearchCard } from '../home/Search';
 import { AppSafeAreaView } from '../../components/AppSafeAreaView';
+import NavigationService from '../NavigationService';
 
 const { width } = Dimensions.get('window');
 const cellSize = (width - 30) / 7;
@@ -479,12 +480,12 @@ export default function CreateRequest(props: any) {
 
   function onBackProfessional() {
     if (selectedProgress === 1) {
-      props.navigation.goBack();
+      NavigationService.goBack();
     } else if (selectedProgress === 2) {
       setSelectedProgress(1);
     } else if (selectedProgress === 3) {
       if (category && subCategory) {
-        props.navigation.goBack();
+        NavigationService.goBack();
       } else {
         setSelectedProgress(2);
       }
@@ -499,12 +500,12 @@ export default function CreateRequest(props: any) {
 
   function onBackNonProfessional() {
     if (selectedProgress === 1) {
-      props.navigation.goBack();
+      NavigationService.goBack();
     } else if (selectedProgress === 2) {
       setSelectedProgress(1);
     } else if (selectedProgress === 3) {
       if (category && subCategory) {
-        props.navigation.goBack();
+        NavigationService.goBack();
       } else {
         setSelectedProgress(2);
       }
@@ -733,6 +734,10 @@ export default function CreateRequest(props: any) {
     return asset?.thumbnailUri || asset?.uri;
   };
 
+  const handlePickDocFromDevice = () => {
+
+  }
+
   function renderPreview() {
     return (
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -876,7 +881,7 @@ export default function CreateRequest(props: any) {
                 size={getScaleSize(18)}
                 font={FONTS.Lato.Bold}
                 color={theme.primary}>
-                {selectedCategory === 'professional' ? `€${valuation}` : productName}
+                {selectedCategory === 'professional' ? `P${valuation}` : productName}
               </Text>
             </View>
             <View style={styles(theme).deviderVerticalView} />
@@ -966,6 +971,21 @@ export default function CreateRequest(props: any) {
                   : addressError ? addressError : '-'}
               </Text>
             </View>
+            <TouchableOpacity
+              activeOpacity={1}
+              style={styles(theme).selectAddressButton}
+              onPress={() => {
+                NavigationService.navigate(SCREENS.Address.identifier);
+                setAddressError('');
+              }}
+            >
+              <Text
+                size={getScaleSize(12)}
+                font={FONTS.Lato.Regular}
+                color={theme.white}>
+                {STRING.change}
+              </Text>
+            </TouchableOpacity>
           </View>
           <View style={{ height: 16 }} />
         </View>
@@ -1309,7 +1329,9 @@ export default function CreateRequest(props: any) {
           </Text>
           <View style={styles(theme).imageUploadContent}>
             <UploadDocumentBox
-              onPress={() => { }}
+              onPress={() => {
+                handlePickDocFromDevice()
+              }}
               containerStyle={{ width: getScaleSize(182) }}
               icon={IMAGES.upload_attachment}
             />
@@ -1350,7 +1372,7 @@ export default function CreateRequest(props: any) {
               activeOpacity={1}
               style={styles(theme).selectAddressButton}
               onPress={() => {
-                props.navigation.navigate(SCREENS.Address.identifier);
+                NavigationService.navigate(SCREENS.Address.identifier);
                 setAddressError('');
               }}
             >
@@ -1663,7 +1685,10 @@ export default function CreateRequest(props: any) {
       <AppSafeAreaView
         style={styles(theme).container}>
         <>
-          {selectedCategory == 'professional' ? renderProfessional() : renderNonProfessional()}
+          {selectedCategory == 'professional' ?
+           renderProfessional() : 
+           renderNonProfessional()
+           }
         </>
       </AppSafeAreaView>
       <View style={styles(theme).buttonContainer}>

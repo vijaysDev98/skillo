@@ -1,30 +1,26 @@
-import { Dimensions, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
-import React, { useContext, useEffect, useState } from 'react';
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useContext, useState } from 'react';
 
 //CONTEXT
 import { ThemeContext, ThemeContextType } from '../../context';
 
 //CONSTANT & ASSETS
-import { FONTS, IMAGES } from '../../assets';
-import { getScaleSize, REGEX, SHOW_TOAST, useString } from '../../constant';
-
-//SCREENS
-import { SCREENS } from '..';
+import { FONTS } from '../../assets';
+import { getScaleSize, REGEX, useString } from '../../constant';
 
 //COMPONENTS
 import { Header, Input, Text, Button } from '../../components';
-import { API } from '../../api';
 import { AppSafeAreaView } from '../../components/AppSafeAreaView';
+import { createwPasswordAction, newPasswordAction } from '../../actions/auth/authAction';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 
 export default function CreatePassword(props: any) {
-
     const STRING = useString();
-
     const { theme } = useContext<any>(ThemeContext);
+    const {email,id} = props?.route?.params || {};
 
-    const email = props?.route?.params?.email || '';
-    // const isPhoneNumber = props?.route?.params?.isPhoneNumber || false;
-    // const countryCode = props?.route?.params?.countryCode || '+91';
+    const dispatch = useAppDispatch();
+    const {isLoading} = useAppSelector((state) => state.auth);
 
     const [password, setPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
@@ -32,7 +28,8 @@ export default function CreatePassword(props: any) {
     const [confirmPasswordError, setConfirmPasswordError] = useState('');
     const [show, setShow] = useState(true);
     const [confirmShow, setConfirmShow] = useState(true);
-    const [isLoading, setLoading] = useState(false);
+
+
 
     async function onSignup() {
         if (!password) {
@@ -53,54 +50,14 @@ export default function CreatePassword(props: any) {
         } else {
             setPasswordError('');
             setConfirmPasswordError('');
-            // let params = {}
-            // if (isPhoneNumber) {
-            //     params = {
-            //         mobile: email,
-            //         phone_country_code: countryCode,
-            //         password: password,
-            //         confirm_password: confirmPassword,
-            //     }
-            // } else {
             const params = {
                 email: email,
                 password: password,
                 confirm_password: confirmPassword,
             }
-            // }
-            try {
-                setLoading(true);
-                const result: any = await API.Instance.post(API.API_ROUTES.createPassword, params);
-                setLoading(false);
-                console.log('result', result.status, result)
-                if (result.status) {
-                    SHOW_TOAST(result?.data?.message ?? '', 'success')
-                    props.navigation.navigate(SCREENS.AddPersonalDetails.identifier, {
-                        email: email,
-                        // isPhoneNumber: isPhoneNumber,
-                        // countryCode: countryCode,
-                    });
-                } else {
-                    if (result?.code === 409) {
-                        if (result?.data?.message == 'Password already set. Redirect to Details page.') {
-                            props.navigation.navigate(SCREENS.AddPersonalDetails.identifier, {
-                                email: email,
-                            })
-                        } else {
-                            SHOW_TOAST(result?.data?.message ?? '', 'error')
-                        }
-                    } else {
-                        SHOW_TOAST(result?.data?.message ?? '', 'error')
-                        console.log('error==>', result?.data?.message)
-                    }
-                }
-            } catch (error: any) {
-                setLoading(false);
-                SHOW_TOAST(error?.message ?? '', 'error');
-                console.log(error?.message)
-            } finally {
-                setLoading(false);
-            }
+        
+            console.log("params", params)
+            dispatch(createwPasswordAction(params))
         }
     }
 
@@ -126,7 +83,6 @@ export default function CreatePassword(props: any) {
                         <Input
                             placeholder={STRING.placeHolders.enter_new_password}
                             placeholderTextColor={theme._939393}
-                            // inputTitle={STRING.inputTitle.password}
                             inputColor={true}
                             value={password}
                             passwordIcon={true}
@@ -149,7 +105,6 @@ export default function CreatePassword(props: any) {
                         <Input
                             placeholder={STRING.placeHolders.re_enter_new_password}
                             placeholderTextColor={theme._939393}
-                            // inputTitle={STRING.inputTitle.confirm_password}
                             inputColor={true}
                             value={confirmPassword}
                             passwordIcon={true}
@@ -172,14 +127,10 @@ export default function CreatePassword(props: any) {
             </ScrollView>
             <Button
                 title={STRING.next}
+                loading={isLoading}
                 style={{ marginVertical: getScaleSize(10), marginHorizontal: getScaleSize(24) }}
                 onPress={() => {
-                    // onSignup();
-                    props.navigation.navigate(SCREENS.AddPersonalDetails.identifier, {
-                        email: email,
-                        // isPhoneNumber: isPhoneNumber,
-                        // countryCode: countryCode,
-                    });
+                    onSignup();
                 }}
             />
         </AppSafeAreaView>

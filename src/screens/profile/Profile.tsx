@@ -1,12 +1,10 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useRef } from 'react';
 import {
   View,
   StyleSheet,
   TouchableOpacity,
   Image,
   ScrollView,
-  Alert,
-  Dimensions,
 } from 'react-native';
 
 //CONTEXT
@@ -14,60 +12,61 @@ import { AuthContext, ThemeContext, ThemeContextType } from '../../context';
 
 //CONSTANT & ASSETS
 import { FONTS, IMAGES } from '../../assets';
-import { getScaleSize, openStripeCheckout, Storage, TABBAR_HEIGHT, useString } from '../../constant';
+import { getScaleSize, Storage, useString } from '../../constant';
 
 //COMPONENTS
-import { Text, HomeHeader, SearchComponent, Header, Button, BottomSheet, ProgressView } from '../../components';
+import { Text, Header, BottomSheet, ProgressView } from '../../components';
 import { SCREENS } from '..';
-import { CommonActions } from '@react-navigation/native';
-import { stubFalse } from 'lodash';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { userRoles } from '../../constant/utils';
 import { AppSafeAreaView } from '../../components/AppSafeAreaView';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import NavigationService from '../NavigationService';
+import { logoutAction } from '../../actions/auth/authAction';
 
 
 export default function Profile(props: any) {
 
   const STRING = useString();
-  const insets = useSafeAreaInsets();
+  const dispatch = useAppDispatch()
 
   const { theme } = useContext<any>(ThemeContext);
   const { userType, profile } = useContext<any>(AuthContext);
+  const { isLoading,userData } = useAppSelector(state => state.auth)
 
-  const [isLoading, setLoading] = useState(false);
+  // const [isLoading, setLoading] = useState(false);
   const bottomSheetRef = useRef<any>(null);
 
   const profileSeekerIndividualItems = [
-    { id: 1, title: STRING.my_profile, icon: IMAGES.ic_my_profile, onPress: () => { props.navigation.navigate(SCREENS.MyProfile.identifier) } },
-    { id: 2, title: STRING.transactions, icon: IMAGES.ic_transactions, onPress: () => { props.navigation.navigate(SCREENS.TransactionsElder.identifier) } },
-    { id: 3, title: STRING.ratings_reviews, icon: IMAGES.ic_ratings_reviews, onPress: () => { props.navigation.navigate(SCREENS.RatingsReviews.identifier) } },
-    { id: 4, title: STRING.notifications, icon: IMAGES.ic_notifications, onPress: () => { props.navigation.navigate(SCREENS.Notification.identifier) } },
-    // { id: 5, title: STRING.prefered_language, icon: IMAGES.ic_language, onPress: ()=>{props.navigation.navigate(SCREENS.Language.identifier)} }
+    { id: 1, title: STRING.my_profile, icon: IMAGES.ic_my_profile, onPress: () => { NavigationService.navigate(SCREENS.MyProfile.identifier) } },
+    { id: 2, title: STRING.transactions, icon: IMAGES.ic_transactions, onPress: () => { NavigationService.navigate(SCREENS.TransactionsElder.identifier) } },
+    { id: 3, title: STRING.ratings_reviews, icon: IMAGES.ic_ratings_reviews, onPress: () => { NavigationService.navigate(SCREENS.RatingsReviews.identifier) } },
+    { id: 4, title: STRING.notifications, icon: IMAGES.ic_notifications, onPress: () => { NavigationService.navigate(SCREENS.Notification.identifier) } },
+    // { id: 5, title: STRING.prefered_language, icon: IMAGES.ic_language, onPress: ()=>{NavigationService.navigate(SCREENS.Language.identifier)} }
     { id: 5, title: STRING.logout, icon: IMAGES.ic_logout, onPress: () => { bottomSheetRef.current.open() } }
   ]
 
   const profieItemsProfessional = [
-    { id: 1, title: STRING.my_profile, icon: IMAGES.ic_my_profile, onPress: () => { props.navigation.navigate(SCREENS.MyProfileProfessional.identifier) } },
-    { id: 2, title: STRING.my_earnings, icon: IMAGES.ic_my_earnings, onPress: () => { props.navigation.navigate(SCREENS.MyEarnings.identifier) } },
-    { id: 3, title: STRING.manage_services, icon: IMAGES.ic_manage_services, onPress: () => { props.navigation.navigate(SCREENS.ManageServices.identifier) } },
-    { id: 4, title: STRING.manage_subscription, icon: IMAGES.ic_manage_subscription, onPress: () => { props.navigation.navigate(SCREENS.ManageSubscription.identifier) }, isRightIcon: false },
-    { id: 5, title: STRING.ratings_reviews, icon: IMAGES.ic_ratings_reviews, onPress: () => { props.navigation.navigate(SCREENS.RatingsReviews.identifier) } },
-    { id: 6, title: STRING.notifications, icon: IMAGES.ic_notifications, onPress: () => { props.navigation.navigate(SCREENS.Notification.identifier) } },
+    { id: 1, title: STRING.my_profile, icon: IMAGES.ic_my_profile, onPress: () => { NavigationService.navigate(SCREENS.MyProfileProfessional.identifier) } },
+    { id: 2, title: STRING.my_earnings, icon: IMAGES.ic_my_earnings, onPress: () => { NavigationService.navigate(SCREENS.MyEarnings.identifier) } },
+    { id: 3, title: STRING.manage_services, icon: IMAGES.ic_manage_services, onPress: () => { NavigationService.navigate(SCREENS.ManageServices.identifier) } },
+    { id: 4, title: STRING.manage_subscription, icon: IMAGES.ic_manage_subscription, onPress: () => { NavigationService.navigate(SCREENS.ManageSubscription.identifier) }, isRightIcon: false },
+    { id: 5, title: STRING.ratings_reviews, icon: IMAGES.ic_ratings_reviews, onPress: () => { NavigationService.navigate(SCREENS.RatingsReviews.identifier) } },
+    { id: 6, title: STRING.notifications, icon: IMAGES.ic_notifications, onPress: () => { NavigationService.navigate(SCREENS.Notification.identifier) } },
     // { id: 7, title: STRING.prefered_language, icon: IMAGES.ic_language, onPress: SCREENS.Language.identifier }
     { id: 7, title: STRING.logout, icon: IMAGES.ic_logout, onPress: () => { bottomSheetRef.current.open() } }
   ]
 
   const profileSeekerBusiness = [
-    { id: 1, title: STRING.my_profile, icon: IMAGES.ic_my_profile, onPress: () => { props.navigation.navigate(SCREENS.MyProfile.identifier) } },
-    { id: 2, title: STRING.transactions, icon: IMAGES.ic_transactions, onPress: () => { props.navigation.navigate(SCREENS.TransactionsElder.identifier) } },
-    { id: 3, title: STRING.ratings_reviews, icon: IMAGES.ic_ratings_reviews, onPress: () => { props.navigation.navigate(SCREENS.RatingsReviews.identifier) } },
+    { id: 1, title: STRING.my_profile, icon: IMAGES.ic_my_profile, onPress: () => { NavigationService.navigate(SCREENS.MyProfile.identifier) } },
+    { id: 2, title: STRING.transactions, icon: IMAGES.ic_transactions, onPress: () => { NavigationService.navigate(SCREENS.TransactionsElder.identifier) } },
+    { id: 3, title: STRING.ratings_reviews, icon: IMAGES.ic_ratings_reviews, onPress: () => { NavigationService.navigate(SCREENS.RatingsReviews.identifier) } },
     {
       id: 4, title: STRING.manage_subscription, icon: IMAGES.ic_manage_subscription,
       isRightIcon: false,
-      onPress: () => { props.navigation.navigate(SCREENS.ManageSubscription.identifier) }
+      onPress: () => { NavigationService.navigate(SCREENS.ManageSubscription.identifier) }
     },
-    { id: 5, title: STRING.notifications, icon: IMAGES.ic_notifications, onPress: () => { props.navigation.navigate(SCREENS.Notification.identifier) } },
-    // { id: 5, title: STRING.prefered_language, icon: IMAGES.ic_language, onPress: ()=>{props.navigation.navigate(SCREENS.Language.identifier)} }
+    { id: 5, title: STRING.notifications, icon: IMAGES.ic_notifications, onPress: () => { NavigationService.navigate(SCREENS.Notification.identifier) } },
+    // { id: 5, title: STRING.prefered_language, icon: IMAGES.ic_language, onPress: ()=>{NavigationService.navigate(SCREENS.Language.identifier)} }
     { id: 6, title: STRING.logout, icon: IMAGES.ic_logout, onPress: () => { bottomSheetRef.current.open() } }
   ]
 
@@ -84,17 +83,17 @@ export default function Profile(props: any) {
   }
 
   async function logout() {
-    setLoading(true);
+    const userData: any = await Storage.get(Storage.USER_DETAILS);
+    const user = JSON.parse(userData);
+    const refreshToken = user?.tokens?.refresh_token || user?.refresh_token;
+    let data = {
+      refresh_token: refreshToken
+    }
+    dispatch(logoutAction(data))
     bottomSheetRef.current.close();
-    await Storage.clear()
-    props.navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: SCREENS.Login.identifier }],
-      })
-    );
-    setLoading(false);
   }
+
+  console.log("userData===>>",userData?.profile?.profile_photo?.url)
 
   return (
     <AppSafeAreaView style={styles(theme).container}>
@@ -111,8 +110,8 @@ export default function Profile(props: any) {
           paddingBottom: getScaleSize(20)
         }}>
         <View style={styles(theme).mainContainer}>
-          {profile?.user?.profile_photo_url ? (
-            <Image source={{ uri: profile?.user?.profile_photo_url }} resizeMode='cover' style={styles(theme).profileContainer} />
+          {userData?.profile?.profile_photo?.url ? (
+            <Image source={{ uri: userData?.profile?.profile_photo?.url }} resizeMode='cover' style={styles(theme).profileContainer} />
           ) : (
             <View style={styles(theme).EmptyProfileContainer}>
               <Text
@@ -120,8 +119,8 @@ export default function Profile(props: any) {
                 font={FONTS.Lato.Regular}
                 align="center"
                 color={theme._262B43E5}>
-                {(profile?.user?.first_name?.charAt(0) ?? '').toUpperCase() +
-                  (profile?.user?.last_name?.charAt(0) ?? '').toUpperCase()}
+                {(userData?.profile?.full_name?.charAt(0) ?? '').toUpperCase() }
+                  {/* // (profile?.user?.last_name?.charAt(0) ?? '').toUpperCase()} */}
               </Text>
             </View>
           )}
@@ -131,7 +130,8 @@ export default function Profile(props: any) {
             align="center"
             numberOfLines={1}
             color={theme.primaryText}>
-            {(profile?.user?.first_name ?? "") + " " + (profile?.user?.last_name ?? "")}
+              {userData?.profile?.full_name || ''}
+            {/* {(userData?.profile?.full_name ?? "") + " " + (profile?.user?.last_name ?? "")} */}
           </Text>
           {userType !== userRoles.Service_Seeker_individual
             // userType === 'service_provider' 
@@ -151,7 +151,7 @@ export default function Profile(props: any) {
                   {/* {profile?.provider_info?.is_docs_verified === false && ( */}
                   <TouchableOpacity
                     onPress={() => {
-                      props.navigation.navigate(SCREENS.ApplicationStatus.identifier);
+                      NavigationService.navigate(SCREENS.ApplicationStatus.identifier);
                     }}
                     style={[styles(theme).checkStatusButton, { backgroundColor: theme.primary }]}>
                     <Text
@@ -186,7 +186,7 @@ export default function Profile(props: any) {
             {getProfileItems().map((item: any, index: number) => {
               return (
                 <TouchableOpacity key={index}
-                  // onPress={() => { props.navigation.navigate(item.onPress) }}
+                  // onPress={() => { NavigationService.navigate(item.onPress) }}
                   onPress={() => { item?.onPress() }}
                   style={styles(theme).profileItemContainer}>
                   <Image
@@ -230,7 +230,7 @@ const styles = (theme: ThemeContextType['theme']) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.white
+      // backgroundColor: theme.white
     },
     mainContainer: {
       flex: 1,
@@ -256,6 +256,7 @@ const styles = (theme: ThemeContextType['theme']) =>
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: getScaleSize(12),
+      elevation:2
     },
     profileItemContainer: {
       flexDirection: 'row',

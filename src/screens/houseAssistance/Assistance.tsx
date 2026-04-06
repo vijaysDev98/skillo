@@ -40,18 +40,23 @@ import Animated, {
   Extrapolate,
 } from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { getSubCategoryData } from '../../actions/seekerHome/seekerHomeAction';
 
 const { width } = Dimensions.get('window');
 const cellSize = (width - 30) / 7;
 
 export default function Assistance(props: any) {
 
-  const service = props.route.params?.service;
+  const { service, id } = props?.route?.params || "";
   const STRING = useString();
+  const dispatch = useAppDispatch()
   const { theme } = useContext<any>(ThemeContext);
+  const { serviceCategoryData, isLoading, serviceCategoryList } = useAppSelector(state => state.seekerHome)
 
-  const [selectedCategory, setSelectedCategory] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<any>();
+  const [selectedCategoryId, setSelectedCategoryId] = useState(id)
+  // const [isLoading, setLoading] = useState(true);
   const [categoryList, setCategoryList] = useState(DummyData.categoryList);
   const [subCategoryList, setSubCategoryList] = useState(DummyData.filteredSubCategories || []);
   const [bannerData, setBannerData] = useState<any>(null);
@@ -63,9 +68,10 @@ export default function Assistance(props: any) {
   const maxScrollOffset = getScaleSize(220);
   const flatListRef = useRef<FlatList>(null);
 
-  // useEffect(() => {
-  //   getCategoryData();
-  // }, []);
+  useEffect(() => {
+    // getCategoryData();
+    dispatch(getSubCategoryData(selectedCategoryId))
+  }, [selectedCategoryId]);
 
   // useEffect(() => {
   //   if (selectedCategory) {
@@ -93,54 +99,52 @@ export default function Assistance(props: any) {
   //   setFilteredSubCategories(filtered);
   // }, [searchText, subCategoryList]);
 
-  async function getCategoryData() {
-    try {
-      setLoading(true);
-      const result = await API.Instance.get(API.API_ROUTES.getHomeData + `?service_name=${service?.name}`);
-      setLoading(false)
-      console.log('CAT', JSON.stringify(result))
-      if (result.status) {
-        setCategoryList(result?.data?.data?.categories ?? []);
-        if (result?.data?.data?.categories?.[0]?.id) {
-          setSelectedCategory(result?.data?.data?.categories?.[0]);
-          getSubCategoryData(result?.data?.data?.categories?.[0]?.id);
-        }
-      } else {
-        SHOW_TOAST(result?.data?.message ?? '', 'error')
-      }
-    } catch (error: any) {
-      SHOW_TOAST(error?.message ?? '', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }
+  // async function getCategoryData() {
+  //   try {
+  //     setLoading(true);
+  //     const result = await API.Instance.get(API.API_ROUTES.getHomeData + `?service_name=${service?.name}`);
+  //     setLoading(false)
+  //     console.log('CAT', JSON.stringify(result))
+  //     if (result.status) {
+  //       setCategoryList(result?.data?.data?.categories ?? []);
+  //       if (result?.data?.data?.categories?.[0]?.id) {
+  //         setSelectedCategory(result?.data?.data?.categories?.[0]);
+  //         getSubCategoryData(result?.data?.data?.categories?.[0]?.id);
+  //       }
+  //     } else {
+  //       SHOW_TOAST(result?.data?.message ?? '', 'error')
+  //     }
+  //   } catch (error: any) {
+  //     SHOW_TOAST(error?.message ?? '', 'error');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
 
-  async function getSubCategoryData(id: string) {
-    try {
-      setLoading(true);
-      const result = await API.Instance.get(API.API_ROUTES.getHomeData + `/${id}`);
-      setLoading(false)
-      if (result.status) {
-        console.log('subcategoryList==', JSON.stringify(result?.data?.data?.subcategories?.length < 0))
-        setBannerData(result?.data?.data?.Banner ?? null);
-        setSubCategoryList(result?.data?.data?.subcategories ?? []);
-        setFilteredSubCategories(result?.data?.data?.subcategories ?? []);
-        if (result?.data?.data?.subcategories?.length == 0) {
-          setErrorMessage('No data found')
-        }
-      } else {
-        SHOW_TOAST(result?.data?.message ?? '', 'error')
-      }
-    } catch (error: any) {
-      SHOW_TOAST(error?.message ?? '', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }
+  // async function getSubCategoryData(id: string) {
+  //   try {
+  //     setLoading(true);
+  //     const result = await API.Instance.get(API.API_ROUTES.getHomeData + `/${id}`);
+  //     setLoading(false)
+  //     if (result.status) {
+  //       console.log('subcategoryList==', JSON.stringify(result?.data?.data?.subcategories?.length < 0))
+  //       setBannerData(result?.data?.data?.Banner ?? null);
+  //       setSubCategoryList(result?.data?.data?.subcategories ?? []);
+  //       setFilteredSubCategories(result?.data?.data?.subcategories ?? []);
+  //       if (result?.data?.data?.subcategories?.length == 0) {
+  //         setErrorMessage('No data found')
+  //       }
+  //     } else {
+  //       SHOW_TOAST(result?.data?.message ?? '', 'error')
+  //     }
+  //   } catch (error: any) {
+  //     SHOW_TOAST(error?.message ?? '', 'error');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
 
-  console.log('BANNER', JSON.stringify(bannerData))
 
-  // const patterns = searchText ? ['small'] : ['small', 'large', 'large', 'small'];
   const patterns = ['small', 'large', 'large', 'small'];
 
   const scrollHandler = useAnimatedScrollHandler({
@@ -164,7 +168,7 @@ export default function Assistance(props: any) {
 
   const categoryRenderItem = useCallback(
     ({ item, index }: { item: any; index: number }) => {
-      const isSelected = selectedCategory?.id === item?.id;
+      const isSelected = selectedCategoryId === item?.id;
       return (
         <TouchableOpacity
           style={[
@@ -182,6 +186,7 @@ export default function Assistance(props: any) {
 
             setSearchText('');
             setSelectedCategory(item);
+            setSelectedCategoryId(item?.id)
 
             flatListRef.current?.scrollToIndex({
               index,
@@ -193,7 +198,7 @@ export default function Assistance(props: any) {
           <Image
             resizeMode="cover"
             style={styles(theme).categoryImage}
-            source={item?.category_logo}
+            source={item?.category_logo ? { uri: item?.category_logo } : IMAGES.childCareImg}
           />
 
           <Text
@@ -244,20 +249,8 @@ export default function Assistance(props: any) {
             },
           ]}
         >
-
-
           <ImageBackground
-            source={{ uri: imageUri }}
-            // style={{
-            //     width: "100%",
-            //     height: getScaleSize(220),
-            //     overflow: "hidden",
-            //     marginBottom: getScaleSize(16),
-            //     shadowColor: "#000",
-            //     shadowOpacity: 0.1,
-            //     shadowRadius: 8,
-            //     elevation: 4
-            // }}
+            source={{ uri: item?.image || '' }}
             style={[styles(theme).imageView, { overflow: "hidden", }]}
           >
             <LinearGradient
@@ -270,7 +263,7 @@ export default function Assistance(props: any) {
                 font={FONTS.Lato.Bold}
                 align='center'
                 color={theme.primaryText}
-              >{item?.subcategory_name}</Text>
+              >{item?.service_name}</Text>
             </LinearGradient>
           </ImageBackground>
         </Pressable>
@@ -279,45 +272,32 @@ export default function Assistance(props: any) {
     [patterns, theme, selectedCategory, service] // 🔥 dependencies
   );
 
+
   return (
     <View style={styles(theme).container}>
       <HomeHeader
         // screenName={selectedCategory ? selectedCategory?.category_name : service?.name}
-        screenName={selectedCategory ? selectedCategory?.category_name : service}
+        screenName={serviceCategoryData?.Banner?.category_name ? serviceCategoryData?.Banner?.category_name : service}
         onBack={() => props.navigation.goBack()}
       />
       <View style={styles(theme).secondContainer}>
         <Animated.View style={[styles(theme).animatedBannerContainer, animatedHeaderStyle]}>
           <>
-            {bannerData || IMAGES.viewAllBanner ? (
+            {serviceCategoryData?.Banner?.url || IMAGES.viewAllBanner ? (
               // <View>
               <Image
                 style={styles(theme).bannerContainer}
                 resizeMode="contain"
-                source={bannerData ? { uri: bannerData?.url } : IMAGES.viewAllBanner}
+                source={serviceCategoryData?.Banner?.url ? { uri: serviceCategoryData?.Banner?.url } : IMAGES.viewAllBanner}
               />
-              //   /* <TouchableOpacity
-              //     activeOpacity={0.8}
-              //     onPress={() => {
-              //       props.navigation.navigate(SCREENS.CreateRequest.identifier);
-              //     }}
-              //     style={styles(theme).bookNowButton}>
-              //     <Text
-              //       size={getScaleSize(14)}
-              //       font={FONTS.Lato.Bold}
-              //       color={theme.white}>
-              //       {STRING.book_now}
-              //     </Text>
-              //   </TouchableOpacity>
-              // </View> */}
             ) : (
               <View style={styles(theme).bannerContainer} />
             )}
-            {categoryList.length > 1 && (
+            {serviceCategoryList.length > 0 && (
               <View style={styles(theme).tabContainer}>
                 <FlatList
                   ref={flatListRef}
-                  data={categoryList}
+                  data={serviceCategoryList}
                   horizontal
                   showsHorizontalScrollIndicator={false}
                   keyExtractor={(item: any, index: number) => index.toString()}
@@ -333,9 +313,9 @@ export default function Assistance(props: any) {
             )}
           </>
         </Animated.View>
-        {/* {subCategoryList && subCategoryList.length > 0 && filteredSubCategories.length > 0 && loading === false ? */}
+        {/* {serviceCategoryData?.Services && serviceCategoryData?.Services.length > 0  && */}
         <Animated.FlatList
-          data={filteredSubCategories}
+          data={serviceCategoryData?.Services}
           numColumns={2}
           contentContainerStyle={{}}
           keyExtractor={(item: any, index: number) => index.toString()}
@@ -350,19 +330,30 @@ export default function Assistance(props: any) {
             return <View style={{ height: getScaleSize(50) }} />;
           }}
           renderItem={subCategoryRenderItem}
+          ListEmptyComponent={() => (
+            <View style={{
+              height: getScaleSize(200),
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: theme._F0EFF0,
+              elevation: 2,
+              borderRadius: 10,
+              marginHorizontal: getScaleSize(24)
+            }}>
+              <Text
+                size={getScaleSize(16)}
+                font={FONTS.Lato.Bold}
+                color={theme._8C8C8C}>
+                {/* {errorMessage ?? 'No Data Available'} */}
+                {"No Category Available"}
+              </Text>
+            </View>
+          )}
         />
-        {/* :
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text
-              size={getScaleSize(16)}
-              font={FONTS.Lato.Bold}
-              color={theme.primary}>
-              {errorMessage ?? 'No Data Available'}
-            </Text>
-          </View>
-        } */}
+
+        {/* } */}
       </View>
-      {!loading && <ProgressView />}
+      {isLoading && <ProgressView />}
     </View>
   );
 }
@@ -392,11 +383,12 @@ const styles = (theme: ThemeContextType['theme']) =>
       marginHorizontal: getScaleSize(24),
     },
     tabContainer: {
-      marginTop: getScaleSize(20),
+      marginTop: getScaleSize(10),
       height: getScaleSize(50)
     },
     itemContainer: {
-      height: getScaleSize(44),
+      // height: getScaleSize(),
+      // paddingVertical:getScaleSize(10),
       paddingHorizontal: getScaleSize(20),
       borderRadius: getScaleSize(10),
       flexDirection: 'row',

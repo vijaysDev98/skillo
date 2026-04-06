@@ -187,50 +187,51 @@ export const TABBAR_HEIGHT = SCREEN_WIDTH * TABBAR_RATIO;
 
 
 export const userRoles = {
-  Service_Seeker_individual: "Service_Seeker_individual",
-  Service_Seeker_business: "Service_Seeker_business",
-  Service_Provider_individual: "Service_Provider_individual",
-  Service_Provider_business: "Service_Provider_business"
+  Service_Seeker_individual: "customer_individual",
+  Service_Seeker_business: "customer_business",
+  Service_Provider_individual: "provider_individual",
+  Service_Provider_business: "provider_business"
 }
 
 
 /* ---------------- DOCUMENT CONFIG ---------------- */
 
-export const serviceproviderIndividualDocs = [
+export const serviceProviderIndividualDocs = [
   {
-    key: "proofOfResidence",
+    key: "proof_of_residence",
     title: "Proof of residence",
     noteText: "*less than 3 months old (e.g., water or electricity bill)"
   },
-  { key: "residencePermit", title: "Residence Permit" },
-  { key: "workPermit", title: "Work Permit" },
-  { key: "certificateOfQualification", title: "Certificate of qualification" }
+  { key: "residence_permit", title: "Residence Permit" },
+  { key: "work_permit", title: "Work Permit" },
+  { key: "certificate_of_qualification", title: "Certificate of qualification" }
 ];
 
 export const serviceSeekerBusinessDocs = [
-  { key: "certificate", title: "Certificate of incorporation" },
-  { key: "cipa", title: "CIPA extract" },
-  { key: "tax", title: "Tax Clearance" },
+  { key: "certificate_of_incorporation", title: "Certificate of incorporation" },
+  { key: "cipa_extract", title: "CIPA extract" },
+  { key: "tax_clearance", title: "Tax Clearance" },
   {
-    key: "residence",
+    key: "proof_of_residence",
     title: "Proof of residence",
     noteText: "*less than 3 months old (e.g. water or electricity bill)"
   },
-  { key: "directorDocs", title: "Directors Identity Documents" },
-  { key: "companyProfile", title: "Company Profile" }
+  { key: "directors_identity_documents", title: "Directors Identity Documents" },
+  { key: "company_profile", title: "Company Profile" }
 ];
 
 export const serviceProviderBusinessDocs = [
-  { key: "certificateOfIncorporation", title: "Certificate of incorporation" },
-  { key: "cipaExtract", title: "CIPA extract" },
-  { key: "taxClearance", title: "Tax Clearance" },
+  { key: "certificate_of_incorporation", title: "Certificate of incorporation" },
+  { key: "cipa_extract", title: "CIPA extract" },
+  { key: "tax_clearance", title: "Tax Clearance" },
   {
-    key: "proofOfResidence",
+    key: "proof_of_residence",
     title: "Proof of residence",
     noteText: "*less than 3 months old (e.g., water or electricity bill)"
   },
-  { key: "directorsIdentityDocuments", title: "Directors Identity Documents" },
-  { key: "companyProfile", title: "Company Profile" }
+  { key: "directors_identity_documents", title: "Directors Identity Documents" },
+  { key: "company_profile", title: "Company Profile" }
 ];
+
 
 

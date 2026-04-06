@@ -182,6 +182,7 @@ export default function Address(props: any) {
                 onPress={() => {
                     props.navigation.navigate(SCREENS.AddAdress.identifier, {
                         fromChangeAddress: true,
+                        title:"Add New Address"
                     });
                 }}
             />

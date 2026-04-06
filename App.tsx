@@ -30,6 +30,9 @@ import Toast, {
   InfoToast,
 } from 'react-native-toast-message';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import NavigationService from './src/screens/NavigationService';
+import { Provider } from 'react-redux';
+import store from './src/redux/store';
 
 LogBox.ignoreAllLogs(true);
 
@@ -95,14 +98,19 @@ function App(): any {
           backgroundColor={"transparent"}
         // barStyle={currentTheme === ThemeName.Light ? "light-content" : "light-content"}
         />
-        <NavigationContainer>
+        <Provider store={store}>
+        <NavigationContainer
+          ref={(navigationRef) => {
+            NavigationService.setTopLevelNavigator(navigationRef);
+          }}
+        >
           <Navigator
             screenOptions={{
               headerShown: false,
               gestureEnabled: false,
             }}
             initialRouteName={SCREENS.Splash.identifier}>
-            {_.toArray(SCREENS).map((item: any, index: number) => {
+            {_.toArray(SCREENS).map((item: any) => {
               return item.component ? (
                 <Screen
                   key={item.identifier}
@@ -113,6 +121,7 @@ function App(): any {
             })}
           </Navigator>
         </NavigationContainer>
+        </Provider>
         <Toast config={toastConfig} />
       </View>
     );

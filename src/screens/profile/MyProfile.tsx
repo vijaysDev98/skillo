@@ -1,13 +1,10 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useMemo, useRef, useState } from 'react';
 import {
     View,
     StyleSheet,
     TouchableOpacity,
     Image,
-    ScrollView,
-    SafeAreaView,
     Platform,
-    Pressable,
 } from 'react-native';
 
 //CONTEXT
@@ -15,7 +12,7 @@ import { AuthContext, ThemeContext, ThemeContextType } from '../../context';
 
 //CONSTANT & ASSETS
 import { FONTS, IMAGES } from '../../assets';
-import { getScaleSize, REGEX, SHOW_SUCCESS_TOAST, SHOW_TOAST, useString } from '../../constant';
+import { getScaleSize, SHOW_SUCCESS_TOAST, SHOW_TOAST, useString } from '../../constant';
 
 //COMPONENTS
 import { Text, Header, Input, Button, BottomSheet, SelectCountrySheet, KeyBoardAware } from '../../components';
@@ -30,6 +27,8 @@ import { CommonActions } from '@react-navigation/native';
 
 //SCREENS
 import { SCREENS } from '..';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { editSeekerProfileAction, uploadSeekerProfilePhotoAction } from '../../actions/auth/authAction';
 
 export default function MyProfile(props: any) {
 
@@ -37,17 +36,27 @@ export default function MyProfile(props: any) {
 
     const { theme } = useContext<any>(ThemeContext);
 
-    const { profile, fetchProfile, setUser, setUserType } = useContext(AuthContext)
+    const { profile, fetchProfile, setUser, setUserType, userType } = useContext(AuthContext)
+
+    const { userData } = useAppSelector(state => state.auth)
+    const dispatch = useAppDispatch()
 
     const bottomSheetRef = useRef<any>(null);
     const inputHeight = Platform.OS == 'ios' ? getScaleSize(56) : getScaleSize(56)
 
-    const [name, setName] = useState((profile?.user?.first_name ?? "") + " " + (profile?.user?.last_name ?? ""));
+    const initialValues = useMemo(() => ({
+        name: userData?.profile?.full_name || "",
+        email: userData?.user?.email ?? "",
+        mobile: userData?.user?.mobile ?? "",
+        countryCode: userData?.user?.phone_country_code || '+91',
+    }), [userData]);
+
+    const [name, setName] = useState(initialValues.name);
     const [nameError, setNameError] = useState('');
-    const [email, setEmail] = useState(profile?.user?.email ?? "");
+    const [email, setEmail] = useState(initialValues.email);
     const [emailError, setEmailError] = useState('');
     const [mobileNumberError, setMobileNumberError] = useState('');
-    const [address, setAddress] = useState(profile?.user?.address ?? "");
+    const [address, setAddress] = useState(userData?.user?.address ?? "");
     const [addressError, setAddressError] = useState('');
     const [isLoading, setLoading] = useState(false);
     const [profileImage, setProfileImage] = useState<any>(null);
@@ -56,65 +65,41 @@ export default function MyProfile(props: any) {
 
     const [isEmailVerified, setIsEmailVerified] = useState(false)
 
-    const fullPhone = profile?.user?.phone_number ?? '';
-
-    const codeMatch = fullPhone.match(/^\+\d+/);
-    const numberMatch = fullPhone.replace(/^\+\d+/, '');
-
-    const [countryCode, setCountryCode] = useState(codeMatch || '+91');
+    const [countryCode, setCountryCode] = useState(initialValues.countryCode);
     const [countryFlag, setCountryFlag] = useState('🇮🇳');
-    const [mobileNumber, setMobileNumber] = useState(numberMatch);
+    const [mobileNumber, setMobileNumber] = useState(initialValues.mobile);
 
     const pickImage = async () => {
         launchImageLibrary({ mediaType: 'photo' }, (response) => {
             if (!response.didCancel && !response.errorCode && response.assets) {
                 const asset: any = response.assets[0];
                 console.log('asset', asset)
-                setProfileImage(asset);
-                uploadProfileImage(asset);
+                let formData = new FormData();
+                formData.append('user_id', userData?.user?.user_id);
+                formData.append('file', {
+                    uri: asset?.uri,
+                    name: asset?.fileName || 'profile_image.jpg',
+                    type: asset?.type || 'image/jpeg',
+                } as any);
+                dispatch(
+                    uploadSeekerProfilePhotoAction(
+                        formData,
+                        handleProfileImageSucess,
+                        () => setProfileImage(null),
+                    ),
+                );
+
             } else {
                 console.log('response', response)
             }
         });
     }
 
-    async function uploadProfileImage(asset: any) {
-        try {
-            const formData = new FormData();
-            formData.append(profile?.user?.phone_number ? 'email' : 'email', profile?.user?.email);
-            formData.append('file', {
-                uri: asset?.uri,
-                name: asset?.fileName || 'profile_image.jpg',
-                type: asset?.type || 'image/jpeg',
-            });
-
-            console.log('FORM DATA', formData)
-            setLoading(true);
-            const result = await API.Instance.post(API.API_ROUTES.uploadProfileImage, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            setLoading(false);
-            console.log('PROFILE PIC RES', JSON.stringify(result))
-
-            if (result.status) {
-                SHOW_TOAST(result?.data?.message ?? '', 'success')
-                await fetchProfile()
-            } else {
-                SHOW_TOAST(result?.data?.message ?? '', 'error')
-                setProfileImage(null);
+    const handleProfileImageSucess= (data?: any) =>{
+            let apiData={
+                 profile_photo_id: data?.profile_photo_id,
             }
-            console.log('error==>', result?.data?.message)
-        }
-        catch (error: any) {
-            setProfileImage(null);
-            setLoading(false);
-            SHOW_TOAST(error?.message ?? '', 'error');
-            console.log(error?.message)
-        } finally {
-            setLoading(false);
-        }
+        dispatch(editSeekerProfileAction(apiData))
     }
 
     const isOnlyWhitespace = (value: string) => !value || !value.trim();
@@ -203,61 +188,53 @@ export default function MyProfile(props: any) {
         return "";
     }
 
+    const hasChanges = useMemo(() => {
+        return (
+            name !== initialValues.name ||
+            email !== initialValues.email ||
+            mobileNumber !== initialValues.mobile ||
+            countryCode !== initialValues.countryCode
+        );
+    }, [name, email, mobileNumber, countryCode, initialValues]);
+
     async function onEditUserProfile() {
-
-        const trimmedAddress = address.trim();
-        const addressValidation = validateAddress(trimmedAddress);
-        const trimmedName = name.trim();
-
-        if (addressValidation) {
-            setAddressError(addressValidation);
-            return;
+        let data = {
+            mobile: mobileNumber,
+            phone_country_code:countryCode,
+            full_name: name,
         }
+        dispatch(editSeekerProfileAction(data))
+        // try {
+        //     const params = {
+        //         user_data: {
+        //             name: trimmedName,
+        //             address: trimmedAddress,
+        //             phone_number: mobileNumber,
+        //             phone_country_code: countryCode,
+        //         }
+        //     };
 
-        // Name validation
-        const nameValidation = validateName(trimmedName);
-        if (nameValidation) {
-            setNameError(nameValidation);
-            return;
-        }
+        //     console.log('EDIT PARAMS', params)
 
-        // Mobile validation
-        if (isOnlyWhitespace(mobileNumber)) {
-            setMobileNumberError("Mobile number required");
-            return;
-        }
+        //     setLoading(true);
+        //     const result = await API.Instance.patch(API.API_ROUTES.editProfile, params);
+        //     setLoading(false);
 
-        try {
-            const params = {
-                user_data: {
-                    name: trimmedName,
-                    address: trimmedAddress,
-                    phone_number: mobileNumber,
-                    phone_country_code: countryCode,
-                }
-            };
+        //     console.log('EDIT PROFILE RES', JSON.stringify(result))
 
-            console.log('EDIT PARAMS', params)
-
-            setLoading(true);
-            const result = await API.Instance.patch(API.API_ROUTES.editProfile, params);
-            setLoading(false);
-
-            console.log('EDIT PROFILE RES', JSON.stringify(result))
-
-            if (result?.status) {
-                SHOW_SUCCESS_TOAST(STRING.profile_updated_successfully)
-                setLoading(false);
-                props.navigation.goBack();
-                await fetchProfile()
-            }
-            else {
-                SHOW_TOAST(result?.data?.message, 'error')
-                console.log('ERR', result?.data?.message)
-            }
-        } catch (error: any) {
-            SHOW_TOAST(error?.message ?? '', 'error');
-        }
+        //     if (result?.status) {
+        //         SHOW_SUCCESS_TOAST(STRING.profile_updated_successfully)
+        //         setLoading(false);
+        //         props.navigation.goBack();
+        //         await fetchProfile()
+        //     }
+        //     else {
+        //         SHOW_TOAST(result?.data?.message, 'error')
+        //         console.log('ERR', result?.data?.message)
+        //     }
+        // } catch (error: any) {
+        //     SHOW_TOAST(error?.message ?? '', 'error');
+        // }
     }
 
     async function onDeleteProfile() {
@@ -294,240 +271,143 @@ export default function MyProfile(props: any) {
 
     const isEmailChange = email !== profile?.user?.email;
 
-
-
     return (
         <View style={styles(theme).container}>
-            <View style={{ marginTop: getScaleSize(10) }}>
+            <View style={styles(theme).headerContainer}>
                 <Header
                     rightIcon={{ icon: IMAGES.ic_delete_profile, title: STRING.delete_account }}
-                    rightIconContainerStyle={{ backgroundColor: theme.white, padding: getScaleSize(8), borderRadius: getScaleSize(6) }}
+                    rightIconContainerStyle={styles(theme).deleteIconContainer}
                     onPress={() => { bottomSheetRef.current.open() }}
                     onBack={() => { props.navigation.goBack() }}
                     screenName={STRING.my_profile}
                 />
             </View>
-            <KeyBoardAware showsVerticalScrollIndicator={false}>
-                <View style={styles(theme).mainContainer}>
-                    {profile?.user?.profile_photo_url ? (
-                        <Image source={{ uri: profile?.user?.profile_photo_url }} resizeMode='cover' style={styles(theme).profileContainer} />
-                    ) : (
-                        <View style={styles(theme).EmptyProfileContainer}>
-                            <Text
-                                size={getScaleSize(24)}
-                                font={FONTS.Lato.Regular}
-                                align="center"
-                                color={theme._262B43E5}>
-                                {(profile?.user?.first_name?.charAt(0) ?? '').toUpperCase() +
-                                    (profile?.user?.last_name?.charAt(0) ?? '').toUpperCase()}
-                            </Text>
-                        </View>
-                    )}
-                    <TouchableOpacity onPress={() => {
-                        pickImage()
-                    }}>
+            {/* <KeyBoardAware showsVerticalScrollIndicator={false}> */}
+            <View style={styles(theme).mainContainer}>
+                {(userData?.profile?.profile_photo?.url || profileImage) ? (
+                    <Image
+                        source={{ uri: (userData?.profile?.profile_photo?.url) ? userData?.profile?.profile_photo?.url : profileImage?.url }}
+                        resizeMode='cover'
+                        style={styles(theme).profileContainer} />
+                ) : (
+                    <View style={styles(theme).EmptyProfileContainer}>
                         <Text
-                            size={getScaleSize(16)}
-                            font={FONTS.Lato.SemiBold}
+                            size={getScaleSize(24)}
+                            font={FONTS.Lato.Regular}
                             align="center"
-                            color={theme._EC613D}>
-                            {STRING.edit_picture_or_avatar}
+                            color={theme._262B43E5}>
+                            {(userData?.profile?.full_name?.charAt(0) ?? '').toUpperCase()}
+                            {/* // +
+                                //     (profile?.user?.last_name?.charAt(0) ?? '').toUpperCase()} */}
                         </Text>
-                    </TouchableOpacity>
-                    <Text
-                        style={{ marginTop: getScaleSize(22), marginBottom: getScaleSize(12) }}
-                        size={getScaleSize(20)}
-                        font={FONTS.Lato.SemiBold}
-                        color={theme._2B2B2B}>
-                        {STRING.personal_information}
-                    </Text>
-                    <View style={{ gap: getScaleSize(16) }}>
-                        <Input
-                            placeholder={STRING.enter_name}
-                            placeholderTextColor={theme._939393}
-                            inputTitle={STRING.name}
-                            inputColor={true}
-                            maxLength={50}
-                            value={name}
-                            continerStyle={{ marginBottom: getScaleSize(20) }}
-                            onChangeText={text => {
-                                // Remove invalid characters
-                                let cleaned = text.replace(/[^A-Za-z\s]/g, '');
-
-                                // Remove leading spaces
-                                cleaned = cleaned.replace(/^\s+/, '');
-
-                                // Replace multiple spaces with single space
-                                cleaned = cleaned.replace(/\s{2,}/g, ' ');
-
-                                setName(cleaned);
-                                setNameError('');
-                            }}
-                            isError={nameError}
-                        />
-
-                        <Input
-                            placeholder={STRING.enter_mobile_number}
-                            placeholderTextColor={theme._939393}
-                            inputTitle={STRING.mobile_number}
-                            inputColor={true}
-                            keyboardType="numeric"
-                            continerStyle={{ marginBottom: getScaleSize(20) }}
-                            value={mobileNumber}
-                            maxLength={10}
-                            // countryCode={`${countryFlag} ${countryCode}`}
-                            // onPressCountryCode={() => {
-                            //     setVisibleCountry(true);
-                            // }}
-                            onChangeText={text => {
-                                const cleaned = text.replace(/[^0-9]/g, '');
-                                setMobileNumber(cleaned);
-                                setMobileNumberError('');
-                            }}
-                            isError={mobileNumberError}
-                        />
-                        <Input
-                            // placeholder={STRING.enter_email}
-                            // placeholderTextColor={theme._939393}
-                            // value={email}
-                            inputTitle={STRING.e_mail_id}
-                            inputColor={true}
-                            containerStyle={{
-                                paddingHorizontal: 0,
-                                marginBottom: getScaleSize(20)
-                            }}
-                            value={email}
-                            inputContainer={{
-                                // backgroundColor: theme._F0EFF0,
-                                fontSize: getScaleSize(14),
-                                opacity: 0.7,
-                                color: theme.primaryTextColor,
-                                paddingHorizontal: getScaleSize(10)
-                            }}
-                            // editable={false}
-                            onChangeText={text => {
-                                setEmail(text);
-                                setEmailError('');
-                            }}
-                            isError={emailError}
-                        // isRightComponent={isEmailChange && (() => 
-                        //     {!isEmailVerified ?
-                        //         (
-                        //     <Pressable
-                        //         onPress={() => {
-                        //             if (!REGEX.email.test(email.trim())) {
-                        //                 setEmailError(STRING.errorText.please_enter_valid_email);
-                        //             } else {
-                        //                 props.navigation.navigate(SCREENS.Otp.identifier, {
-                        //                     type: "emailChange",
-                        //                     email: email
-                        //                 });
-                        //                 setIsEmailVerified(true)
-                        //             }
-
-                        //         }}
-                        //         style={styles(theme).changeEmailBtn}>
-                        //         <Text
-                        //             size={getScaleSize(12)}
-                        //             color={theme.white}
-                        //         >{"Change Email"}</Text>
-                        //     </Pressable>)
-                        //     :
-                        // <Text
-                        // size={getScaleSize(16)}
-                        // color={theme.success}
-                        // font={FONTS.Lato.SemiBold}
-                        // >{"Verified"}</Text>    
-                        // }
-                        // )}
-
-                        // isRightComponent={
-                        //     isEmailChange &&
-                        //     (() => {
-                        //         if (!isEmailVerified) {
-                        //             return (
-                        //                 <Pressable
-                        //                     onPress={() => {
-                        //                         if (!REGEX.email.test(email.trim())) {
-                        //                             setEmailError(STRING.errorText.please_enter_valid_email);
-                        //                         } else {
-                        //                             props.navigation.navigate(SCREENS.Otp.identifier, {
-                        //                                 type: "emailChange",
-                        //                                 email: email,
-                        //                             });
-                        //                             setIsEmailVerified(true);
-                        //                         }
-                        //                     }}
-                        //                     style={styles(theme).changeEmailBtn}
-                        //                 >
-                        //                     <Text size={getScaleSize(12)} color={theme.white}>
-                        //                         {"Change Email"}
-                        //                     </Text>
-                        //                 </Pressable>
-                        //             );
-                        //         }
-
-                        //         return (
-                        //             <Text
-                        //                 size={getScaleSize(16)}
-                        //                 color={theme.successText}
-                        //                 font={FONTS.Lato.SemiBold}
-                        //                 style={{ marginRight: getScaleSize(20) }}
-                        //             >
-                        //                 {"Verified"}
-                        //             </Text>
-                        //         );
-                        //     })
-                        // }
-                        />
-                        {/* <Input
-                        placeholder={STRING.enter_address}
-                        placeholderTextColor={theme._939393}
-                        inputTitle={STRING.address}
-                        inputColor={true}
-                        value={address}
-                        multiline={true}
-                        numberOfLines={10}
-                        maxLength={250}
-                        onContentSizeChange={(e) => {
-                            
-                            const newHeight = e.nativeEvent.contentSize.height;
-                            setAddressHeight(
-                                Math.min(getScaleSize(200), Math.max(inputHeight, newHeight))
-                            );
-                        }}
-                        inputContainer={{
-                            maxHeight: getScaleSize(200),
-                            height: addressHeight,
-                            minHeight: inputHeight,
-                        }}
-                        continerStyle={{ marginBottom: getScaleSize(20) }}
-                        onChangeText={text => {
-                            let cleaned = text.replace(/[<>]/g, '');
-                            cleaned = cleaned.replace(/^\s+/, '');
-                            if (containsEmoji(cleaned)) return;
-
-                            setAddress(cleaned);
-                            setAddressError('');
-                        }}
-                        isError={addressError}
-                    /> */}
                     </View>
+                )}
+                <TouchableOpacity onPress={pickImage}>
+                    <Text
+                        size={getScaleSize(16)}
+                        font={FONTS.Lato.SemiBold}
+                        align="center"
+                        color={theme._EC613D}
+                        style={styles(theme).editPicText}>
+                        {STRING.edit_picture_or_avatar}
+                    </Text>
+                </TouchableOpacity>
+                <Text
+                    style={styles(theme).sectionTitle}
+                    size={getScaleSize(20)}
+                    font={FONTS.Lato.SemiBold}
+                    color={theme._2B2B2B}>
+                    {STRING.personal_information}
+                </Text>
+                <View style={styles(theme).fieldsWrapper}>
+                    <Input
+                        placeholder={STRING.enter_name}
+                        placeholderTextColor={theme._939393}
+                        inputTitle={STRING.name}
+                        inputColor={true}
+                        maxLength={50}
+                        value={name}
+                        continerStyle={styles(theme).inputSpacing}
+                        onChangeText={text => {
+                            // Remove invalid characters
+                            let cleaned = text.replace(/[^A-Za-z\s]/g, '');
+
+                            // Remove leading spaces
+                            cleaned = cleaned.replace(/^\s+/, '');
+
+                            // Replace multiple spaces with single space
+                            cleaned = cleaned.replace(/\s{2,}/g, ' ');
+
+                            setName(cleaned);
+                            setNameError('');
+                        }}
+                        isError={nameError}
+                    />
+
+                    {/* <Input
+                        placeholder={STRING.enter_mobile_number}
+                        placeholderTextColor={theme._939393}
+                        inputTitle={STRING.mobile_number}
+                        inputColor={true}
+                        keyboardType="numeric"
+                        continerStyle={styles(theme).inputSpacing}
+                        value={mobileNumber}
+                        maxLength={10}
+                        onChangeText={text => {
+                            const cleaned = text.replace(/[^0-9]/g, '');
+                            setMobileNumber(cleaned);
+                            setMobileNumberError('');
+                        }}
+                        isError={mobileNumberError}
+                    /> */}
+                    <Input
+                                placeholder={STRING.enter_mobile_no}
+                                placeholderTextColor={theme._939393}
+                                inputTitle={STRING.mobile_number}
+                                // inputColor={true}
+                                  continerStyle={styles(theme).inputSpacing}
+                                value={mobileNumber}
+                               onChangeText={text => {
+                            const cleaned = text.replace(/[^0-9]/g, '');
+                            setMobileNumber(cleaned);
+                            setMobileNumberError('');
+                        }}
+                                keyboardType="number-pad"
+                                maxLength={10}
+                                isError={mobileNumberError}
+                                countryCode={countryCode}
+                                // countryFlag={countryFlag}
+                                onPressCountryCode={() => {
+                                  setVisibleCountry(true);
+                                }}
+                              />
+                    <Input
+                        inputTitle={STRING.e_mail_id}
+                        // inputColor={true}
+                        containerStyle={styles(theme).emailContainer}
+                        value={email}
+                        inputContainer={styles(theme).emailInput}
+                        onChangeText={text => {
+                            setEmail(text);
+                            setEmailError('');
+                        }}
+                        isError={emailError}
+                        editable={true}
+                    />
                 </View>
-            </KeyBoardAware>
+            </View>
+            {/* </KeyBoardAware> */}
             <Button
                 title={STRING.update}
-                style={{ marginVertical: getScaleSize(24), marginHorizontal: getScaleSize(24) }}
-                onPress={() => {
-                    onEditUserProfile()
-                }}
+                style={[styles(theme).updateButton, !hasChanges && styles(theme).disabledButton]}
+                disabled={!hasChanges}
+                onPress={onEditUserProfile}
             />
             <BottomSheet
                 bottomSheetRef={bottomSheetRef}
                 height={getScaleSize(360)}
                 isInfo={true}
                 title={STRING.are_you_sure_you_want_to_delete_your_account}
-                // description={STRING.delete_account_message}
                 description={'Once deleted, your account and all associated data are permanently erased. No refunds will be issued.'}
                 buttonTitle={STRING.delete_account}
                 secondButtonTitle={STRING.cancel}
@@ -590,5 +470,45 @@ const styles = (theme: ThemeContextType['theme']) =>
             paddingVertical: getScaleSize(10),
             paddingHorizontal: getScaleSize(24),
             marginRight: getScaleSize(16)
-        }
+        },
+        headerContainer: {
+            marginTop: getScaleSize(10),
+        },
+        deleteIconContainer: {
+            backgroundColor: theme.white,
+            padding: getScaleSize(8),
+            borderRadius: getScaleSize(6),
+        },
+        editPicText: {
+            marginTop: getScaleSize(6),
+        },
+        sectionTitle: {
+            marginTop: getScaleSize(22),
+            marginBottom: getScaleSize(12),
+        },
+        fieldsWrapper: {
+            gap: getScaleSize(16),
+        },
+        inputSpacing: {
+            marginBottom: getScaleSize(20),
+        },
+        emailContainer: {
+            paddingHorizontal: 0,
+            marginBottom: getScaleSize(20),
+            opacity: 0.5,
+            backgroundColor: theme._F0EFF0,
+        },
+        emailInput: {
+            fontSize: getScaleSize(16),
+            // opacity: 0.7,
+            color: theme.primaryText,
+            paddingHorizontal: getScaleSize(10),
+        },
+        updateButton: {
+            marginVertical: getScaleSize(24),
+            marginHorizontal: getScaleSize(24),
+        },
+        disabledButton: {
+            opacity: 0.6,
+        },
     });

@@ -29,161 +29,29 @@ import { SCREENS, TABS } from '..';
 import { API } from '../../api';
 import { userRoles } from '../../constant/utils';
 import SubscriptionSuccessModal from '../../components/SubcriptionSuccessModal';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { getSeekerHomeService, getServiceCategoryData } from '../../actions/seekerHome/seekerHomeAction';
+import NavigationService from '../NavigationService';
 
 export default function Home(props: any) {
   const STRING = useString();
+  const dispatch = useAppDispatch();
   const { theme } = useContext<any>(ThemeContext);
 
   const { userType } = useContext<any>(AuthContext);
+  const {userData}=useAppSelector(state => state?.auth)
+  const { services = {} as any, serviceCategoryData, isLoading, serviceCategoryList = [] } = useAppSelector((state: any) => state.seekerHome)
 
   const {fromFromSubscription,userRole} = props.route?.params || {};
 
   const acceptRef = useRef<any>(null);
 
-  const [isLoading, setLoading] = useState(false);
   const [allServices, setAllServices] = useState([]);
   const [recentRequests, setRecentRequests] = useState([]);
   const [favoriteProfessionals, setFavoriteProfessionals] = useState([]);
   const [professionalConnectedCount, setProfessionalConnectedCount] =
     useState(0);
-
     const [subscriptionSuccessModalVisible,setSubscriptionSuccessModalVisible] = useState(false)
-
-
-  const homeServices = [
-    {
-      id: "diy",
-      title: "DIY",
-      icon: IMAGES.hammerImg,
-      onPress: (navigation: any) => {
-        navigation.navigate(SCREENS.Assistance.identifier, {
-          service: "Diy"
-        });
-      }
-    },
-    {
-      id: "housekeeping",
-      title: "Housekeeping",
-      icon: IMAGES.housekeeping,
-      onPress: (navigation: any) => {
-        navigation.navigate(SCREENS.Assistance.identifier, {
-          service: "Housekeeping"
-        });
-      }
-    },
-    {
-      id: "gardening",
-      title: "Gardening",
-      icon: IMAGES.gardeningImg,
-      onPress: (navigation: any) => {
-        navigation.navigate(SCREENS.Assistance.identifier, {
-          service: "Gardening"
-        });
-      }
-    },
-  ];
-
-  const otherService = [
-    {
-      id: "transport",
-      title: "Transport",
-      icon: IMAGES.transport,
-      onPress: (navigation: any) => {
-        navigation.navigate(SCREENS.Transport.identifier, {
-          service: "Transport"
-        });
-      }
-    },
-    {
-      id: "personal_care",
-      title: "Personal Care",
-      icon: IMAGES.personal_care,
-      onPress: (navigation: any) => {
-        navigation.navigate(SCREENS.Transport.identifier, {
-          service: "Personal Care"
-        });
-      }
-    },
-    {
-      id: "Tech Support",
-      title: "Tech Support",
-      icon: IMAGES.tech_support,
-      onPress: (navigation: any) => {
-        navigation.navigate(SCREENS.Transport.identifier, {
-          service: "Tech Support"
-        });
-      }
-    },
-  ]
-
-  const businessSevice = [
-    {
-      id: "office Cleaning",
-      title: "Office Cleaning",
-      icon: IMAGES.housekeeping,
-      onPress: (navigation: any) => {
-        navigation.navigate(SCREENS.Assistance.identifier, {
-          service: "Office Cleaning"
-        });
-      }
-    },
-    {
-      id: "electrical",
-      title: "Electrical",
-      icon: IMAGES.electricalImg,
-      onPress: (navigation: any) => {
-        navigation.navigate(SCREENS.Assistance.identifier, {
-          service: "Electrical"
-        });
-      }
-    },
-    {
-      id: "event_support",
-      title: "Event Support",
-      icon: IMAGES.eventSupportImg,
-      onPress: (navigation: any) => {
-        navigation.navigate(SCREENS.Assistance.identifier, {
-          service: "Event Support"
-        });
-      }
-    },
-  ];
-
-  const businessOtherService = [{
-    id: "transport",
-    title: "Transport",
-    icon: IMAGES.transport,
-    onPress: (navigation: any) => {
-      navigation.navigate(SCREENS.Transport.identifier, {
-        service: "Transport"
-      });
-    }
-  },
-  {
-    id: "network",
-    title: "Network",
-    icon: IMAGES.networkImg,
-    onPress: (navigation: any) => {
-      navigation.navigate(SCREENS.Transport.identifier, {
-        service: "Network"
-      });
-    }
-  },
-  {
-    id: "Tech Support",
-    title: "Tech Support",
-    icon: IMAGES.tech_support,
-    onPress: (navigation: any) => {
-      navigation.navigate(SCREENS.Transport.identifier, {
-        service: "Tech Support"
-      });
-    }
-  },]
-
-
-  const serviceData = userType == userRoles.Service_Seeker_individual ? homeServices : businessSevice
-
-  const otherServiceData = userType == userRoles.Service_Seeker_individual ? otherService : businessOtherService
 
   useFocusEffect(
     React.useCallback(() => {
@@ -203,6 +71,7 @@ export default function Home(props: any) {
   }, [fromFromSubscription, userRole]);
 
   const isFocused = useIsFocused();
+
   // useEffect(() => {
   //   if (isFocused) {
   //     getHomeData();
@@ -210,6 +79,10 @@ export default function Home(props: any) {
   //     getAllRequests();
   //   }
   // }, [isFocused]);
+
+  useEffect(()=>{
+    dispatch(getServiceCategoryData())
+  },[isFocused])
 
   async function getHomeData() {
     try {
@@ -286,6 +159,28 @@ export default function Home(props: any) {
     }
   }
 
+  const handleHomeServiceViewAll = () =>{
+    dispatch(getServiceCategoryData("home services",(data:any)=>{
+      NavigationService.navigate(SCREENS.Assistance.identifier, {
+                service: "All Services",
+                id:data?.id
+              });
+    }))
+  }
+
+const handleCategoryOnPress = (item:any) =>{
+  dispatch(getServiceCategoryData("home services",(data:any)=>{
+      NavigationService.navigate(SCREENS.Assistance.identifier, {
+                service: item?.category_name,
+                id:item?.id
+              });
+    }))
+  // NavigationService.navigate(SCREENS.Assistance.identifier, {
+  //               service: item?.category_name,
+  //               id:item?.id
+  //             });
+}
+
   return (
     <View style={styles(theme).container}>
       <StatusBar
@@ -296,14 +191,15 @@ export default function Home(props: any) {
       />
       {/* HEADER */}
       <HomeHeader
+      userImage={userData?.profile.profile_photo?.url}
         bannerImg={IMAGES.homeBanner}
-        // userData={}
+        userName={userData?.profile?.full_name || userData?.profile?.business_name}
         professionalConnectedCount={professionalConnectedCount}
         onSearchPress={() => {
-          props.navigation.navigate(SCREENS.Search.identifier);
+          NavigationService.navigate(SCREENS.Search.identifier);
         }}
         onPressNotification={() => {
-          props.navigation.navigate(SCREENS.Notification.identifier);
+          NavigationService.navigate(SCREENS.Notification.identifier);
         }}
         onPressUserProfile={() => {
           props.navigation.dispatch(
@@ -320,17 +216,11 @@ export default function Home(props: any) {
         }}
       />
       <ScrollView
-        contentContainerStyle={{ paddingBottom: getScaleSize(50), paddingHorizontal: getScaleSize(24) }}
+        contentContainerStyle={styles(theme).scrollContent}
         showsVerticalScrollIndicator={false} scrollEnabled={true}>
         <Image
           source={IMAGES.homeBanner}
-          style={{
-            width: '100%',
-            height: getScaleSize(200),
-            // top:getScaleSize(-32),
-            // position:'absolute',
-            // zIndex:999
-          }}
+          style={styles(theme).homeBanner}
           resizeMode="contain"
         />
         {/* <View
@@ -371,10 +261,8 @@ export default function Home(props: any) {
             </View>
           </View>
         </View> */}
-        <View style={{
-          marginTop: getScaleSize(24),
-          flexDirection: "row", alignItems: 'center', justifyContent: 'space-between'
-        }}>
+       {services && services?.home_services?.length>0 && (<>
+        <View style={styles(theme).sectionHeader}>
           <Text
             size={getScaleSize(16)}
             font={FONTS.Lato.SemiBold}
@@ -382,12 +270,7 @@ export default function Home(props: any) {
             {userType == userRoles.Service_Seeker_individual ?  STRING.home_services : "Business Service"}
           </Text>
           <TouchableOpacity
-            onPress={() => {
-              // props.navigation.navigate(SCREENS.ViewAllService.identifier)
-              props.navigation.navigate(SCREENS.Assistance.identifier, {
-                service: "All Services",
-              });
-            }}
+            onPress={() => handleHomeServiceViewAll()}
           >
             <Text
               size={getScaleSize(12)}
@@ -397,79 +280,40 @@ export default function Home(props: any) {
             </Text>
           </TouchableOpacity>
         </View>
-        <View style={{
-          marginTop: getScaleSize(24),
-          flexDirection: 'row', alignItems: 'center', gap: 16, justifyContent: 'center'
-        }}>
-          {serviceData.map((item, index) => {
+        <ScrollView 
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles(theme).serviceListContainer}>
+          {services?.home_services?.map((item, index) => {
             return (
               <TouchableOpacity
-                style={{
-                  paddingVertical: getScaleSize(12),
-                  backgroundColor: theme.white,
-                  minWidth: getScaleSize(116),
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: getScaleSize(10),
-                  elevation: 1,
-                  shadowColor: theme.black,
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 4,
-                  paddingHorizontal: getScaleSize(6)
-                }}
+                style={styles(theme).serviceCard}
                 activeOpacity={1}
-                onPress={() => item.onPress(props.navigation)}>
-
+                onPress={() => handleCategoryOnPress(item)}>
                 <Image
-                  // style={styles(theme).bannerImage}
-                  style={{ height: getScaleSize(48), width: getScaleSize(48), marginBottom: getScaleSize(10) }}
-                  source={item.icon}
+                  style={styles(theme).serviceIcon}
+                  source={{uri:item?.category_logo}}
                 />
                 <Text
                   // style={{flex: 1.0, alignSelf: 'center'}}
                   size={getScaleSize(14)}
                   font={FONTS.Lato.SemiBold}
                   color={theme._404040}>
-                  {item.title}
+                  {item?.category_name}
                 </Text>
               </TouchableOpacity>
             )
           })
 
           }
-        </View>
-        {/* <TouchableOpacity
-          style={styles(theme).bannerContainer}
-          activeOpacity={1}
-          onPress={() => {
-            const service = allServices.find(
-              (item: any) => item.name === 'Home Assistance',
-            );
-            if (service) {
-              props.navigation.navigate(SCREENS.Assistance.identifier, {
-                service: service,
-              });
-            } else {
-              SHOW_TOAST('Service not found', 'error');
-            }
-          }}>
-          <Text
-            style={{flex: 1.0, alignSelf: 'center'}}
-            size={getScaleSize(24)}
-            font={FONTS.Lato.Bold}
-            color={theme._323232}>
-            {'Home Assistance'}
-          </Text>
-          <Image
-            style={styles(theme).bannerImage}
-            source={IMAGES.home_assitance}
-          />
-        </TouchableOpacity> */}
+        </ScrollView>
+        </>
+        )}
 
-        <View style={{
-          marginTop: getScaleSize(24),
-        }}>
+       {services && services.other_services?.length >0 &&
+         (
+         <>
+         <View style={styles(theme).otherSectionHeader}>
           <Text
             size={getScaleSize(16)}
             font={FONTS.Lato.SemiBold}
@@ -477,32 +321,18 @@ export default function Home(props: any) {
             {STRING.other_services}
           </Text>
         </View>
-        <View style={{
-          marginTop: getScaleSize(24),
-          flexDirection: 'row', alignItems: 'center', gap: 16, justifyContent: 'center'
-        }}>
-          {otherServiceData.map((item, index) => {
+         <ScrollView 
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles(theme).otherServiceListContainer}>
+          {services?.other_services?.map((item, index) => {
             return (
               <TouchableOpacity
-                style={{
-                  paddingVertical: getScaleSize(12),
-                  backgroundColor: theme.white,
-                  minWidth: getScaleSize(116),
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: getScaleSize(10),
-                  elevation: 1,
-                  shadowColor: theme.black,
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 4,
-                  paddingHorizontal: getScaleSize(6)
-                }}
+                style={styles(theme).serviceCard}
                 activeOpacity={1}
                 onPress={() => item.onPress(props.navigation)}>
                 <Image
-                  // style={styles(theme).bannerImage}
-                  style={{ height: getScaleSize(48), width: getScaleSize(48), marginBottom: getScaleSize(10) }}
+                  style={styles(theme).serviceIcon}
                   source={item.icon}
                 />
                 <Text
@@ -516,9 +346,11 @@ export default function Home(props: any) {
             )
           })
           }
-        </View>
+        </ScrollView>
+        </>
+        )}
 
-        <Button
+        {/* <Button
           title='Add Other'
           style={{ marginTop: getScaleSize(24), marginBottom: getScaleSize(12) }}
           onPress={() => {
@@ -530,7 +362,7 @@ export default function Home(props: any) {
           font={FONTS.Lato.SemiBold}
           size={getScaleSize(12)}
           color={theme._8C8C8C}
-        >{"Can't find what you're looking for? Suggest a new service or category."}</Text>
+        >{"Can't find what you're looking for? Suggest a new service or category."}</Text> */}
 
         {/* <View style={styles(theme).deviderView} />
         <View
@@ -672,14 +504,18 @@ export default function Home(props: any) {
 
 const styles = (theme: ThemeContextType['theme']) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: "#fafafa",
+    container: { flex: 1, backgroundColor: theme.white },
+    scrollContent: {
+      paddingBottom: getScaleSize(50),
+    },
+    homeBanner: {
+      width: '100%',
+      height: getScaleSize(200),
     },
     bannerContainer: {
-      height: getScaleSize(105),
-      flex: 1.0,
-      backgroundColor: '#FDBE12',
+      height: getScaleSize(161),
+      flex: 1,
+      backgroundColor: theme.primary,
       borderBottomLeftRadius: getScaleSize(40),
       borderTopRightRadius: getScaleSize(40),
       borderBottomRightRadius: getScaleSize(12),
@@ -689,6 +525,56 @@ const styles = (theme: ThemeContextType['theme']) =>
       justifyContent: 'center',
       flexDirection: 'row',
       marginHorizontal: getScaleSize(22),
+    },
+    sectionHeader: {
+      marginTop: getScaleSize(24),
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginHorizontal: getScaleSize(24),
+    },
+    serviceListContainer: {
+      paddingVertical: 10,
+      marginTop: getScaleSize(24),
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 16,
+      justifyContent: 'center',
+      marginHorizontal: getScaleSize(24),
+      paddingRight: 50,
+    },
+    serviceCard: {
+      paddingVertical: getScaleSize(12),
+      backgroundColor: theme.white,
+      minWidth: getScaleSize(116),
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: getScaleSize(10),
+      elevation: 1,
+      shadowColor: theme.black,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      paddingHorizontal: getScaleSize(6),
+    },
+    serviceIcon: {
+      height: getScaleSize(48),
+      width: getScaleSize(48),
+      marginBottom: getScaleSize(10),
+    },
+    otherSectionHeader: {
+      marginTop: getScaleSize(24),
+      marginHorizontal: getScaleSize(24),
+    },
+    otherServiceListContainer: {
+      paddingVertical: 10,
+      marginTop: getScaleSize(24),
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 16,
+      justifyContent: 'center',
+      marginHorizontal: getScaleSize(24),
+      paddingRight: 50,
     },
     bannerImage: {
       height: getScaleSize(74),

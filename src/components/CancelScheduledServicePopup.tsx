@@ -292,7 +292,6 @@ export default function CancelScheduledServicePopup(props: CancelScheduledServic
                                     {"Platform Fee" + ` (${cancelServiceDetails?.deduction_percentage ?? '0'}%)`}
                                 </Text>
                                 <Text
-
                                     size={getScaleSize(14)}
                                     font={FONTS.Lato.SemiBold}
                                     color={theme._404040}>
@@ -571,7 +570,7 @@ const styles = (theme: ThemeContextType['theme']) =>
             paddingHorizontal: getScaleSize(7)
         },
         nextButtonContainer: {
-            // flex: 1.0,
+            flex: 1.0,
             justifyContent: 'center',
             borderWidth: 1,
             borderColor: theme.primary,

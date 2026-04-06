@@ -23,6 +23,7 @@ interface Props {
     uploadBoxStyle?: StyleProp<ViewStyle>;
     textFont?: string;
     icon?: string;
+    isError?:string
 }
 
 export default function UploadDocumentBox({
@@ -35,6 +36,7 @@ export default function UploadDocumentBox({
     containerStyle,
     uploadBoxStyle,
     textFont,
+    isError,
     icon
 }: Props) {
     const { theme } = useContext(ThemeContext);
@@ -60,7 +62,11 @@ export default function UploadDocumentBox({
             </View>
 
             <TouchableOpacity
-                style={[styles(theme).uploadBox,uploadBoxStyle]}
+                style={[styles(theme).uploadBox,
+                    {
+                        borderColor:isError? theme.primary :  "#ddd"
+                    },
+                    uploadBoxStyle]}
                 onPress={onPress}
             >
                 {(value && value?.[0]?.uri) &&
@@ -97,7 +103,13 @@ export default function UploadDocumentBox({
                 }
 
             </TouchableOpacity>
-
+           {isError&&
+            <Text
+            size={getScaleSize(12)}
+            font={FONTS.Lato.Regular}
+            color={theme.primary}
+           >{isError}</Text>
+            }
         </View>
 
     )

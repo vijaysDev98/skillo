@@ -11,9 +11,10 @@ interface GenderSelectionProps {
   placeholder: string;
   value: string;
   onSelect: (value: string) => void;
+  isError?:string;
 }
 
-const GenderSelection = ({ inputTitle, placeholder, value, onSelect }: GenderSelectionProps) => {
+const GenderSelection = ({ inputTitle, placeholder, value, onSelect,isError }: GenderSelectionProps) => {
   const { theme } = useContext<any>(ThemeContext);
   const [showOptions, setShowOptions] = useState(false);
 
@@ -58,6 +59,7 @@ const GenderSelection = ({ inputTitle, placeholder, value, onSelect }: GenderSel
         editable={false}
         isDropDown={true}
         onPress={() => setShowOptions(!showOptions)}
+        isError={isError}
       />
       {showOptions && (
         <View style={styles(theme).optionsContainer}>

@@ -30,10 +30,14 @@ import { PERMISSIONS, request, RESULTS } from 'react-native-permissions';
 
 import LinearGradient from 'react-native-linear-gradient'
 import { userRoles } from '../constant/utils';
+import { useAppDispatch } from '../redux/hooks';
+import { getProviderProfile, getSeekerProfile } from '../actions/auth/authAction';
+import NavigationService from './NavigationService';
 
 export default function Splash(props: any) {
   const { theme } = useContext(ThemeContext);
   const { setUser, setUserType, setProfile, userType } = useContext<any>(AuthContext);
+  const dispatch = useAppDispatch();
 
 
   console.log("Splash userType=====>>>", userType)
@@ -99,27 +103,21 @@ export default function Splash(props: any) {
     const userData = JSON.parse(userDetails ?? '{}');
     if (userData && userData?.user_data?.role) {
       setUser(userData);
-      // setUserType(userData?.user_data?.role);
-      setUserType(userRoles.Service_Seeker_individual)
-      getProfileData();
+      const role = userData?.user_data?.role;
+      setUserType(role);
+      await getProfileData(role);
     } else {
       setTimeout(() => {
-        props?.navigation?.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [{ name: SCREENS.Login.identifier }],
-          }),
-        );
+        // props?.navigation?.dispatch(
+        //   CommonActions.reset({
+        //     index: 0,
+        //     routes: [{ name: SCREENS.Login.identifier }],
+        //   }),
+        // );
         //  props.navigation.dispatch(
         //   CommonActions.reset({
         //     index: 0,
-        //     routes: [
-        //       {
-        //         name: SCREENS.BottomBar.identifier,
-        //       },
-        //     ],
-        //   }),
-        // );
+        NavigationService.navigate(SCREENS.Login.identifier);
         setUser('');
         setUserType('');
         setProfile('');
@@ -127,58 +125,42 @@ export default function Splash(props: any) {
     }
   }
 
-  async function getProfileData() {
-    setUserType(userRoles.Service_Seeker_individual)
-    props.navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [
-          {
-            name: SCREENS.BottomBar.identifier,
-          },
-        ],
-      }),
-    );
-    // try {
-    //   const result = await API.Instance.get(
-    //     API.API_ROUTES.getUserDetails + `?platform=app`,
-    //   );
-    //   if (result.status) {
-    //     setProfile(result?.data?.data);
-    //     props.navigation.dispatch(
-    //       CommonActions.reset({
-    //         index: 0,
-    //         routes: [
-    //           {
-    //             name: SCREENS.BottomBar.identifier,
-    //           },
-    //         ],
-    //       }),
-    //     );
-    //   } else {
-    //     props.navigation.dispatch(
-    //       CommonActions.reset({
-    //         index: 0,
-    //         routes: [
-    //           {
-    //             name: SCREENS.RoleTypeSelection.identifier,
-    //           },
-    //         ],
-    //       }),
-    //     );
-    //   }
-    // } catch (error: any) {
+  async function getProfileData(role: string) {
+    // const resetTo = (screen: string) => {
     //   props.navigation.dispatch(
     //     CommonActions.reset({
     //       index: 0,
     //       routes: [
     //         {
-    //           name: SCREENS.RoleTypeSelection.identifier,
+    //           name: screen,
     //         },
     //       ],
     //     }),
     //   );
-    // }
+    // };
+
+    try {
+      const onSuccess = (profile: any) => {
+        setProfile(profile);
+        const profileRole = profile?.user_data?.role;
+        if (profileRole) {
+          setUserType(profileRole);
+        }
+      };
+
+      if (role === userRoles.Service_Provider_business || role === userRoles.Service_Provider_individual) {
+        await dispatch<any>(getProviderProfile(onSuccess, ));
+      } else {
+        await dispatch<any>(getSeekerProfile(onSuccess,));
+      }
+
+      // resetTo(SCREENS.BottomBar.identifier);
+      NavigationService.reset(SCREENS.BottomBar.identifier);
+    } catch (error: any) {
+      SHOW_TOAST(error?.message ?? 'Something went wrong', 'error');
+      // resetTo(SCREENS.Login.identifier);
+      NavigationService.reset(SCREENS.Login.identifier);
+    }
   }
 
   return (

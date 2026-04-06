@@ -5,6 +5,7 @@ import {
   ViewStyle,
   Image,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import React, { useContext } from 'react';
 
@@ -24,17 +25,22 @@ interface ButtonProps {
   disabled?: boolean;
   titleColor?: string;
   buttonTitleFont?: string;
-  buttonTitleSize?: number
+  buttonTitleSize?: number;
+  loading?:boolean;
 }
 
 const Button = (props: ButtonProps) => {
   const { theme } = useContext<any>(ThemeContext)
-  const { style, title, onPress, disabled, titleColor, buttonTitleFont, buttonTitleSize } = props;
+  const { style, title, onPress, disabled, titleColor, buttonTitleFont, buttonTitleSize,loading } = props;
 
   return (
     <TouchableOpacity
       onPress={onPress}
       style={[styles(theme).gradient, { backgroundColor: disabled ? theme.primary : theme.primary }, style]} activeOpacity={0.8}>
+     {loading ? (
+      <ActivityIndicator size="small" color={theme.white}/>
+     ):
+(
       <Text
         align="center"
         font={buttonTitleFont ? buttonTitleFont : FONTS.Lato.Bold}
@@ -44,7 +50,7 @@ const Button = (props: ButtonProps) => {
           disabled ? theme.white : titleColor ? titleColor : theme.white}
       >
         {title}
-      </Text>
+      </Text>)}
     </TouchableOpacity>
   );
 };

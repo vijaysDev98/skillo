@@ -45,32 +45,66 @@ Instance.interceptors.request.use(
         //         hasShownNoInternetAlert = false;
         //     }
         // }
+        if (config.skipAuth) {
+            const fullUrl = `${config?.baseURL ?? ''}${config?.url ?? ''}`;
+          console.log('[API Request] without token', {
+                method: config?.method,
+                url: fullUrl,
+                headers: config?.headers,
+                params: config?.params,
+                data: config?.data,
+            });  
+            return config;
+        }
+        
         if (!DISABLE_API_LOGS) {
-            console.log(`Config Header ${JSON.stringify(config?.headers)}`)
-            console.log(`Config Base URL ${config?.method} ${JSON.stringify(config?.baseURL)} ${JSON.stringify(config?.url)}`)
-            console.log(`Config Data ${JSON.stringify(config?.data)}`)
+            const fullUrl = `${config?.baseURL ?? ''}${config?.url ?? ''}`;
+            console.log('[API Request]', {
+                method: config?.method,
+                url: fullUrl,
+                headers: config?.headers,
+                params: config?.params,
+                data: config?.data,
+            });
         }
 
         if (!config.headers.Authorization) {
-            const userData: any = await Storage.get(Storage.USER_DETAILS)
-            const result = JSON.parse(userData)
-            const accessToken = result?.access_token
-            if (accessToken) {
-                const isExpired = isTokenExpire(accessToken)
-                if (isExpired) {
-                    const newAccessToken = await refreshAccessToken(result?.refresh_token)
-                    if (newAccessToken) {
-                        config.headers.Authorization = "Bearer " + `${newAccessToken}`
-                    }
-                    else {
-                        EventRegister.emit('onInvalidToken')
-                    }
+            const userData: any = await Storage.get(Storage.USER_DETAILS);
+            if (!userData) {
+                console.warn('No stored user data found; request sent without Authorization');
+                return config;
+            }
+
+            const result = JSON.parse(userData);
+            console.log("result", result?.tokens?.access_token)
+            const accessToken = result?.tokens?.access_token || result?.access_token;
+            console.log('AccessToken====>>', accessToken);
+
+            if (!accessToken) {
+                console.warn('No access token found in stored user data; request sent without Authorization');
+                return config;
+            }
+
+            const isExpired = isTokenExpire(accessToken);
+            console.log("isExpired",isExpired)
+            console.log("result?.tokens?.refresh_token",result?.refresh_token)
+            if (isExpired) {
+                const newAccessToken = await refreshAccessToken(result?.refresh_token || result?.tokens?.refresh_token);
+                if (newAccessToken) {
+                    config.headers.Authorization = 'Bearer ' + `${newAccessToken}`;
+                } else {
+                    EventRegister.emit('onInvalidToken');
                 }
-                else {
-                    config.headers.Authorization = "Bearer " + `${accessToken}`
-                }
+            } else {
+                config.headers.Authorization = 'Bearer ' + `${accessToken}`;
             }
         }
+        if (!config.headers.Authorization) {
+            console.warn('Authorization header missing for request', config.method, config.url);
+        } else {
+            console.log('Authorization header set:', config.headers.Authorization);
+        }
+
         return config;
     },
     (error) => {

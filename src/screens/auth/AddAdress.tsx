@@ -8,10 +8,14 @@ import { API } from '../../api';
 import { CommonActions } from '@react-navigation/native';
 import { userRoles } from '../../constant/utils';
 import { AppSafeAreaView } from '../../components/AppSafeAreaView';
+import { useAppDispatch } from '../../redux/hooks';
+import { addressCreateAction, getSeekerProfile, providerAddressCreateAction } from '../../actions/auth/authAction';
+import NavigationService from '../NavigationService';
 
 const AddAdress = (props: any) => {
-    const { data } = props.route.params ?? "";
+    const { data, title } = props.route.params ?? "";
     const fromChangeAddress = props.route.params?.fromChangeAddress ?? "";
+    const dispatch = useAppDispatch()
 
     const STRING = useString();
 
@@ -26,182 +30,75 @@ const AddAdress = (props: any) => {
         addressLine1: '',
         addressLine2: '',
         city: '',
-        state: '',
+        addressState: '',
         country: '',
         postalCode: '',
     });
 
-    // async function onSignup() {
-
-    //     // REGEX (clean + strict)
-    //     const emojiRegex =
-    //         /([\u2700-\u27BF]|[\uE000-\uF8FF]|[\uD83C-\uDBFF\uDC00-\uDFFF]+)/;
-
-    //     const nameRegex = /^[A-Za-z.\- ]+$/;
-    //     const onlyNumbers = /^\d+$/;
-    //     const onlySpecialChars = /^[^A-Za-z0-9]+$/;
-    //     const mobileRegex = /^[0-9]{10}$/;
-
-    //     // Trim everything first
-    //     const cleanAddress1 = state.addressLine1.trim();
-    //     const cleanAddress2 = state.addressLine2.trim();
-    //     const cleanCity = state.city.trim();
-    //     const cleanState = state.state.trim();
-    //     const cleanCountry = state.country.trim();
-    //     const cleanPostalCode = state.postalCode.trim();
-    //     // const cleanEmail = data.email.trim();
-
-    //     // // Update state with trimmed values
-    //     // setName(cleanName);
-    //     // setMobileNo(cleanMobile);
-    //     // setAddress(cleanAddress);
-    //     // setEmail(cleanEmail);
-
-    //     // let hasError = false;
-
-    //     // setNameError('');
-    //     // setMobileNoError('');
-    //     // setEmailError('');
-    //     // setAddressError('')
-
-    //     // // NAME VALIDATION 
-    //     // if (!cleanName) {
-    //     //   setNameError(STRING.name_required);
-    //     //   hasError = true;
-    //     // }
-    //     // else if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(cleanName)) {
-    //     //   setNameError(STRING.name_invalid_characters);
-    //     //   hasError = true;
-    //     // }
-
-    //     // // MOBILE VALIDATION 
-    //     // if (!cleanMobile) {
-    //     //   setMobileNoError(STRING.mobile_number_required);
-    //     //   hasError = true;
-    //     // } else if (!mobileRegex.test(cleanMobile)) {
-    //     //   setMobileNoError(STRING.mobile_must_be_10_digits);
-    //     //   hasError = true;
-    //     // }
-
-    //     // // EMAIL VALIDATION 
-    //     // if (!cleanEmail) {
-    //     //   setEmailError(STRING.email_required);
-    //     //   hasError = true;
-    //     // } else if (
-    //     //   cleanEmail.length < 6 ||
-    //     //   cleanEmail.length > 100 ||
-    //     //   !REGEX.email.test(cleanEmail)
-    //     // ) {
-    //     //   setEmailError(STRING.please_enter_valid_email);
-    //     //   hasError = true;
-    //     // }
-
-    //     // ADDRESS VALIDATION 
-    //     // if (!cleanAddress1) {
-    //     //   setAddressError(STRING.address_required);
-    //     //   hasError = true;
-    //     // }
-    //     // else if (/^\d+$/.test(cleanAddress1)) {
-    //     //   setAddressError(STRING.address_only_numbers_error);
-    //     //   hasError = true;
-    //     // }
-    //     // else if (/^[^A-Za-z0-9]+$/.test(cleanAddress1)) {
-    //     //   setAddressError(STRING.address_special_char_error);
-    //     //   hasError = true;
-    //     // }
-
-    //     // if (hasError) {
-    //     //   return
-    //     // }
-    //     // else {
-    //     const params = {
-    //         mobile: data?.mobile,
-    //         phone_country_code: data?.phone_country_code,
-    //         name: data?.name,
-    //         email: data?.email,
-    //         address: cleanAddress1 + ', ' + cleanAddress2 + ', ' + cleanCity + ', ' + cleanState + ', ' + cleanCountry + ', ' + cleanPostalCode,
-    //         role: data?.role,
-    //     };
-
-    //     try {
-    //         setLoading(true);
-    //         const result = await API.Instance.post(
-    //             API.API_ROUTES.addPersonalDetails,
-    //             params,
-    //         );
-
-    //         if (result.status) {
-    //             SHOW_TOAST(result?.data?.message ?? '', 'success');
-    //             Storage.save(
-    //                 Storage.USER_DETAILS,
-    //                 JSON.stringify(result?.data?.data),
-    //             );
-    //             setUser(result?.data?.data);
-    //             setUserType(result?.data?.data?.user_data?.role);
-    //             getProfileData();
-    //         } else {
-    //             SHOW_TOAST(result?.data?.message ?? '', 'error');
-    //         }
-    //     } catch (error: any) {
-    //         SHOW_TOAST(error?.message ?? '', 'error');
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // }
-
-
-    // async function getProfileData() {
-    //     try {
-    //         setLoading(true);
-    //         const result = await API.Instance.get(API.API_ROUTES.getUserDetails + `?platform=app`);
-    //         if (result.status) {
-    //             setProfile(result?.data?.data);
-    //             onNext();
-    //         } else {
-    //             SHOW_TOAST(result?.data?.message, 'error');
-    //             console.log('ERR', result?.data?.message);
-    //         }
-    //     } catch (error: any) {
-    //         SHOW_TOAST(error?.message ?? '', 'error');
-    //         return null;
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // }
-
-    // async function onNext() {
-    //     if (userType == 'service_provider') {
-    //         props.navigation.navigate(SCREENS.ChooseYourSubscription.identifier);
-    //     } else {
-    //         props.navigation.dispatch(
-    //             CommonActions.reset({
-    //                 index: 0,
-    //                 routes: [{ name: SCREENS.BottomBar.identifier }],
-    //             }),
-    //         );
-    //     }
-    // }
+    const [errors, setErrors] = React.useState({
+        addressLine1: '',
+        city: '',
+        addressState: '',
+        country: '',
+        postalCode: '',
+    });
 
     const handleAddAddress = () => {
+        const nextErrors = {
+            addressLine1: !state.addressLine1.trim() ? 'Address Line 1 is required' : '',
+            city: !state.city.trim() ? 'City is required' : '',
+            addressState: !state.addressState.trim() ? 'State is required' : '',
+            country: !state.country.trim() ? 'Country is required' : '',
+            postalCode: !state.postalCode.trim() ? 'Postal code is required' : '',
+        } as typeof errors;
+
+        setErrors(nextErrors);
+
+        const hasErrors = Object.values(nextErrors).some(Boolean);
+        if (hasErrors) {
+            SHOW_TOAST('Please fill all required fields', 'error');
+            return;
+        }
+
         if (fromChangeAddress) {
             props.navigation.navigate(SCREENS.AddressMapScreen.identifier)
             return;
         }
-        if (userType == userRoles.Service_Seeker_individual) {
-            // TODO: Add address for service seeker individual
-            props.navigation.dispatch(
-                CommonActions.reset({
-                    index: 0,
-                    routes: [
-                        {
-                            name: SCREENS.Login.identifier,
-                        },
-                    ],
-                }),
-            );
+        if (userType == userRoles.Service_Seeker_individual || userType == userRoles.Service_Seeker_business) {
+            let data = {
+                address_line1: state?.addressLine1,
+                address_line2: state?.addressLine2,
+                city: state?.city,
+                state: state?.addressState,
+                country: state?.country,
+                postal_code: state?.postalCode,
+                is_default: true
+            }
+            dispatch(addressCreateAction(data, handleSuccess))
         } else {
             // TODO: Add address for service seeker business
-            props.navigation.navigate(SCREENS.VerificationDetails.identifier)
+            // props.navigation.navigate(SCREENS.VerificationDetails.identifier)
+            let data = {
+                address_line1: state?.addressLine1,
+                address_line2: state?.addressLine2,
+                city: state?.city,
+                state: state?.addressState,
+                country: state?.country,
+                postal_code: state?.postalCode,
+                is_default: true
+            }
+            // handleSuccess()
+            dispatch(providerAddressCreateAction(data, handleSuccess))
+        }
+    }
+
+
+    const handleSuccess = () => {
+        if (userType === userRoles.Service_Seeker_individual) {
+            dispatch(getSeekerProfile())
+            NavigationService.reset(SCREENS.BottomBar.identifier)
+        } else {
+            NavigationService.navigate(SCREENS.VerificationDetails.identifier)
         }
     }
 
@@ -211,7 +108,7 @@ const AddAdress = (props: any) => {
                 onBack={() => {
                     props.navigation.goBack();
                 }}
-                screenName={STRING.addAdress.title}
+                screenName={title ? title : STRING.addAdress.title}
             />
             <KeyBoardAware
                 enableOnAndroid
@@ -225,7 +122,9 @@ const AddAdress = (props: any) => {
                         inputTitle={STRING.inputTitle.address_line_1}
                         mainContinerStyle={{ marginBottom: getScaleSize(16) }}
                         value={state?.addressLine1}
+                        isError={errors.addressLine1}
                         onChangeText={text => {
+                            if (errors.addressLine1) setErrors((prev) => ({ ...prev, addressLine1: '' }));
                             setState((prev) => ({ ...prev, addressLine1: text }));
                         }}
                     />
@@ -243,7 +142,9 @@ const AddAdress = (props: any) => {
                         inputTitle={STRING.inputTitle.city}
                         mainContinerStyle={{ marginBottom: getScaleSize(16) }}
                         value={state?.city}
+                        isError={errors.city}
                         onChangeText={text => {
+                            if (errors.city) setErrors((prev) => ({ ...prev, city: '' }));
                             setState((prev) => ({ ...prev, city: text }));
                         }}
                     />
@@ -251,9 +152,11 @@ const AddAdress = (props: any) => {
                         placeholder={""}
                         inputTitle={STRING.inputTitle.state}
                         mainContinerStyle={{ marginBottom: getScaleSize(16) }}
-                        value={state?.state}
+                        value={state?.addressState}
+                        isError={errors.addressState}
                         onChangeText={text => {
-                            setState((prev) => ({ ...prev, state: text }));
+                            if (errors.addressState) setErrors((prev) => ({ ...prev, addressState: '' }));
+                            setState((prev) => ({ ...prev, addressState: text }));
                         }}
                     />
                     <Input
@@ -261,7 +164,9 @@ const AddAdress = (props: any) => {
                         inputTitle={STRING.inputTitle.country}
                         mainContinerStyle={{ marginBottom: getScaleSize(16) }}
                         value={state?.country}
+                        isError={errors.country}
                         onChangeText={text => {
+                            if (errors.country) setErrors((prev) => ({ ...prev, country: '' }));
                             setState((prev) => ({ ...prev, country: text }));
                         }}
                     />
@@ -270,7 +175,9 @@ const AddAdress = (props: any) => {
                         inputTitle={STRING.inputTitle.postal_code}
                         mainContinerStyle={{ marginBottom: getScaleSize(16) }}
                         value={state?.postalCode}
+                        isError={errors.postalCode}
                         onChangeText={text => {
+                            if (errors.postalCode) setErrors((prev) => ({ ...prev, postalCode: '' }));
                             setState((prev) => ({ ...prev, postalCode: text }));
                         }}
                     />

@@ -14,13 +14,15 @@ import { SCREENS } from '../screens';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { userRoles } from '../constant/utils';
+import NavigationService from '../screens/NavigationService';
+import { useDispatch } from 'react-redux';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 function Tabbar(props: any) {
 
   const insets = useSafeAreaInsets();
-
+const dispatch = useDispatch()
   const { theme } = useContext<any>(ThemeContext);
 
   const { userType, setUser, setUserType, fetchProfile } = useContext<any>(AuthContext);
@@ -173,7 +175,7 @@ function Tabbar(props: any) {
 
   useEffect(() => {
     EventRegister.addEventListener('onInvalidToken', () => {
-      // onLogout();
+      onLogout();
     });
     return () => {
       EventRegister.removeEventListener('onInvalidToken');
@@ -184,12 +186,13 @@ function Tabbar(props: any) {
     Storage.clear();
     setUser(null);
     setUserType(null);
-    props.navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: SCREENS.Login.identifier }],
-      }),
-    );
+    // props.navigation.dispatch(
+    //   CommonActions.reset({
+    //     index: 0,
+    //     routes: [{ name: SCREENS.Login.identifier }],
+    //   }),
+    // );
+    NavigationService.reset(SCREENS.Login.identifier);
   }
 
   let images: any = [];
@@ -203,7 +206,7 @@ function Tabbar(props: any) {
       IMAGES.profile_unselected,
     ];
 
-    names = ['Home', 'Task', 'Chat', 'Profile'];
+    names = ['Home', 'Task', 'Chats', 'Profile'];
   } else {
     images = [
       IMAGES.home_unselected,
@@ -213,17 +216,16 @@ function Tabbar(props: any) {
       IMAGES.profile_unselected,
     ];
 
-    names = ['Home', 'Request', '', 'Chat', 'Profile'];
+    names = ['Home', 'Request', '', 'Chats', 'Profile'];
   }
 
   const STRING = useString();
 
   function onPress(name: string) {
     if (name === 'plus') {
-      props.navigation.navigate(SCREENS.CreateRequest.identifier);
+      NavigationService.navigate(SCREENS.CreateRequest.identifier);
     } else {
-      console.log("name====>>",name)
-      props.navigation.navigate(name);
+      NavigationService.navigate(name);
     }
   }
 
@@ -236,7 +238,6 @@ function Tabbar(props: any) {
         // { paddingBottom: insets.bottom }
       ]}>
         {props.state.routes.map((route: any, index: number) => {
-          console.log("name====>>",route.name)
           return (
             <Item
               key={index}
@@ -251,7 +252,6 @@ function Tabbar(props: any) {
       </View>
     )
   }
-  console.log("userType======>>>>>", userType)
   if (userType === userRoles.Service_Provider_individual || userType === userRoles.Service_Provider_business) {
     return (
       // <SafeAreaView style={{ backgroundColor: 'transparent' }}>
@@ -313,21 +313,22 @@ const Item = (props: any) => {
     images = [
       IMAGES.home_unselected,
       IMAGES.request_unselected,
-      IMAGES.chat_unselected,
+      // IMAGES.chat_unselected,
+      props.selected ? IMAGES.chat_unselected : IMAGES.seekerChatsIcon,
       IMAGES.profile_unselected,
     ];
 
-    names = ['Home', 'Task', 'Chat', 'Profile'];
+    names = ['Home', 'Task', 'Chats', 'Profile'];
   } else {
     images = [
       IMAGES.home_unselected,
       IMAGES.request_unselected,
       IMAGES.plus,
-      IMAGES.chat_unselected,
+      props.selected ? IMAGES.chat_unselected : IMAGES.seekerChatsIcon,
       IMAGES.profile_unselected,
     ];
 
-    names = ['Home', 'Request', '', 'Chat', 'Profile'];
+    names = ['Home', 'Request', '', 'Chats', 'Profile'];
   }
   const STRING = useString();
 

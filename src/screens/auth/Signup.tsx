@@ -6,7 +6,7 @@ import { AuthContext, ThemeContext, ThemeContextType } from '../../context';
 
 //CONSTANT & ASSETS
 import { FONTS, IMAGES } from '../../assets';
-import { getScaleSize, REGEX, SHOW_TOAST, useString } from '../../constant';
+import { getScaleSize, REGEX, SHOW_TOAST, Storage, useString } from '../../constant';
 
 //SCREENS
 import { SCREENS } from '..';
@@ -16,6 +16,8 @@ import { Header, Input, Text, Button, SelectCountrySheet } from '../../component
 import { CommonActions } from '@react-navigation/native';
 import { API } from '../../api';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { signUpAction } from '../../actions/auth/authAction';
 
 export default function Signup(props: any) {
 
@@ -23,25 +25,13 @@ export default function Signup(props: any) {
 
     const { theme } = useContext<any>(ThemeContext);
     const { userType } = useContext<any>(AuthContext);
-
-    console.log("userType======>>>>", userType)
+    const { isLoading } = useAppSelector((state) => state.auth);
 
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState('');
-    const [isLoading, setLoading] = useState(false);
     const [visibleCountry, setVisibleCountry] = useState(false);
-    // const [countryCode, setCountryCode] = useState('+91');
-    // const [isPhoneNumber, setIsPhoneNumber] = useState(false);
 
-    // useEffect(() => {
-    //     if (email.length >= 3) {
-    //         const isNumber = REGEX.phoneRegex.test(email);
-    //         setIsPhoneNumber(isNumber)
-    //     }
-    //     else {
-    //         setIsPhoneNumber(false)
-    //     }
-    // }, [email])
+    const dispatch = useAppDispatch()
 
     async function onSignup() {
         const trimmedEmail = email.trim();
@@ -57,60 +47,13 @@ export default function Signup(props: any) {
 
         } else {
             setEmailError('');
-            // let params = {}
-            // if (isPhoneNumber) {
-            //     params = {
-            //         mobile: email,
-            //         phone_country_code: countryCode,
-            //         role: userType,
-            //     }
-            // } else {
+            
             const params = {
                 email: trimmedEmail,
                 role: userType,
             }
-            // }
-            try {
-                setLoading(true);
-                const result: any = await API.Instance.post(API.API_ROUTES.signup, params);
-                setLoading(false);
-                console.log('result', result?.code, result)
-                if (result.status) {
-                    SHOW_TOAST(result?.data?.message ?? '', 'success')
-                    props.navigation.navigate(SCREENS.Otp.identifier, {
-                        isFromSignup: true,
-                        email: email,
-                        // isPhoneNumber: isPhoneNumber,
-                        // countryCode: countryCode,
-                    });
-                } else {
-                    if (result?.code === 409) {
-                        if (result?.data?.message == 'OTP already sent. Redirect to Verify page.') {
-                            props.navigation.navigate(SCREENS.Otp.identifier, {
-                                isFromSignup: true,
-                                email: email,
-                            })
-                        } else if (result?.data?.message == 'OTP already verified. Redirect to Password page.') {
-                            props.navigation.navigate(SCREENS.CreatePassword.identifier, {
-                                email: email,
-                            })
-                        } else if (result?.data?.message == 'Password already set. Redirect to Details page.') {
-                            props.navigation.navigate(SCREENS.AddPersonalDetails.identifier, {
-                                email: email,
-                            })
-                        } else {
-                            SHOW_TOAST(result?.data?.message ?? '', 'error')
-                        }
-                    } else {
-                        SHOW_TOAST(result?.data?.message ?? '', 'error')
-                        console.log('error==>', result?.data?.message)
-                    }
-                }
-            } catch (error: any) {
-                setLoading(false);
-                SHOW_TOAST(error?.message ?? '', 'error');
-                console.log(error?.message)
-            }
+            console.log("params", params)
+            dispatch(signUpAction(params))
         }
     }
 
@@ -188,12 +131,13 @@ export default function Signup(props: any) {
                     <Button
                         title={STRING.buttonText.sign_up}
                         style={{ marginTop: getScaleSize(32) }}
+                        loading={isLoading}
                         onPress={() => {
-                            // onSignup();
-                            props.navigation.navigate(SCREENS.Otp.identifier, {
-                                isFromSignup: true,
-                                email: email,
-                            })
+                            onSignup();
+                            // props.navigation.navigate(SCREENS.Otp.identifier, {
+                            //     isFromSignup: true,
+                            //     email: email,
+                            // })
                         }}
                     />
                     <Text

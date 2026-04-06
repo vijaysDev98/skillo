@@ -12,7 +12,7 @@ import {
 import { FONTS, IMAGES } from '../../assets';
 
 //CONTEXT
-import { ThemeContext, ThemeContextType } from '../../context';
+import { AuthContext, ThemeContext, ThemeContextType } from '../../context';
 
 //CONSTANT
 import { getScaleSize, SHOW_TOAST, useString } from '../../constant';
@@ -27,10 +27,12 @@ import JobDetailBox from '../service/ui/JobDetailx';
 import { buildThreadId } from '../../services/chat';
 import { API } from '../../api';
 import { screenWidth } from '../../constant/scaleSize';
+import { userRoles } from '../../constant/utils';
 
 export default function Task(props: any) {
   const STRING = useString();
   const { theme } = useContext<any>(ThemeContext);
+    const { userType } = useContext<any>(AuthContext);
 
   const tabs = [
     { id: 'all', title: 'All' },
@@ -342,13 +344,16 @@ props.navigation.navigate(SCREENS.ProviderRaiseDispute.identifier)
             fontSize: getScaleSize(16),
             fontFamily: FONTS.Lato.Regular
           }}
-          searchViewStyle={{ width: screenWidth - getScaleSize(110) }}
+          searchViewStyle={{ width:userType === userRoles.Service_Provider_business ?
+            screenWidth - getScaleSize(110): "100%" }}
         />
-        <TouchableOpacity
+     {userType === userRoles.Service_Provider_business && (  
+       <TouchableOpacity
           style={styles(theme).filterButton}
         >
           <Image source={IMAGES.filterIcon} style={styles(theme).filterIcon} />
         </TouchableOpacity>
+      )}
       </View>
       <View>
         <FlatList

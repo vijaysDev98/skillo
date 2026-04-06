@@ -15,6 +15,8 @@ import { SCREENS } from '..';
 import { Header, Input, Text, Button, SelectCountrySheet } from '../../components';
 import { API } from '../../api';
 import { AppSafeAreaView } from '../../components/AppSafeAreaView';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { resetPasswordStartAction } from '../../actions/auth/authAction';
 
 export default function ResetPassword(props: any) {
 
@@ -22,9 +24,11 @@ export default function ResetPassword(props: any) {
 
     const { theme } = useContext<any>(ThemeContext);
 
+    const dispatch = useAppDispatch();
+    const {isLoading} = useAppSelector((state) => state.auth);
+
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState('');
-    const [isLoading, setLoading] = useState(false);
     // const [isPhoneNumber, setIsPhoneNumber] = useState(false);
     const [countryCode, setCountryCode] = useState('+91');
     const [visibleCountry, setVisibleCountry] = useState(false);
@@ -65,35 +69,14 @@ export default function ResetPassword(props: any) {
                 email: email,
             };
             // }
-            props.navigation.navigate(SCREENS.Otp.identifier, {
-                email: email,
-                // isPhoneNumber: isPhoneNumber,
-                countryCode: countryCode,
-            });
-
-            // try {
-            //     setLoading(true);
-            //     const result = await API.Instance.post(API.API_ROUTES.resetPassword, params);
-            //     setLoading(false);
-            //     console.log('result', result.status, result)
-            //     if (result.status) {
-            //         SHOW_TOAST(result?.data?.message ?? '', 'success')
-            //         props.navigation.navigate(SCREENS.Otp.identifier, {
-            //             email: email,
-            //             // isPhoneNumber: isPhoneNumber,
-            //             countryCode: countryCode,
-            //         });
-            //     } else {
-            //         SHOW_TOAST(result?.data?.message ?? '', 'error')
-            //         console.log('error==>', result?.data?.message)
-            //     }
-            // } catch (error: any) {
-            //     setLoading(false);
-            //     SHOW_TOAST(error?.message ?? '', 'error');
-            //     console.log(error?.message)
-            // } finally {
-            //     setLoading(false);
-            // }
+            // props.navigation.navigate(SCREENS.Otp.identifier, {
+            //     email: email,
+            //     // isPhoneNumber: isPhoneNumber,
+            //     isResetPassword:true,
+            //     countryCode: countryCode,
+            // });
+            dispatch(resetPasswordStartAction(params));
+            
         }
     }
 
@@ -169,6 +152,7 @@ export default function ResetPassword(props: any) {
                 }}
             /> */}
             <Button
+            loading={isLoading}
                 title={STRING.buttonText.send_otp}
                 style={styles(theme).sendOtpBtn}
                 onPress={() => {

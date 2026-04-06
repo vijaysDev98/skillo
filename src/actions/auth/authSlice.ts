@@ -5,6 +5,7 @@ export const initialState = {
   isBtnLoading: false,
   userData: undefined,
   cityList: [],
+  allCategoriesData:[]
 };
 
 export const authSlice = createSlice({
@@ -20,10 +21,13 @@ export const authSlice = createSlice({
     setUserData: (state, { payload }) => {
       state.userData = payload;
     },
+    setAllCategoriesData: (state, { payload }) => {
+      state.allCategoriesData = payload;
+    },
     resetAuth: () => initialState, 
   },
 });
 
-export const { setLoading, setBtnLoading, setUserData, resetAuth }: any = authSlice.actions;
+export const { setLoading, setBtnLoading, setUserData, setAllCategoriesData, resetAuth }: any = authSlice.actions;
 
 export const authReducer = authSlice.reducer;

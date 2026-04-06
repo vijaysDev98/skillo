@@ -40,6 +40,10 @@ import { API } from '../../api';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { userRoles } from '../../constant/utils';
 import { AppSafeAreaView } from '../../components/AppSafeAreaView';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { addPersonalDetailsAction, addProviderPersonalDetailsAction, providerAddressCreateAction, uploadProviderProfilePhotoAction, uploadSeekerProfilePhotoAction } from '../../actions/auth/authAction';
+import { setLoading } from '../../actions/auth/authSlice';
+import NavigationService from '../NavigationService';
 
 const RadioItem = ({ label, value, selected, onPress }: any) => {
 
@@ -87,10 +91,13 @@ export default function AddPersonalDetails(props: any) {
   const STRING = useString();
 
   const { theme } = useContext<any>(ThemeContext);
+  const dispatch = useAppDispatch();
+  const { isLoading } = useAppSelector((state) => state.auth);
   const { userType, setUser, setUserType, setProfile, userRole } =
     useContext<any>(AuthContext);
 
   const isEmail = props?.route?.params?.email || '';
+  const { id } = props?.route?.params || {};
   // const isPhoneNumber = props?.route?.params?.isPhoneNumber || false;
   // const isCountryCode = props?.route?.params?.countryCode || '+91';
 
@@ -102,7 +109,6 @@ export default function AddPersonalDetails(props: any) {
   const [emailError, setEmailError] = useState('');
   const [address, setAddress] = useState('');
   const [addressError, setAddressError] = useState('');
-  const [isLoading, setLoading] = useState(false);
   const [visibleCountry, setVisibleCountry] = useState(false);
   const [countryCode, setCountryCode] = useState('+91');
   const [profileImage, setProfileImage] = useState<any>(null);
@@ -117,7 +123,7 @@ export default function AddPersonalDetails(props: any) {
   const [businessNameError, setBusinessNameError] = useState('')
   const [vatNumber, setVatNumber] = useState('')
   const [vatNumberError, setVatNumberError] = useState('')
-  const [businessEmail, setBusinessEmail] = useState('')
+  const [businessEmail, setBusinessEmail] = useState(isEmail ? isEmail : '')
   const [businessEmailError, setBusinessEmailError] = useState('')
   const [businessDisc, setBusinessDisc] = useState('')
   const [businessDiscError, setBusinessDiscError] = useState('')
@@ -126,6 +132,7 @@ export default function AddPersonalDetails(props: any) {
 
   const [passportNumber, setPassportNumber] = useState('')
   const [passportError, setPassportError] = useState('')
+  const [dobError, setDobError] = useState('')
   const [dob, setDob] = useState('')
   const [gender, setGender] = useState('')
   const [nextOfKinName, setNextOfKinName] = useState('')
@@ -135,15 +142,13 @@ export default function AddPersonalDetails(props: any) {
   const [selfTaught, setSelfTaught] = useState('')
   const [isTermsAccepted, setIsTermsAccepted] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [kinNameError, setKinNameError] = useState('');
+  const [kinNumberError, setKinNumberError] = useState('');
+  const [relationError, setRelationError] = useState('');
+  const [genderError, setGenderError] = useState('');
 
-  // useEffect(() => {
-  //   if (isPhoneNumber) {
-  //     setMobileNo(isEmail);
-  //     setCountryCode(isCountryCode);
-  //   } else {
-  //     setEmail(isEmail);
-  //   }
-  // }, [isEmail]);
+  const [nationalityError, setNationalityError] = useState('');
+  const [residenceError, setResidenceError] = useState('');
 
   const getInitialName = (fullName: string) => {
     if (!fullName) return '';
@@ -161,171 +166,49 @@ export default function AddPersonalDetails(props: any) {
   };
 
   const pickImage = async () => {
-    launchImageLibrary({ mediaType: 'photo' }, response => {
+    launchImageLibrary({ mediaType: 'photo' }, async response => {
       if (!response.didCancel && !response.errorCode && response.assets) {
+        const userData: any = await Storage.get(Storage.USER_DETAILS)
+        const userDataParse = JSON.parse(userData)
+        console.log("userDataParse", userDataParse)
+        console.log("userDataParse?.user_id", userDataParse?.user_id || userDataParse?._id)
         const asset: any = response.assets[0];
-        setProfileImage(asset);
-        uploadProfileImage(asset);
+        const formData = new FormData();
+        formData.append('user_id', userDataParse?.user_id || userDataParse?._id);
+        formData.append('file', {
+          uri: asset?.uri,
+          name: asset?.fileName || 'profile_image.jpg',
+          type: asset?.type || 'image/jpeg',
+        } as any);
+        if (userType === userRoles.Service_Provider_individual || userType === userRoles.Service_Provider_business) {
+          dispatch(
+            uploadProviderProfilePhotoAction(
+              formData,
+              (data: any) => {
+                console.log("data", data)
+                setProfileImage(data)
+              },
+              () => setProfileImage(null),
+            ),
+          );
+        } else {
+          dispatch(
+            uploadSeekerProfilePhotoAction(
+              formData,
+              (data: any) => {
+                console.log("data", data)
+                setProfileImage(data)
+              },
+              () => setProfileImage(null),
+            ),
+          );
+        }
+
       } else {
         console.log('response', response);
       }
     });
   };
-
-  async function uploadProfileImage(asset: any) {
-    try {
-      const formData = new FormData();
-      formData.append('email', isEmail);
-      formData.append('file', {
-        uri: asset?.uri,
-        name: asset?.fileName || 'profile_image.jpg',
-        type: asset?.type || 'image/jpeg',
-      });
-      setLoading(true);
-      const result = await API.Instance.post(
-        API.API_ROUTES.uploadProfileImage,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      );
-      setLoading(false);
-      if (result.status) {
-        SHOW_TOAST(result?.data?.message ?? '', 'success');
-      } else {
-        SHOW_TOAST(result?.data?.message ?? '', 'error');
-        setProfileImage(null);
-      }
-      console.log('error==>', result?.data?.message);
-    } catch (error: any) {
-      setProfileImage(null);
-      setLoading(false);
-      SHOW_TOAST(error?.message ?? '', 'error');
-      console.log(error?.message);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // async function onSignup() {
-
-  //   // REGEX (clean + strict)
-  //   const emojiRegex =
-  //     /([\u2700-\u27BF]|[\uE000-\uF8FF]|[\uD83C-\uDBFF\uDC00-\uDFFF]+)/;
-
-  //   const nameRegex = /^[A-Za-z.\- ]+$/;
-  //   const onlyNumbers = /^\d+$/;
-  //   const onlySpecialChars = /^[^A-Za-z0-9]+$/;
-  //   const mobileRegex = /^[0-9]{10}$/;
-
-  //   // Trim everything first
-  //   const cleanName = name.trim();
-  //   const cleanMobile = mobileNo.trim();
-  //   const cleanAddress = address.trim();
-  //   const cleanEmail = email.trim();
-
-  //   // Update state with trimmed values
-  //   setName(cleanName);
-  //   setMobileNo(cleanMobile);
-  //   setAddress(cleanAddress);
-  //   setEmail(cleanEmail);
-
-  //   let hasError = false;
-
-  //   setNameError('');
-  //   setMobileNoError('');
-  //   setEmailError('');
-  //   setAddressError('')
-
-  //   // NAME VALIDATION 
-  //   if (!cleanName) {
-  //     setNameError(STRING.name_required);
-  //     hasError = true;
-  //   }
-  //   else if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(cleanName)) {
-  //     setNameError(STRING.name_invalid_characters);
-  //     hasError = true;
-  //   }
-
-  //   // MOBILE VALIDATION 
-  //   if (!cleanMobile) {
-  //     setMobileNoError(STRING.mobile_number_required);
-  //     hasError = true;
-  //   } else if (!mobileRegex.test(cleanMobile)) {
-  //     setMobileNoError(STRING.mobile_must_be_10_digits);
-  //     hasError = true;
-  //   }
-
-  //   // EMAIL VALIDATION 
-  //   if (!cleanEmail) {
-  //     setEmailError(STRING.email_required);
-  //     hasError = true;
-  //   } else if (
-  //     cleanEmail.length < 6 ||
-  //     cleanEmail.length > 100 ||
-  //     !REGEX.email.test(cleanEmail)
-  //   ) {
-  //     setEmailError(STRING.please_enter_valid_email);
-  //     hasError = true;
-  //   }
-
-  //   // ADDRESS VALIDATION 
-  //   if (!cleanAddress) {
-  //     setAddressError(STRING.address_required);
-  //     hasError = true;
-  //   }
-  //   else if (/^\d+$/.test(cleanAddress)) {
-  //     setAddressError(STRING.address_only_numbers_error);
-  //     hasError = true;
-  //   }
-  //   else if (/^[^A-Za-z0-9]+$/.test(cleanAddress)) {
-  //     setAddressError(STRING.address_special_char_error);
-  //     hasError = true;
-  //   }
-
-  //   if (hasError) {
-  //     return
-  //   }
-  //   else {
-  //     const params = {
-  //       mobile: cleanMobile,
-  //       phone_country_code: countryCode,
-  //       name: cleanName,
-  //       email: cleanEmail,
-  //       address: cleanAddress,
-  //       role: userType,
-  //     };
-
-  //     props.navigation.navigate(SCREENS.AddAdress.identifier, { data: params });
-
-  //     // try {
-  //     //   setLoading(true);
-  //     //   const result = await API.Instance.post(
-  //     //     API.API_ROUTES.addPersonalDetails,
-  //     //     params,
-  //     //   );
-
-  //     //   if (result.status) {
-  //     //     SHOW_TOAST(result?.data?.message ?? '', 'success');
-  //     //     Storage.save(
-  //     //       Storage.USER_DETAILS,
-  //     //       JSON.stringify(result?.data?.data),
-  //     //     );
-  //     //     setUser(result?.data?.data);
-  //     //     setUserType(result?.data?.data?.user_data?.role);
-  //     //     getProfileData();
-  //     //   } else {
-  //     //     SHOW_TOAST(result?.data?.message ?? '', 'error');
-  //     //   }
-  //     // } catch (error: any) {
-  //     //   SHOW_TOAST(error?.message ?? '', 'error');
-  //     // } finally {
-  //     //   setLoading(false);
-  //     // }
-  //   }
-  // }
 
   function validateIndividualForm() {
 
@@ -369,6 +252,78 @@ export default function AddPersonalDetails(props: any) {
 
     if (!residence) {
       SHOW_TOAST("Please select country of residence", "error");
+      hasError = true;
+    }
+
+    return !hasError;
+  }
+
+  function validateProviderIndividualForm() {
+    let hasError = false;
+
+    const cleanName = name.trim();
+    const cleanMobile = mobileNo.trim();
+    const mobileRegex = /^[0-9]{10}$/;
+
+    setNameError('');
+    setMobileNoError('');
+    setPassportError('');
+    setDobError('');
+    setKinNameError('');
+    setKinNumberError('');
+    setRelationError('');
+    setGenderError('');
+
+    if (!cleanName) {
+      setNameError(STRING.name_required);
+      hasError = true;
+    }
+
+    if (!cleanMobile) {
+      setMobileNoError(STRING.mobile_number_required);
+      hasError = true;
+    } else if (!mobileRegex.test(cleanMobile)) {
+      setMobileNoError(STRING.mobile_must_be_10_digits);
+      hasError = true;
+    }
+
+    if (!passportNumber.trim()) {
+      setPassportError('Passport number is required');
+      hasError = true;
+    }
+
+    if (!dob) {
+      setDobError('Date of birth is required');
+      hasError = true;
+    }
+
+    if (!gender) {
+      setGenderError('Gender is required');
+      hasError = true;
+    }
+
+    if (!nextOfKinName.trim()) {
+      setKinNameError('Next of kin name is required');
+      hasError = true;
+    }
+
+    if (!nextOfKinNumber.trim()) {
+      setKinNumberError('Next of kin number is required');
+      hasError = true;
+    }
+
+    if (!relation.trim()) {
+      setRelationError('Relation is required');
+      hasError = true;
+    }
+
+    if (!nationality) {
+      setNationalityError('Please select nationality');
+      hasError = true;
+    }
+
+    if (!residence) {
+      setResidenceError('Please select country of residence');
       hasError = true;
     }
 
@@ -432,60 +387,134 @@ export default function AddPersonalDetails(props: any) {
     return !hasError;
   }
 
-  async function onSignup() {
-
-    // if (userType === userRoles.Service_Seeker_individual) {
-    //   if (!validateIndividualForm()) return;
-    // }
-
-    // if (userType === userRoles.Service_Seeker_business) {
-    //   if (!validateBusinessForm()) return;
-    // }
-
-    const params = {
-      mobile: mobileNo.trim(),
-      phone_country_code: countryCode,
-      name: name.trim(),
-      email: email.trim(),
-      address: address.trim(),
-      role: userType,
-    };
-
-    props.navigation.navigate(SCREENS.AddAdress.identifier, { data: params });
-  }
+  async function handlePersonalDetails() {
 
 
-  async function getProfileData() {
-    try {
-      setLoading(true);
-      const result = await API.Instance.get(API.API_ROUTES.getUserDetails + `?platform=app`);
-      if (result.status) {
-        setProfile(result?.data?.data);
-        onNext();
-      } else {
-        SHOW_TOAST(result?.data?.message, 'error');
-        console.log('ERR', result?.data?.message);
-      }
-    } catch (error: any) {
-      SHOW_TOAST(error?.message ?? '', 'error');
-      return null;
-    } finally {
-      setLoading(false);
+    if (userType === userRoles.Service_Seeker_individual) {
+      if (!validateIndividualForm()) return;
     }
-  }
 
-  async function onNext() {
-    if (userType == 'service_provider') {
-      props.navigation.navigate(SCREENS.ChooseYourSubscription.identifier);
-    } else {
-      props.navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: SCREENS.BottomBar.identifier }],
+    if (userType === userRoles.Service_Seeker_business || userType === userRoles.Service_Provider_business) {
+      if (!validateBusinessForm()) return;
+    }
+
+    if (userType === userRoles.Service_Provider_individual) {
+      if (!validateProviderIndividualForm()) return;
+    }
+
+    if (!isTermsAccepted) {
+      SHOW_TOAST('Please accept Privacy Policy & Terms to continue', 'error');
+      return;
+    }
+    if (userType === userRoles.Service_Seeker_individual) {
+      let apiData = {
+        mobile: mobileNo,
+        phone_country_code: countryCode,
+        name: name,
+        nationality: nationality,
+        country_of_residence: residence,
+        profile_photo_id: profileImage?.profile_photo_id,
+      }
+      dispatch(
+        addPersonalDetailsAction(apiData, () => {
+          NavigationService.navigate(SCREENS.AddAdress.identifier, { data: apiData });
         }),
       );
     }
+    else if (userType === userRoles.Service_Seeker_business) {
+      let apiData = {
+        mobile: mobileNo,
+        phone_country_code: countryCode,
+        name: name,
+        nationality: nationality,
+        country_of_residence: residence,
+        profile_photo_id: profileImage?.profile_photo_id,
+        business_name: businessName,
+        business_description: businessDisc,
+        vat_number: vatNumber,
+        contact_person_name: contactPersonName,
+      }
+      dispatch(
+        addPersonalDetailsAction(apiData, () => {
+          NavigationService.navigate(SCREENS.AddAdress.identifier, { data: apiData });
+        }),
+      );
+    }
+    else if (userType === userRoles.Service_Provider_individual) {
+      const apiData = {
+        mobile: mobileNo,
+        phone_country_code: countryCode,
+        nationality: nationality,
+        country_of_residence: residence,
+        profile_photo_id: profileImage?.profile_photo_id,
+        is_terms_accepted: isTermsAccepted,
+        full_name: name,
+        passport_number: passportNumber,
+        date_of_birth: dob,
+        gender: gender,
+        next_of_kin_name: nextOfKinName,
+        next_of_kin_number: nextOfKinNumber,
+        next_kin_phone_country_code:kinCountryCode,
+        relation: relation,
+        has_professional_training: professionalTraining === 'yes' ? true : false,
+        is_self_taught: selfTaught === 'yes' ? true : false,
+      };
+
+      dispatch(addProviderPersonalDetailsAction(apiData, () => {
+        NavigationService.navigate(SCREENS.AddAdress.identifier, { data: apiData });
+      }));
+    }
+    else if (userType === userRoles.Service_Provider_business) {
+      let apiData = {
+        profile_photo_id: profileImage?.profile_photo_id,
+        business_name: businessName,
+        vat_number: vatNumber,
+        business_description: businessDisc,
+        contact_person_name: contactPersonName,
+        phone_country_code: countryCode,
+        mobile: mobileNo,
+        country_of_residence: residence,
+        //  nationality: nationality,
+        is_terms_accepted: isTermsAccepted
+      }
+      dispatch(addProviderPersonalDetailsAction(apiData, () => {
+        NavigationService.navigate(SCREENS.AddAdress.identifier, { data: apiData });
+      }));
+    }
   }
+
+
+  // async function getProfileData() {
+  //   try {
+  //     dispatch(setLoading(true));
+  //     const result = await API.Instance.get(API.API_ROUTES.getUserDetails + `?platform=app`);
+  //     if (result.status) {
+  //       setProfile(result?.data?.data);
+  //       onNext();
+  //     } else {
+  //       SHOW_TOAST(result?.data?.message, 'error');
+  //       console.log('ERR', result?.data?.message);
+  //     }
+  //   } catch (error: any) {
+  //     SHOW_TOAST(error?.message ?? '', 'error');
+  //     return null;
+  //   } finally {
+  //     dispatch(setLoading(false));
+  //   }
+  // }
+
+  // async function onNext() {
+  //   if (userType == 'service_provider') {
+  //     props.navigation.navigate(SCREENS.ChooseYourSubscription.identifier);
+  //   } else {
+  //     props.navigation.dispatch(
+  //       CommonActions.reset({
+  //         index: 0,
+  //         routes: [{ name: SCREENS.BottomBar.identifier }],
+  //       }),
+  //     );
+  //   }
+  // }
 
   function getForm() {
     if (userType === userRoles.Service_Seeker_individual) {
@@ -599,6 +628,21 @@ export default function AddPersonalDetails(props: any) {
     else if (userType === userRoles.Service_Seeker_business || userType === userRoles.Service_Provider_business) {
       return (
         <>
+          {/* <Input
+            placeholder={STRING.enter_name}
+            placeholderTextColor={theme._939393}
+            inputTitle={STRING.name}
+            // inputColor={}
+            // continerStyle={{ marginBottom: getScaleSize(16) }}
+            value={name}
+            maxLength={50}
+            onChangeText={text => {
+              const clean = sanitizeNameInput(text);
+              setName(clean);
+              setNameError('');
+            }}
+            isError={nameError}
+          /> */}
           <Input
             placeholder={STRING.enter_business_name}
             placeholderTextColor={theme._939393}
@@ -639,7 +683,7 @@ export default function AddPersonalDetails(props: any) {
               backgroundColor: theme._F0EFF0,
             }}
             continerStyle={{ marginBottom: getScaleSize(16) }}
-            value={email}
+            value={businessEmail}
             editable={isEmail ? false : true}
             onChangeText={text => {
               setBusinessEmail(text);
@@ -703,7 +747,7 @@ export default function AddPersonalDetails(props: any) {
               setVisibleCountry(true);
             }}
           />
-          {userType == userRoles.Service_Provider_individual && (
+          {userType == userRoles.Service_Seeker_business && (
             <Input
               placeholder={STRING.placeHolders.select_nationality}
               placeholderTextColor={theme._939393}
@@ -716,7 +760,7 @@ export default function AddPersonalDetails(props: any) {
                 setVisibleCountry(true)
               }}
             />
-          )}
+          )} 
           <Input
             placeholder={STRING.placeHolders.select_country_of_residence}
             placeholderTextColor={theme._939393}
@@ -736,7 +780,7 @@ export default function AddPersonalDetails(props: any) {
       return (
         <>
           <Input
-            placeholder="Enter Name"
+            placeholder="Enter Full Name"
             inputTitle="Full Name"
             value={name}
             onChangeText={(text) => {
@@ -767,6 +811,7 @@ export default function AddPersonalDetails(props: any) {
             onPress={() => {
               setShowDatePicker(true);
             }}
+            isError={dobError}
           />
 
           <GenderSelection
@@ -774,6 +819,7 @@ export default function AddPersonalDetails(props: any) {
             placeholder={STRING.gender}
             value={gender}
             onSelect={setGender}
+            isError={genderError}
           />
 
           <Input
@@ -791,6 +837,7 @@ export default function AddPersonalDetails(props: any) {
               setDropDownType('mobile_number')
               setVisibleCountry(true)
             }}
+            isError={mobileNoError}
           />
 
           <Input
@@ -821,6 +868,7 @@ export default function AddPersonalDetails(props: any) {
               setDropDownType('nationality')
               setVisibleCountry(true)
             }}
+            isError={nationalityError}
           />
           <Input
             placeholder="Select Country of Residence"
@@ -831,12 +879,14 @@ export default function AddPersonalDetails(props: any) {
               setDropDownType('residence')
               setVisibleCountry(true)
             }}
+            isError={residenceError}
           />
           <Input
             placeholder="Next of Kin Name"
             inputTitle="Next of Kin's Name"
             value={nextOfKinName}
             onChangeText={setNextOfKinName}
+            isError={kinNameError}
           />
           <Input
             placeholder="Enter Mobile No"
@@ -849,12 +899,14 @@ export default function AddPersonalDetails(props: any) {
               setDropDownType('kin_mobile_number');
               setVisibleCountry(true);
             }}
+            isError={kinNumberError}
           />
           <Input
             placeholder="Relation"
             inputTitle="Relation"
             value={relation}
             onChangeText={setRelation}
+            isError={relationError}
           />
           <Text
             size={getScaleSize(16)}
@@ -916,18 +968,9 @@ export default function AddPersonalDetails(props: any) {
           <View style={styles(theme).imageContainer}>
             {profileImage ? (
               <Image
-                source={{ uri: profileImage?.uri }}
+                source={{ uri: profileImage?.url }}
                 style={styles(theme).image}
               />
-            ) : name.trim() ? (
-              <View style={styles(theme).image}>
-                <Text
-                  size={getScaleSize(24)}
-                  font={FONTS.Lato.Regular}
-                  color={theme._262B43E5}>
-                  {getInitialName(name)}
-                </Text>
-              </View>
             ) : (
               <Image
                 source={IMAGES.user_placeholder}
@@ -962,17 +1005,17 @@ export default function AddPersonalDetails(props: any) {
               checked={isTermsAccepted}
               onPress={() => setIsTermsAccepted(!isTermsAccepted)}
               onPressInfo={() => {
-                props.navigation.navigate(SCREENS.PrivacyDetails.identifier);
+                NavigationService.navigate(SCREENS.PrivacyDetails.identifier);
               }}
             />
           </View>
         </View>
         <Button
           title={STRING.next}
+          loading={isLoading}
           style={styles(theme).btnStyle}
           onPress={() => {
-            onSignup();
-            // props.navigation.navigate(SCREENS.AddAdress.identifier);
+            handlePersonalDetails();
           }}
         />
       </KeyBoardAware>
@@ -980,9 +1023,10 @@ export default function AddPersonalDetails(props: any) {
         height={getScaleSize(500)}
         isVisible={visibleCountry}
         onPress={(e: any) => {
-          console.log('Selected Country:', dropDownType);
+          console.log('Selected Country:', e, "name", e?.name?.en);
 
-          const countryName = e?.code ?? '';
+          const countryCode = e?.code ?? '';
+          const countryName = e?.name?.en ?? '';
 
           if (dropDownType === 'nationality') {
             setNationality(countryName);

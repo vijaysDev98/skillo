@@ -1231,7 +1231,7 @@ export default function RequestDetails(props: any) {
 
       <CancelScheduledServicePopup
         onRef={cancelScheduledServicePopupRef}
-        height={cancelType === "Reject Reason" ? getScaleSize(400) :getScaleSize(530)}
+        height={cancelType === "Reject Reason" ? getScaleSize(400) :getScaleSize(600)}
         cancelServiceDetails={cancelServiceDetails}
         onClose={() => {
           cancelScheduledServicePopupRef.current.close();
