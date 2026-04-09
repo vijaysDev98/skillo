@@ -15,6 +15,7 @@ import { AuthContext, ThemeContext, ThemeContextType } from '../../context';
 
 //CONSTANTS
 import { DummyData, getScaleSize, SHOW_TOAST, useString } from '../../constant';
+import NavigationService from '../NavigationService';
 
 export default function RatingsReviews(props: any) {
 
@@ -29,6 +30,7 @@ export default function RatingsReviews(props: any) {
     const [ratingsReviews, setRatingsReviews] = useState<any>([]);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
+    const [showMoreId, setShowMoreId] = useState("")
 
     // useEffect(() => {
     //     getRatingReviews()
@@ -74,13 +76,13 @@ export default function RatingsReviews(props: any) {
         <View style={styles(theme).container}>
             <Header
                 onBack={() => {
-                    props.navigation.goBack();
+                    NavigationService.goBack();
                 }}
                 screenName={STRING.ratings_reviews}
             />
             <View style={styles(theme).mainContainer}>
                 <Text
-                    style={{ marginVertical: getScaleSize(16) }}
+                    style={styles(theme).headingTextStyle}
                     size={getScaleSize(22)}
                     font={FONTS.Lato.SemiBold}
                     color={theme._2B2B2B}>
@@ -89,32 +91,35 @@ export default function RatingsReviews(props: any) {
                 {ratingsReviews?.length > 0 ?
                     <FlatList
                         data={ratingsReviews}
-                        contentContainerStyle={{ paddingBottom: getScaleSize(50) }}
+                        contentContainerStyle={styles(theme).listContainer}
                         showsVerticalScrollIndicator={false}
                         keyExtractor={(item: any, index: number) => index.toString()}
-                        onEndReached={loadMore}
+                        // onEndReached={loadMore}
                         onEndReachedThreshold={0.1}
                         ListFooterComponent={
-                            isLoading ? <ActivityIndicator size="large" color={theme.primary} style={{ margin: 20 }} /> : null
+                            isLoading ?
+                                <ActivityIndicator size="large" color={theme.primary} style={{ margin: 20 }} />
+                                : null
                         }
                         renderItem={({ item, index }) => {
                             return (
                                 <RatingsReviewsItem
                                     key={index}
                                     item={item}
-                                    itemContainer={{ marginBottom: getScaleSize(24) }}
+                                    itemContainer={styles(theme).ratingItemContainer}
                                     onPressShowMore={() => {
                                         setShowMore(!showMore);
+                                        setShowMoreId(item?.id);
                                     }}
-                                    showMore={showMore}
+                                    showMore={item?.id == showMoreId ? showMore : false}
                                 />
                             )
                         }}
                     />
                     :
-                    <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1.0 }}>
+                    <View style={styles(theme).emptyListContainer}>
                         <Text
-                            style={{ marginTop: getScaleSize(24) }}
+                            style={styles(theme).emptyTextStyle}
                             size={getScaleSize(16)}
                             font={FONTS.Lato.Medium}
                             color={theme._2B2B2B}
@@ -138,5 +143,21 @@ const styles = (theme: ThemeContextType['theme']) => StyleSheet.create({
         flex: 1.0,
         marginHorizontal: getScaleSize(24),
     },
-
+    headingTextStyle: {
+        marginVertical: getScaleSize(16)
+    },
+    listContainer: {
+        paddingBottom: getScaleSize(50)
+    },
+    emptyListContainer: {
+        flex: 1.0,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    emptyTextStyle: {
+        marginTop: getScaleSize(24)
+    },
+    ratingItemContainer: {
+        marginBottom: getScaleSize(24)
+    }
 })

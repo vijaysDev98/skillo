@@ -37,12 +37,14 @@ import { SCREENS } from '..';
 import { CommonActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppSafeAreaView } from '../../components/AppSafeAreaView';
+import { useSelector } from 'react-redux';
 
 export default function EditProfile(props: any) {
 
     const STRING = useString();
     const { theme } = useContext<any>(ThemeContext);
     const { profile, fetchProfile, setUser, setUserType } = useContext(AuthContext)
+    const {userData}= useSelector((state: any) => state.auth)
     const inputHeight = Platform.OS == 'ios' ? getScaleSize(56) : getScaleSize(56)
 
     const bottomSheetRef = useRef<any>(null);
@@ -71,33 +73,32 @@ export default function EditProfile(props: any) {
     const [addressHeight, setAddressHeight] = useState(inputHeight);
     const [visibleCountry, setVisibleCountry] = useState(false)
 
-    const fullPhone = profile?.user?.phone_number ?? '';
+    // const fullPhone = profile?.user?.phone_number ?? '';
 
-    const codeMatch = fullPhone.match(/^\+\d+/);
-    const numberMatch = fullPhone.replace(/^\+\d+/, '');
+    // const codeMatch = fullPhone.match(/^\+\d+/);
+    // const numberMatch = fullPhone.replace(/^\+\d+/, '');
 
-    const [countryCode, setCountryCode] = useState(codeMatch || '+91');
+    const [countryCode, setCountryCode] = useState(userData?.user?.phone_country_code || '+91');
     const [countryFlag, setCountryFlag] = useState('🇮🇳');
-    const [mobileNumber, setMobileNumber] = useState(numberMatch);
+    const [mobileNumber, setMobileNumber] = useState(userData?.user?.mobile || '');
 
-    console.log('profile==>', profile)
+    console.log('userData==>', userData)
 
     useEffect(() => {
-        setName((profile?.user?.first_name ?? "") + " " + (profile?.user?.last_name ?? ""));
-        setEmail(profile?.user?.email ?? '');
-        setMobileNumber(profile?.user?.phone_number ?? '');
-        setAddress(profile?.user?.address ?? '');
+        setName((userData?.profile?.full_name || userData?.profile?.business_name));
+        setEmail(userData?.user?.email ?? '');
+        setMobileNumber(userData?.user?.mobile ?? '');
+        setAddress(userData?.user?.address ?? '');
         setYearsOfExperience(
-            String(profile?.provider_info?.years_of_experience ?? '')
+            String(userData?.provider_info?.years_of_experience ?? '')
         );
-        setBio(profile?.provider_info?.bio ?? '');
-        setExperienceSpecialities(profile?.provider_info?.experience_speciality ?? '');
-        setAchievements(profile?.provider_info?.achievements ?? '');
-        setFirstImageURL(profile?.past_work_files?.[0] ?? null);
-        setSecondImageURL(profile?.past_work_files?.[1] ?? null);
-    }, [profile]);
+        setBio(userData?.provider_info?.bio ?? '');
+        setExperienceSpecialities(userData?.provider_info?.experience_speciality ?? '');
+        setAchievements(userData?.provider_info?.achievements ?? '');
+        setFirstImageURL(userData?.past_work_files?.[0] ?? null);
+        setSecondImageURL(userData?.past_work_files?.[1] ?? null);
+    }, [userData]);
 
-    console.log('firstImageURL', profile?.past_work_photos)
 
     const pickImage = async (type: string) => {
         launchImageLibrary({ mediaType: 'photo' }, (response) => {
@@ -437,8 +438,8 @@ export default function EditProfile(props: any) {
                 <ScrollView
                     style={styles(theme).scrolledContainer}
                     showsVerticalScrollIndicator={false}>
-                    {profile?.user?.profile_photo_url ?
-                        <Image source={{ uri: profile?.user?.profile_photo_url }}
+                    {userData?.profile?.profile_photo?.url ?
+                        <Image source={{ uri: userData?.profile?.profile_photo?.url }}
                             resizeMode='cover' style={styles(theme).profileContainer} />
                         :
                         <View style={styles(theme).EmptyProfileContainer}>
@@ -447,8 +448,11 @@ export default function EditProfile(props: any) {
                                 font={FONTS.Lato.Regular}
                                 align="center"
                                 color={theme._262B43E5}>
-                                {(profile?.user?.first_name?.charAt(0) ?? '').toUpperCase() +
-                                    (profile?.user?.last_name?.charAt(0) ?? '').toUpperCase()}
+                                {
+                                (userData?.profile?.full_name?.charAt(0) ?? '').toUpperCase() 
+                                || (userData?.profile?.business_name?.charAt(0) ?? '').toUpperCase()
+                                }
+                                    {/* || userData?.profile?.business_name */}
                             </Text>
                         </View>
                     }

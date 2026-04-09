@@ -130,7 +130,8 @@ const API_ROUTES = {
         providerAddressList: "service_provider/provider/address/list",
         providerAddressUpdate: "service_provider/provider/address/ec3cdece-1d83-4494-9a97-d0aaca521598", //
         providerAddressDelete: "service_provider/provider/address/61ce9b5d-ef6a-46f6-9b11-209bda69a419", //
-        providerProfile:"service_provider/auth/provider/me"
+        providerProfile:"service_provider/auth/provider/me",
+        edit_profile:'service_provider/auth/provider/details'
     }
 }
 

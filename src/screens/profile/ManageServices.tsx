@@ -1,5 +1,4 @@
 import {
-    ActivityIndicator,
     Dimensions,
     FlatList,
     Image,
@@ -7,35 +6,31 @@ import {
     Modal,
     Platform,
     Pressable,
-    ScrollView,
     StyleSheet,
     TouchableOpacity,
     View,
 } from 'react-native';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 // CONTEXT
 import { AuthContext, ThemeContext, ThemeContextType } from '../../context';
 
 // CONSTANTS & ASSETS
-import { arrayIcons, getScaleSize, SHOW_TOAST, useString } from '../../constant';
+import { DummyData, getScaleSize, SHOW_TOAST, useString } from '../../constant';
 import { FONTS, IMAGES } from '../../assets';
 
 // COMPONENTS
 import {
-    BottomSheet,
-    Button,
-    EmptyView,
     Header,
     ProgressView,
-    ServiceItem,
     Text,
 } from '../../components';
 import { SCREENS } from '..';
 import { API } from '../../api';
-import { CommonActions, useIsFocused } from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
 import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 import LinearGradient from 'react-native-linear-gradient';
+import { useAppSelector } from '../../redux/hooks';
 
 
 const { width } = Dimensions.get('window');
@@ -107,30 +102,29 @@ export default function ManageServices(props: any) {
 
     const has_purchased = profile?.has_purchased;
 
-    const [isLoading, setLoading] = useState(false);
+    const [localLoading, setLocalLoading] = useState(false);
     const [services, setServices] = useState<any>([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState<any>(null);
     const [selectedServiceId, setSelectedServiceId] = useState<any>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-    const isFocused = useIsFocused();
+    const { isLoading } = useAppSelector(state => state.seekerHome)
 
-    useEffect(() => {
-        if (isFocused) {
-            getServices(false);
-        }
-    }, [isFocused]);
+    // useEffect(() => {
+    //     if (isFocused) {
+    //         getServices(false);
+    //     }
+    // }, [isFocused]);
 
     /* ================= GET SERVICES ================= */
     async function getServices(keepSelection = true) {
         try {
-            setLoading(true);
+            setLocalLoading(true);
             const result = await API.Instance.get(API.API_ROUTES.getAllService);
 
             if (result.status) {
                 const serviceList = result?.data?.data?.services ?? [];
 
-                console.log('serviceList==>', JSON.stringify(result?.data?.data))
                 setServices(result?.data?.data ?? []);
 
                 if (!keepSelection || !selectedCategoryId) {
@@ -152,16 +146,16 @@ export default function ManageServices(props: any) {
         } catch (error: any) {
             SHOW_TOAST(error?.message ?? '', 'error');
         } finally {
-            setLoading(false);
+            setLocalLoading(false);
         }
     }
 
     /* ================= REMOVE SERVICE ================= */
     async function removeService(id: any) {
         try {
-            setLoading(true);
+            setLocalLoading(true);
             const result = await API.Instance.delete(
-                API.API_ROUTES.removeService + `/${id}`
+                `userService/remove-service/${id}`
             );
 
             if (result.status) {
@@ -179,7 +173,7 @@ export default function ManageServices(props: any) {
             setSelectedServiceId(null);
             setShowDeleteModal(false);
         } finally {
-            setLoading(false);
+            setLocalLoading(false);
         }
     }
 
@@ -226,6 +220,107 @@ export default function ManageServices(props: any) {
         }
     }
 
+
+    const categoryRenderItem = useCallback(
+        ({ item, index }: { item: any; index: number }) => {
+            const isSelected = selectedCategoryId === item?.id;
+            return (
+                <TouchableOpacity
+                    style={[
+                        styles(theme).itemContainer,
+                        index === 0 ? {
+                            marginLeft: 0,
+                        } : {
+                            marginLeft: 8,
+                        },
+                        {
+                            backgroundColor: isSelected
+                                ? theme.activeTabBg
+                                : theme.inActiveTabBg,
+                        },
+                    ]}
+                    activeOpacity={0.8}
+                    onPress={() => {
+                        if (isSelected) return;
+                        setSelectedCategoryId(item?.id)
+                    }}
+                >
+                    <Image
+                        resizeMode="cover"
+                        style={styles(theme).categoryImage}
+                        // source={item?.category_logo ? { uri: item?.category_logo } : IMAGES.childCareImg}
+                        source={item?.category_logo}
+                    />
+
+                    <Text
+                        style={{
+                            marginLeft: getScaleSize(14),
+                            alignSelf: 'center',
+                        }}
+                        size={getScaleSize(16)}
+                        font={FONTS.Lato.Regular}
+                        color={isSelected ? theme.primary : theme._8C8C8C}
+                    >
+                        {item?.category_name}
+                    </Text>
+                </TouchableOpacity>
+            );
+        },
+        [selectedCategoryId, theme] // 🔥 dependencies
+    );
+
+
+    const subCategoryRenderItem = useCallback(
+        ({ item, index }: { item: any; index: number }) => {
+            const imageUri = item?.image;
+
+            return (
+                <View
+                    style={[
+                        styles(theme).cardContainer,
+                        {
+                            height: getScaleSize(219),
+                            marginBottom: getScaleSize(20)
+                        },
+                    ]}
+                >
+                    <ImageBackground
+                        source={{ uri: item?.image || '' }}
+                        style={[styles(theme).imageView, styles(theme).imageBackground]}
+                    >
+                        <LinearGradient
+                            colors={["transparent", "#ffffff", "#ffffff"]}
+                            locations={[0.6, 0.9, 1]}
+                            style={styles(theme).listItemLinearContainer}
+                        >
+                            <Text
+                                size={getScaleSize(12)}
+                                font={FONTS.Lato.Bold}
+                                align='center'
+                                color={theme.primaryText}
+                            >{item?.subcategory_name}</Text>
+                        </LinearGradient>
+                        <Pressable
+                            style={styles(theme).deleteBadge}
+                            onPress={() => {
+                                setSelectedServiceId(item?.id ?? item?.sub_category_id);
+                                setShowDeleteModal(true);
+                            }}
+                        >
+                            <Image
+                                source={IMAGES.ic_delete2}
+                                style={styles(theme).deleteBadgeIcon}
+                            />
+                        </Pressable>
+                    </ImageBackground>
+                </View>
+            );
+        },
+        [theme]
+    );
+
+
+
     return (
         <AppSafeAreaView style={styles(theme).container}>
             <Header
@@ -246,145 +341,84 @@ export default function ManageServices(props: any) {
                 }}
                 screenName={STRING.manage_services}
             />
-            {has_purchased ? (
-                <View style={styles(theme).mainContainer}>
-                    <Text
-                        size={getScaleSize(18)}
-                        font={FONTS.Lato.Medium}
-                        color={theme._737373}
-                        style={{ marginHorizontal: getScaleSize(24), marginBottom: getScaleSize(16) }}>
-                        {profile?.user?.service_provider_type === 'professional' ?
-                            STRING.all_service_categories_are_included_in_your_plan_Add_as_many_as_you_need_all_included_in_subscription_plan
-                            : STRING.here_you_can_easily_manage_your_service_categories_each_additional_category_you_add_will_incur_a_monthly_fee_of}
-                    </Text>
-                    {services?.services?.length > 0 && (
-                        <>
-                            {/* <View style={styles(theme).divider} /> */}
-                            <View style={styles(theme).serviceContainer}>
-                                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                                    {(services?.services ?? []).map((item: any, index: number) => {
-                                        const isSelected = selectedCategoryId === item.category_id;
-                                        const isLast = index === services?.services.length - 1;
-                                        return (
-                                            <TouchableOpacity
-                                                key={item.category_id}
-                                                onPress={() =>
-                                                    setSelectedCategoryId(
-                                                        item.category_id
-                                                    )
-                                                }
-                                                style={[
-                                                    styles(theme).itemContainer,
-                                                    {
-                                                        marginLeft: index === 0 ? getScaleSize(24) : getScaleSize(8),
-                                                        backgroundColor: isSelected
-                                                            ? theme.activeTabBg
-                                                            : theme.inActiveTabBg,
-                                                    },
-                                                ]}
-                                                activeOpacity={0.8}
-                                            >
-                                                <Image
-                                                    source={item?.category_logo ? { uri: item.category_logo } : (arrayIcons[item?.category_name?.toLowerCase() as keyof typeof arrayIcons] ?? arrayIcons['diy'] as any)}
-                                                    resizeMode="cover"
-                                                    style={styles(theme).categoryImage}
-                                                />
-                                                <Text
-                                                    style={{
-                                                        marginLeft: getScaleSize(14),
-                                                        alignSelf: 'center',
-                                                    }}
-                                                    size={getScaleSize(16)}
-                                                    font={FONTS.Lato.Regular}
-                                                    color={isSelected ? theme.primary : theme._8C8C8C}
-                                                >
-                                                    {item?.category_name ?? ''}
-                                                </Text>
-                                            </TouchableOpacity>
-                                        );
-                                    }
-                                    )}
-                                </ScrollView>
-                            </View>
-                        </>
-                    )}
-                    <View style={{ marginVertical: getScaleSize(24), flex: 1 }}>
-                        {renderSubCategories()}
+            <Text
+                size={getScaleSize(16)}
+                color={theme._939393}
+                font={FONTS.Lato.SemiBold}
+                style={styles(theme).description}
+            >{"All service categories are included in your plan. Add as many as you need, all included in subscription plan."}
+            </Text>
+            {DummyData?.categoryList.length > 0 &&
+                (
+                    <View style={styles(theme).categoryListWrapper}>
+                        <FlatList
+                            data={DummyData?.categoryList}
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            keyExtractor={(item: any, index: number) => index.toString()}
+                            contentContainerStyle={styles(theme).categoryListContent}
+                            renderItem={categoryRenderItem}
+                            ListEmptyComponent={() => (
+                                <View />
+                            )}
+                        />
                     </View>
+                )}
+
+            {DummyData.filteredSubCategories.length > 0 && (
+                <FlatList
+                    data={DummyData.filteredSubCategories}
+                    numColumns={2}
+                    contentContainerStyle={styles(theme).subCategoryContent}
+                    keyExtractor={(item: any, index: number) => index.toString()}
+                    showsVerticalScrollIndicator={false}
+                    columnWrapperStyle={styles(theme).subCategoryColumn}
+                    scrollEventThrottle={16}
+                    ListHeaderComponent={() => {
+                        return <View style={styles(theme).subCategoryHeaderSpacer} />;
+                    }}
+                    ListFooterComponent={() => {
+                        return <View style={styles(theme).subCategoryFooterSpacer} />;
+                    }}
+                    renderItem={subCategoryRenderItem}
+                    ListEmptyComponent={() => (
+                        <View style={styles(theme).emptyBox}>
+                            <Text
+                                size={getScaleSize(16)}
+                                font={FONTS.Lato.Bold}
+                                color={theme._8C8C8C}>
+                                {"No Category Available"}
+                            </Text>
+                        </View>
+                    )}
+                />)
+            }
+
+            {(DummyData.categoryList.length <= 1 && DummyData.filteredSubCategories.length <= 0) && (
+               <View style={styles(theme).emptyStateContainer}>
+                <Image
+                    source={IMAGES.empty}
+                    style={styles(theme).emptyStateImage}
+                />
                 </View>
-            ) : (
-                <EmptyView
-                    title={STRING.you_have_not_subscribed_to_any_plan}
-                    style={styles(theme).emptyContainer}
-                    onPressButton={() => {
-                        props.navigation.navigate(SCREENS.ChooseYourSubscription.identifier, {
-                            isFromSubscriptionButton: true,
-                        });
-                    }}
-                />
             )}
-            {has_purchased && (
-                <Button
-                    title={services?.services?.length > 0 ? STRING.add_more_services : STRING.add_service}
-                    style={{
-                        marginHorizontal: getScaleSize(24),
-                        marginBottom: getScaleSize(10),
-                    }}
-                    onPress={() => {
-                        if (profile?.user?.service_provider_type === 'professional') {
-                            const subCategoryIds = services?.services?.flatMap((service: any) =>
-                                service.subcategories.map((sub: any) => sub.sub_category_id)
-                            ) || [];
 
-                            props.navigation.navigate(
-                                SCREENS.AddServices.identifier,
-                                { isFromManageServices: true, disableServicesIds: subCategoryIds }
-                            );
-                        } else {
-                            if (services?.services?.length > 0) {
-                                bottomSheetRef.current.open();
-                            } else {
-
-                                const subCategoryIds = services?.services?.flatMap((service: any) =>
-                                    service.subcategories.map((sub: any) => sub.sub_category_id)
-                                ) || [];
-
-                                props.navigation.navigate(
-                                    SCREENS.AddServices.identifier,
-                                    { isFromManageServices: true, disableServicesIds: subCategoryIds }
-                                );
-                            }
-                        }
-                    }}
-                />
-            )}
-            <BottomSheet
-                bottomSheetRef={bottomSheetRef}
-                height={getScaleSize(330)}
-                addMoreServices={true}
-                title={
-                    STRING.additional_category_you_add_will_incur_a_monthly_fee_of
-                }
-                description={
-                    STRING.you_are_on_Non_professional_plan_that_s_why_you_need_to_pay_to_add_more_category_of_services
-                }
-                buttonTitle={STRING.proceed}
-                secondButtonTitle={STRING.cancel}
-                onPressButton={() => {
-
-                    const subCategoryIds = services?.services?.flatMap((service: any) =>
-                        service.subcategories.map((sub: any) => sub.sub_category_id)
-                    ) || [];
-
-                    props.navigation.navigate(SCREENS.AddServices.identifier,
-                        { isFromManageServices: true, disableServicesIds: subCategoryIds }
-                    );
-                    bottomSheetRef.current.close();
-                }}
-            />
+            <View
+                style={styles(theme).addServiceBar}
+            >
+                <Pressable
+                    style={styles(theme).addServiceButton}
+                >
+                    <Text
+                        size={getScaleSize(16)}
+                        font={FONTS.Lato.Bold}
+                        color={theme.white}
+                    >{"Add Service"}</Text>
+                </Pressable>
+            </View>
             <Modal
+                transparent
                 visible={showDeleteModal}
-                transparent={true}
                 animationType="fade"
                 onRequestClose={() => {
                     setShowDeleteModal(false);
@@ -394,11 +428,11 @@ export default function ManageServices(props: any) {
                 <View style={styles(theme).modalOverlay}>
                     <View style={styles(theme).modalContainer}>
                         <Text
-                            size={getScaleSize(18)}
+                            size={getScaleSize(20)}
                             font={FONTS.Lato.Bold}
-                            color={theme.primaryText}
+                            color={theme.secondaryText}
                             align='center'
-                            style={{ marginBottom: getScaleSize(24) }}
+                            style={styles(theme).modalTitle}
                         >
                             Are you sure you want to remove this service?
                         </Text>
@@ -413,9 +447,11 @@ export default function ManageServices(props: any) {
                                 <Text
                                     size={getScaleSize(16)}
                                     font={FONTS.Lato.SemiBold}
-                                    color={theme.primary}
+                                    color={theme._EC613D}
                                     align='center'
-                                >Cancel</Text>
+                                >
+                                    Cancel
+                                </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles(theme).removeButton}
@@ -426,14 +462,15 @@ export default function ManageServices(props: any) {
                                     font={FONTS.Lato.SemiBold}
                                     color={theme.white}
                                     align='center'
-                                >Remove Service</Text>
+                                >
+                                    Remove Service
+                                </Text>
                             </TouchableOpacity>
                         </View>
                     </View>
                 </View>
             </Modal>
-
-            {isLoading && <ProgressView />}
+            {(isLoading || localLoading) && <ProgressView />}
         </AppSafeAreaView>
     );
 }
@@ -486,6 +523,21 @@ const styles = (theme: ThemeContextType['theme']) =>
             right: getScaleSize(8),
             zIndex: 10,
         },
+        deleteBadge: {
+            position: 'absolute',
+            right: getScaleSize(10),
+            top: getScaleSize(10),
+            width: getScaleSize(30),
+            height: getScaleSize(30),
+            borderRadius: getScaleSize(8),
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        deleteBadgeIcon: {
+            width: getScaleSize(24),
+            height: getScaleSize(24),
+        },
         deleteIconContainer: {
             width: getScaleSize(30),
             height: getScaleSize(30),
@@ -516,7 +568,7 @@ const styles = (theme: ThemeContextType['theme']) =>
         },
         modalOverlay: {
             flex: 1,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            backgroundColor: '#777777CC',
             justifyContent: 'center',
             alignItems: 'center',
             paddingHorizontal: getScaleSize(30),
@@ -535,6 +587,9 @@ const styles = (theme: ThemeContextType['theme']) =>
             width: '100%',
             gap: getScaleSize(12),
         },
+        modalTitle: {
+            marginBottom: getScaleSize(24),
+        },
         cancelButton: {
             flex: 1,
             height: getScaleSize(48),
@@ -551,5 +606,67 @@ const styles = (theme: ThemeContextType['theme']) =>
             backgroundColor: theme.primary,
             justifyContent: 'center',
             alignItems: 'center',
+        },
+        imageBackground: {
+            overflow: 'hidden',
+        },
+        description: {
+            marginHorizontal: getScaleSize(24),
+            marginTop: getScaleSize(10),
+        },
+        categoryListWrapper: {
+            paddingVertical: getScaleSize(10),
+            marginTop: getScaleSize(22),
+        },
+        categoryListContent: {
+            paddingHorizontal: getScaleSize(24),
+        },
+        subCategoryContent: {
+            paddingBottom: getScaleSize(16),
+            paddingVertical: getScaleSize(16),
+        },
+        subCategoryColumn: {
+            paddingLeft: getScaleSize(8),
+        },
+        subCategoryHeaderSpacer: {
+            height: getScaleSize(8),
+        },
+        subCategoryFooterSpacer: {
+            height: getScaleSize(50),
+        },
+        emptyBox: {
+            height: getScaleSize(200),
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: theme._F0EFF0,
+            elevation: 2,
+            borderRadius: 10,
+            marginHorizontal: getScaleSize(24),
+        },
+        emptyStateContainer: {
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        emptyStateImage: {
+            width: getScaleSize(187),
+            height: getScaleSize(217),
+            alignSelf: 'center',
+            marginTop: getScaleSize(163),
+        },
+        addServiceBar: {
+            position: 'absolute',
+            bottom: getScaleSize(0),
+            width: '100%',
+            backgroundColor: theme.white,
+            paddingHorizontal: getScaleSize(24),
+            paddingBottom: getScaleSize(32),
+            paddingTop: getScaleSize(5),
+        },
+        addServiceButton: {
+            borderRadius: getScaleSize(10),
+            backgroundColor: theme.primary,
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingVertical: getScaleSize(14),
         },
     });

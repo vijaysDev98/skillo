@@ -2,13 +2,11 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 import {
   View,
   StyleSheet,
-  Dimensions,
   FlatList,
   TouchableOpacity,
   Image,
   Pressable,
   ImageBackground,
-
 } from 'react-native';
 
 //ASSETS
@@ -18,132 +16,49 @@ import { FONTS, IMAGES } from '../../assets';
 import { ThemeContext, ThemeContextType } from '../../context';
 
 //CONSTANT
-import { DummyData, getScaleSize, SHOW_TOAST, useString } from '../../constant';
+import { getScaleSize } from '../../constant';
 
 //COMPONENT
 import {
-  Header,
   HomeHeader,
   ProgressView,
-  SearchComponent,
   Text,
 } from '../../components';
 
 //API
-import { API } from '../../api';
 import { SCREENS } from '..';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   useAnimatedScrollHandler,
   interpolate,
-  Extrapolate,
 } from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { getSubCategoryData } from '../../actions/seekerHome/seekerHomeAction';
-
-const { width } = Dimensions.get('window');
-const cellSize = (width - 30) / 7;
+import { screenWidth } from '../../constant/scaleSize';
 
 export default function Assistance(props: any) {
 
   const { service, id } = props?.route?.params || "";
-  const STRING = useString();
   const dispatch = useAppDispatch()
   const { theme } = useContext<any>(ThemeContext);
   const { serviceCategoryData, isLoading, serviceCategoryList } = useAppSelector(state => state.seekerHome)
 
   const [selectedCategory, setSelectedCategory] = useState<any>();
   const [selectedCategoryId, setSelectedCategoryId] = useState(id)
-  // const [isLoading, setLoading] = useState(true);
-  const [categoryList, setCategoryList] = useState(DummyData.categoryList);
-  const [subCategoryList, setSubCategoryList] = useState(DummyData.filteredSubCategories || []);
-  const [bannerData, setBannerData] = useState<any>(null);
+  const [from, setFrom] = useState<string>(service);
   const [searchText, setSearchText] = useState('');
-  const [filteredSubCategories, setFilteredSubCategories] = useState(DummyData.filteredSubCategories || []);
-  const [errorMessage, setErrorMessage] = useState('');
 
   const scrollY = useSharedValue(0);
   const maxScrollOffset = getScaleSize(220);
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
-    // getCategoryData();
     dispatch(getSubCategoryData(selectedCategoryId))
   }, [selectedCategoryId]);
 
-  // useEffect(() => {
-  //   if (selectedCategory) {
-  //     getSubCategoryData(selectedCategory?.id);
-  //     setErrorMessage('');
-  //   }
-  // }, [selectedCategory]);
-
-  // useEffect(() => {
-  //   if (!searchText.trim()) {
-  //     setFilteredSubCategories(subCategoryList);
-  //     return;
-  //   }
-
   const search = searchText.toLowerCase();
-
-  //   const filtered = subCategoryList.filter((item: any) => {
-  //     const title = (item?.subcategory_name || "").toLowerCase();
-  //     return title.includes(search);
-  //   });
-  //   console.log('filtered==>', JSON.stringify(filtered.length == 0))
-  //   if(filtered?.length == 0){
-  //     setErrorMessage('No data found')
-  //   }
-  //   setFilteredSubCategories(filtered);
-  // }, [searchText, subCategoryList]);
-
-  // async function getCategoryData() {
-  //   try {
-  //     setLoading(true);
-  //     const result = await API.Instance.get(API.API_ROUTES.getHomeData + `?service_name=${service?.name}`);
-  //     setLoading(false)
-  //     console.log('CAT', JSON.stringify(result))
-  //     if (result.status) {
-  //       setCategoryList(result?.data?.data?.categories ?? []);
-  //       if (result?.data?.data?.categories?.[0]?.id) {
-  //         setSelectedCategory(result?.data?.data?.categories?.[0]);
-  //         getSubCategoryData(result?.data?.data?.categories?.[0]?.id);
-  //       }
-  //     } else {
-  //       SHOW_TOAST(result?.data?.message ?? '', 'error')
-  //     }
-  //   } catch (error: any) {
-  //     SHOW_TOAST(error?.message ?? '', 'error');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }
-
-  // async function getSubCategoryData(id: string) {
-  //   try {
-  //     setLoading(true);
-  //     const result = await API.Instance.get(API.API_ROUTES.getHomeData + `/${id}`);
-  //     setLoading(false)
-  //     if (result.status) {
-  //       console.log('subcategoryList==', JSON.stringify(result?.data?.data?.subcategories?.length < 0))
-  //       setBannerData(result?.data?.data?.Banner ?? null);
-  //       setSubCategoryList(result?.data?.data?.subcategories ?? []);
-  //       setFilteredSubCategories(result?.data?.data?.subcategories ?? []);
-  //       if (result?.data?.data?.subcategories?.length == 0) {
-  //         setErrorMessage('No data found')
-  //       }
-  //     } else {
-  //       SHOW_TOAST(result?.data?.message ?? '', 'error')
-  //     }
-  //   } catch (error: any) {
-  //     SHOW_TOAST(error?.message ?? '', 'error');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }
-
 
   const patterns = ['small', 'large', 'large', 'small'];
 
@@ -173,8 +88,8 @@ export default function Assistance(props: any) {
         <TouchableOpacity
           style={[
             styles(theme).itemContainer,
+            index === 0 ? styles(theme).firstCategoryItem : styles(theme).categoryItem,
             {
-              marginLeft: index === 0 ? 0 : 8,
               backgroundColor: isSelected
                 ? theme.activeTabBg
                 : theme.inActiveTabBg,
@@ -183,7 +98,7 @@ export default function Assistance(props: any) {
           activeOpacity={0.8}
           onPress={() => {
             if (isSelected) return; // 🔥 avoid unnecessary re-render
-
+            setFrom("")
             setSearchText('');
             setSelectedCategory(item);
             setSelectedCategoryId(item?.id)
@@ -202,10 +117,7 @@ export default function Assistance(props: any) {
           />
 
           <Text
-            style={{
-              marginLeft: getScaleSize(14),
-              alignSelf: 'center',
-            }}
+            style={styles(theme).categoryText}
             size={getScaleSize(16)}
             font={FONTS.Lato.Regular}
             color={isSelected ? theme.primary : theme._8C8C8C}
@@ -239,19 +151,14 @@ export default function Assistance(props: any) {
           style={[
             styles(theme).cardContainer,
             {
-              height: isLarge
-                ? getScaleSize(233)
-                : getScaleSize(188),
-              marginTop:
-                isLarge && index % 2 === 0
-                  ? getScaleSize(-25)
-                  : getScaleSize(20),
+              height: getScaleSize(219),
+              // gap: 10,
             },
           ]}
         >
           <ImageBackground
             source={{ uri: item?.image || '' }}
-            style={[styles(theme).imageView, { overflow: "hidden", }]}
+            style={[styles(theme).imageView, styles(theme).imageBackground]}
           >
             <LinearGradient
               colors={["transparent", "#ffffff", "#ffffff"]}
@@ -276,19 +183,19 @@ export default function Assistance(props: any) {
   return (
     <View style={styles(theme).container}>
       <HomeHeader
-        // screenName={selectedCategory ? selectedCategory?.category_name : service?.name}
-        screenName={serviceCategoryData?.Banner?.category_name ? serviceCategoryData?.Banner?.category_name : service}
+        screenName={from ? from : serviceCategoryData?.Banner?.category_name}
         onBack={() => props.navigation.goBack()}
       />
       <View style={styles(theme).secondContainer}>
         <Animated.View style={[styles(theme).animatedBannerContainer, animatedHeaderStyle]}>
           <>
             {serviceCategoryData?.Banner?.url || IMAGES.viewAllBanner ? (
-              // <View>
               <Image
                 style={styles(theme).bannerContainer}
                 resizeMode="contain"
-                source={serviceCategoryData?.Banner?.url ? { uri: serviceCategoryData?.Banner?.url } : IMAGES.viewAllBanner}
+                source={serviceCategoryData?.Banner?.url
+                  ? { uri: serviceCategoryData?.Banner?.url }
+                  : IMAGES.viewAllBanner}
               />
             ) : (
               <View style={styles(theme).bannerContainer} />
@@ -302,10 +209,10 @@ export default function Assistance(props: any) {
                   showsHorizontalScrollIndicator={false}
                   keyExtractor={(item: any, index: number) => index.toString()}
                   ListHeaderComponent={() => {
-                    return <View style={{ width: getScaleSize(22) }} />;
+                    return <View style={styles(theme).tabListHeaderSpacer} />;
                   }}
                   ListFooterComponent={() => {
-                    return <View style={{ width: getScaleSize(16) }} />;
+                    return <View style={styles(theme).tabListFooterSpacer} />;
                   }}
                   renderItem={categoryRenderItem}
                 />
@@ -313,45 +220,35 @@ export default function Assistance(props: any) {
             )}
           </>
         </Animated.View>
-        {/* {serviceCategoryData?.Services && serviceCategoryData?.Services.length > 0  && */}
+
         <Animated.FlatList
           data={serviceCategoryData?.Services}
           numColumns={2}
-          contentContainerStyle={{}}
+          contentContainerStyle={styles(theme).listContentContainer}
           keyExtractor={(item: any, index: number) => index.toString()}
           showsVerticalScrollIndicator={false}
-          columnWrapperStyle={{ paddingLeft: getScaleSize(8) }}
+          columnWrapperStyle={styles(theme).columnWrapper}
           onScroll={scrollHandler}
           scrollEventThrottle={16}
           ListHeaderComponent={() => {
-            return <View style={{ height: categoryList.length > 1 ? getScaleSize(280) : getScaleSize(210) }} />;
+            return <View style={styles(theme).listHeaderSpacer} />;
           }}
           ListFooterComponent={() => {
-            return <View style={{ height: getScaleSize(50) }} />;
+            return <View style={styles(theme).listFooterSpacer} />;
           }}
           renderItem={subCategoryRenderItem}
           ListEmptyComponent={() => (
-            <View style={{
-              height: getScaleSize(200),
-              justifyContent: 'center',
-              alignItems: 'center',
-              backgroundColor: theme._F0EFF0,
-              elevation: 2,
-              borderRadius: 10,
-              marginHorizontal: getScaleSize(24)
-            }}>
+            <View style={styles(theme).emptyState}>
               <Text
                 size={getScaleSize(16)}
                 font={FONTS.Lato.Bold}
                 color={theme._8C8C8C}>
-                {/* {errorMessage ?? 'No Data Available'} */}
                 {"No Category Available"}
               </Text>
             </View>
           )}
         />
 
-        {/* } */}
       </View>
       {isLoading && <ProgressView />}
     </View>
@@ -360,8 +257,14 @@ export default function Assistance(props: any) {
 
 const styles = (theme: ThemeContextType['theme']) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.white },
-    secondContainer: { flex: 1, overflow: 'hidden' },
+    container: {
+      flex: 1,
+      backgroundColor: theme._fafafa
+    },
+    secondContainer: {
+      flex: 1,
+      overflow: 'hidden'
+    },
     animatedBannerContainer: {
       position: 'absolute',
       top: 0,
@@ -371,11 +274,6 @@ const styles = (theme: ThemeContextType['theme']) =>
       backgroundColor: theme.white,
       alignItems: 'center',
     },
-    deviderView: {
-      marginTop: getScaleSize(30),
-      height: getScaleSize(6),
-      backgroundColor: '#F8F8F8',
-    },
     bannerContainer: {
       height: getScaleSize(161),
       borderRadius: getScaleSize(20),
@@ -383,18 +281,23 @@ const styles = (theme: ThemeContextType['theme']) =>
       marginHorizontal: getScaleSize(24),
     },
     tabContainer: {
-      marginTop: getScaleSize(10),
-      height: getScaleSize(50)
+      height: getScaleSize(40),
     },
     itemContainer: {
-      // height: getScaleSize(),
-      // paddingVertical:getScaleSize(10),
-      paddingHorizontal: getScaleSize(20),
       borderRadius: getScaleSize(10),
+      paddingHorizontal: getScaleSize(20),
       flexDirection: 'row',
+      alignItems: 'center',
+    },
+    firstCategoryItem: {
+      marginLeft: 0,
+    },
+    categoryItem: {
+      marginLeft: 8,
     },
     listItemLinearContainer: {
-      borderRadius: getScaleSize(20), flex: 1,
+      borderRadius: getScaleSize(20),
+      flex: 1,
       justifyContent: 'flex-end',
       paddingBottom: getScaleSize(16)
     },
@@ -406,21 +309,57 @@ const styles = (theme: ThemeContextType['theme']) =>
     cardContainer: {
       borderRadius: getScaleSize(20),
       backgroundColor: theme._EAF0F3,
-      width: (Dimensions.get('window').width - getScaleSize(64)) / 2,
+      width: (screenWidth - getScaleSize(64)) / 2,
       marginLeft: getScaleSize(16),
       elevation: 1
     },
     imageView: {
-      flex: 1.0,
+      height: '100%',
+      width: '100%',
       borderRadius: getScaleSize(20),
     },
     bookNowButton: {
       position: 'absolute',
       bottom: getScaleSize(35),
       left: getScaleSize(32),
-      paddingHorizontal: getScaleSize(20),
-      paddingVertical: getScaleSize(10),
+      paddingTop: getScaleSize(12),
+      paddingHorizontal: getScaleSize(10),
       backgroundColor: theme.primary,
       borderRadius: getScaleSize(25),
+    },
+    categoryText: {
+      marginLeft: getScaleSize(14),
+      alignSelf: 'center',
+    },
+    imageBackground: {
+      overflow: 'hidden',
+    },
+    listContentContainer: {
+      paddingBottom: getScaleSize(16),
+      paddingVertical: getScaleSize(16)
+    },
+    tabListHeaderSpacer: {
+      width: getScaleSize(22),
+    },
+    tabListFooterSpacer: {
+      width: getScaleSize(16),
+    },
+    columnWrapper: {
+      paddingLeft: getScaleSize(8),
+    },
+    listHeaderSpacer: {
+      height: getScaleSize(250),
+    },
+    listFooterSpacer: {
+      height: getScaleSize(50),
+    },
+    emptyState: {
+      height: getScaleSize(200),
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: theme._F0EFF0,
+      elevation: 2,
+      borderRadius: 10,
+      marginHorizontal: getScaleSize(24),
     },
   });

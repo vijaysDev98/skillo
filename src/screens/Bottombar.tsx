@@ -50,7 +50,6 @@ function BottomBar(props: any) {
   }
 
   function getProfessionalRouteName() {
-    console.log('isTask==>', isTask);
     if (isTask) {
       return TABS.Task.identifier;
     }
@@ -141,7 +140,7 @@ function BottomBar(props: any) {
   async function getNotificationTokens() {
     try {
       const token: any = await requestPermissionsAndToken();
-      console.log('token===', JSON.stringify(token));
+      
       if (token) {
         console.log('token===', JSON.stringify(token));
         // onNotification(token);
@@ -260,7 +259,6 @@ function BottomBar(props: any) {
             headerShown: false,
           }}
           initialRouteName={getProfessionalRouteName()}
-          // initialRouteName={TABS.ProfessionalHome.identifier}
           tabBar={props => {
             return <Tabbar {...props} />;
           }}>

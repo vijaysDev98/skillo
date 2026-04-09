@@ -38,6 +38,7 @@ export const getServiceCategoryData = (params?: any, onSuccess?: any, callBack?:
             dispatch(setServiceCategoryData(null))
             if (result?.status) {
                dispatch(setServiceCategoryData(result?.data?.data))
+               onSuccess?.(result?.data?.data)
             }else{
                   dispatch(setLoading(false));
                 SHOW_TOAST(result?.message ?? 'Something went wrong', 'error');

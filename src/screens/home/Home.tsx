@@ -218,11 +218,11 @@ const handleCategoryOnPress = (item:any) =>{
       <ScrollView
         contentContainerStyle={styles(theme).scrollContent}
         showsVerticalScrollIndicator={false} scrollEnabled={true}>
-        <Image
+        {/* <Image
           source={IMAGES.homeBanner}
           style={styles(theme).homeBanner}
           resizeMode="contain"
-        />
+        /> */}
         {/* <View
           style={{
             marginTop: 0 - getScaleSize(70),
@@ -504,7 +504,7 @@ const handleCategoryOnPress = (item:any) =>{
 
 const styles = (theme: ThemeContextType['theme']) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.white },
+    container: { flex: 1, backgroundColor: theme._fafafa },
     scrollContent: {
       paddingBottom: getScaleSize(50),
     },

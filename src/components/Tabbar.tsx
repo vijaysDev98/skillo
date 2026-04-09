@@ -1,5 +1,5 @@
-import React, { useContext, useEffect } from 'react';
-import { Alert, Dimensions, Image, ImageBackground, Linking, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useContext, useEffect, useMemo } from 'react';
+import { Image, ImageBackground, Linking, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 // CONSTANT & ASSETS
 import { getScaleSize, useString, Storage, TABBAR_HEIGHT } from '../constant';
@@ -7,22 +7,16 @@ import { IMAGES } from '../assets/images';
 import { FONTS } from '../assets';
 import { AuthContext, ThemeContext, ThemeContextType } from '../context';
 import Text from './Text';
-import { head } from 'lodash';
 import { EventRegister } from 'react-native-event-listeners';
-import { CommonActions } from '@react-navigation/native';
 import { SCREENS } from '../screens';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { userRoles } from '../constant/utils';
 import NavigationService from '../screens/NavigationService';
-import { useDispatch } from 'react-redux';
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
+import { screenWidth } from '../constant/scaleSize';
 
 function Tabbar(props: any) {
 
   const insets = useSafeAreaInsets();
-const dispatch = useDispatch()
   const { theme } = useContext<any>(ThemeContext);
 
   const { userType, setUser, setUserType, fetchProfile } = useContext<any>(AuthContext);
@@ -59,23 +53,13 @@ const dispatch = useDispatch()
       if (url.includes('account-success')) {
         const params = parseParams(url);
         fetchProfile()
-        props?.navigation?.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [{ name: SCREENS.BottomBar.identifier }],
-          }),
-        );
+        NavigationService.reset(SCREENS.BottomBar.identifier);
       }
 
       if (url.includes('account-cancel')) {
         const params = parseParams(url);
         fetchProfile()
-        props?.navigation?.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [{ name: SCREENS.BottomBar.identifier }],
-          }),
-        );
+        NavigationService.reset(SCREENS.BottomBar.identifier);
       }
 
       if (url.includes('payment-cancel')) {
@@ -186,38 +170,29 @@ const dispatch = useDispatch()
     Storage.clear();
     setUser(null);
     setUserType(null);
-    // props.navigation.dispatch(
-    //   CommonActions.reset({
-    //     index: 0,
-    //     routes: [{ name: SCREENS.Login.identifier }],
-    //   }),
-    // );
     NavigationService.reset(SCREENS.Login.identifier);
   }
 
-  let images: any = [];
-  let names: any = [];
+  const isProvider = userType === userRoles.Service_Provider_individual || userType === userRoles.Service_Provider_business;
 
-  if (userType === userRoles.Service_Provider_individual || userRoles.Service_Provider_business) {
-    images = [
-      IMAGES.home_unselected,
-      IMAGES.request_unselected,
-      IMAGES.chat_unselected,
-      IMAGES.profile_unselected,
+  const tabs = useMemo(() => {
+    if (isProvider) {
+      return [
+        { label: 'Home', image: IMAGES.home_unselected },
+        { label: 'Task', image: IMAGES.request_unselected },
+        { label: 'Chats', image: IMAGES.chat_unselected, altImage: IMAGES.seekerChatsIcon },
+        { label: 'Profile', image: IMAGES.profile_unselected },
+      ];
+    }
+
+    return [
+      { label: 'Home', image: IMAGES.home_unselected },
+      { label: 'Request', image: IMAGES.request_unselected },
+      { label: 'Create', image: IMAGES.plus, isPlus: true },
+      { label: 'Chats', image: IMAGES.chat_unselected, altImage: IMAGES.seekerChatsIcon },
+      { label: 'Profile', image: IMAGES.profile_unselected },
     ];
-
-    names = ['Home', 'Task', 'Chats', 'Profile'];
-  } else {
-    images = [
-      IMAGES.home_unselected,
-      IMAGES.request_unselected,
-      IMAGES.plus,
-      IMAGES.chat_unselected,
-      IMAGES.profile_unselected,
-    ];
-
-    names = ['Home', 'Request', '', 'Chats', 'Profile'];
-  }
+  }, [isProvider]);
 
   const STRING = useString();
 
@@ -238,14 +213,19 @@ const dispatch = useDispatch()
         // { paddingBottom: insets.bottom }
       ]}>
         {props.state.routes.map((route: any, index: number) => {
+          const tab = tabs[index];
+          if (!tab) return null;
           return (
             <Item
               key={index}
               onPress={() => onPress(route.name)}
-              title={route.name}
+              title={tab.label}
               index={index}
               selected={props.state.index == index}
-              image={images[index]}
+              image={tab.image}
+              altImage={tab.altImage}
+              isPlus={tab.isPlus}
+              isProvider={isProvider}
             />
           );
         })}
@@ -301,162 +281,63 @@ const dispatch = useDispatch()
   // );
 }
 
-const Item = (props: any) => {
+type ItemProps = {
+  onPress: () => void;
+  title: string;
+  index: number;
+  selected: boolean;
+  image: any;
+  altImage?: any;
+  isPlus?: boolean;
+  isProvider: boolean;
+};
+
+const Item = (props: ItemProps) => {
   const { theme } = useContext<any>(ThemeContext);
-
-  const { userType } = useContext<any>(AuthContext);
-
-  let images: any = [];
-  let names: any = [];
-
-  if (userType === userRoles.Service_Provider_individual || userType === userRoles.Service_Provider_business) {
-    images = [
-      IMAGES.home_unselected,
-      IMAGES.request_unselected,
-      // IMAGES.chat_unselected,
-      props.selected ? IMAGES.chat_unselected : IMAGES.seekerChatsIcon,
-      IMAGES.profile_unselected,
-    ];
-
-    names = ['Home', 'Task', 'Chats', 'Profile'];
-  } else {
-    images = [
-      IMAGES.home_unselected,
-      IMAGES.request_unselected,
-      IMAGES.plus,
-      props.selected ? IMAGES.chat_unselected : IMAGES.seekerChatsIcon,
-      IMAGES.profile_unselected,
-    ];
-
-    names = ['Home', 'Request', '', 'Chats', 'Profile'];
-  }
   const STRING = useString();
 
-  if (userType === userRoles.Service_Provider_individual || userType === userRoles.Service_Provider_business) {
+  if (props.isPlus) {
     return (
       <TouchableOpacity
         onPress={props.onPress}
-        style={styles(theme).itemContainer}>
-        <View>
-          {/*  */}
-          {props?.selected ? (
-            <View style={{ alignSelf: 'center' }}>
-              <Image
-                style={
-                  props.selected
-                    ? styles(theme).itemImageSelected
-                    : styles(theme).itemImage
-                }
-                resizeMode="contain"
-                tintColor={theme.primary}
-                source={images[props.index]}
-              />
-              <Text
-                style={{ marginTop: getScaleSize(8) }}
-                size={getScaleSize(14)}
-                font={FONTS.Lato.Bold}
-                color={theme.primary}
-                align="center">
-                {names[props.index]}
-              </Text>
-            </View>
-          ) : (
-            <View style={{ alignSelf: 'center' }}>
-              <Image
-                style={
-                  props.selected
-                    ? styles(theme).itemImageSelected
-                    : styles(theme).itemImage
-                }
-                resizeMode="contain"
-                source={images[props.index]}
-              />
-              <Text
-                style={{ marginTop: getScaleSize(8) }}
-                size={getScaleSize(12)}
-                font={FONTS.Lato.Medium}
-                color={theme._8C8C8C}
-                align="center">
-                {names[props.index]}
-              </Text>
-            </View>
-          )}
-        </View>
+        style={styles(theme).plusButton}>
+        <Image
+          style={styles(theme).plusImage}
+          resizeMode="cover"
+          source={IMAGES.plus}
+        />
       </TouchableOpacity>
     );
-  } else {
-    if (props?.index == 2) {
-      return (
-        <TouchableOpacity
-          onPress={() => {
-            props.onPress(SCREENS.CreateRequest.identifier);
-          }}
-          style={{
-            alignSelf: 'center',
-            transform: [{ translateY: -getScaleSize(20) }],
-            zIndex: 10,
-          }}>
-          <Image
-            style={{ height: getScaleSize(55), width: getScaleSize(55) }}
-            resizeMode="cover"
-            source={IMAGES.plus}
-          />
-        </TouchableOpacity>
-      );
-    } else {
-      return (
-        <TouchableOpacity
-          onPress={props.onPress}
-          style={styles(theme).itemContainer}>
-          <View>
-            {/*  */}
-            {props?.selected ? (
-              <View style={{ alignSelf: 'center' }}>
-                <Image
-                  style={
-                    props.selected
-                      ? styles(theme).itemImageSelected
-                      : styles(theme).itemImage
-                  }
-                  resizeMode="contain"
-                  tintColor={theme.primary}
-                  source={images[props.index]}
-                />
-                <Text
-                  style={{ marginTop: getScaleSize(4) }}
-                  size={getScaleSize(14)}
-                  font={FONTS.Lato.Bold}
-                  color={theme.primary}
-                  align="center">
-                  {names[props.index]}
-                </Text>
-              </View>
-            ) : (
-              <View style={{ alignSelf: 'center' }}>
-                <Image
-                  style={
-                    props.selected
-                      ? styles(theme).itemImageSelected
-                      : styles(theme).itemImage
-                  }
-                  resizeMode="contain"
-                  source={images[props.index]}
-                />
-                <Text
-                  style={{ marginTop: getScaleSize(4) }}
-                  size={getScaleSize(12)}
-                  font={FONTS.Lato.Medium}
-                  color={theme._8C8C8C}
-                  align="center">
-                  {names[props.index]}
-                </Text>
-              </View>
-            )}
-          </View>
-        </TouchableOpacity>
-      );
-    }
   }
+
+  const displayImage = props.selected ? props.image : props.altImage || props.image;
+  const isProvider = props.isProvider;
+  const selectedTextSize = isProvider ? 14 : 14;
+  const unselectedTextSize = isProvider ? 12 : 12;
+  const selectedMarginTop = isProvider ? 8 : 4;
+
+  return (
+    <TouchableOpacity
+      onPress={props.onPress}
+      style={styles(theme).itemContainer}>
+      <View style={styles(theme).itemInner}>
+        <Image
+          style={props.selected ? styles(theme).itemImageSelected : styles(theme).itemImage}
+          resizeMode="contain"
+          tintColor={props.selected ? theme.primary : theme._8C8C8C}
+          source={displayImage}
+        />
+        <Text
+          style={{ marginTop: getScaleSize(selectedMarginTop) }}
+          size={props.selected ? getScaleSize(selectedTextSize) : getScaleSize(unselectedTextSize)}
+          font={props.selected ? FONTS.Lato.Bold : FONTS.Lato.Medium}
+          color={props.selected ? theme.primary : theme._8C8C8C}
+          align="center">
+          {props.title}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
 };
 
 const styles = (theme: ThemeContextType['theme']) =>
@@ -468,7 +349,7 @@ const styles = (theme: ThemeContextType['theme']) =>
       overflow: 'hidden',
     },
     mainView: {
-      width: SCREEN_WIDTH,
+      width: screenWidth,
       // backgroundColor: theme.white,
       // position: 'absolute',
       // bottom: 10,
@@ -479,7 +360,7 @@ const styles = (theme: ThemeContextType['theme']) =>
       flexDirection: 'row',
       height: TABBAR_HEIGHT,
       alignItems: 'center',
-// paddingBottom:20
+      // paddingBottom:20
     },
     tabContainerServiceProvider: {
       flexDirection: 'row',
@@ -492,6 +373,9 @@ const styles = (theme: ThemeContextType['theme']) =>
       justifyContent: 'flex-start',
       alignItems: 'center',
       // paddingTop: getScaleSize(10),
+    },
+    itemInner: {
+      alignSelf: 'center',
     },
     itemImageSelected: {
       height: getScaleSize(24),
@@ -520,6 +404,15 @@ const styles = (theme: ThemeContextType['theme']) =>
       position: 'absolute',
       top: -3,
       right: -3,
+    },
+    plusButton: {
+      alignSelf: 'center',
+      transform: [{ translateY: -getScaleSize(20) }],
+      zIndex: 10,
+    },
+    plusImage: {
+      height: getScaleSize(55),
+      width: getScaleSize(55),
     },
   });
 

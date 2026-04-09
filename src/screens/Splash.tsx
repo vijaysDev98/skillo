@@ -149,9 +149,9 @@ export default function Splash(props: any) {
       };
 
       if (role === userRoles.Service_Provider_business || role === userRoles.Service_Provider_individual) {
-        await dispatch<any>(getProviderProfile(onSuccess, ));
+        await dispatch<any>(getProviderProfile(onSuccess));
       } else {
-        await dispatch<any>(getSeekerProfile(onSuccess,));
+        await dispatch<any>(getSeekerProfile(onSuccess));
       }
 
       // resetTo(SCREENS.BottomBar.identifier);

@@ -660,14 +660,14 @@ export default function ProfessionalHome(props: any) {
         <ScrollView
           style={styles(theme).scrolledContainer}
           showsVerticalScrollIndicator={false}>
-          <Image
+          {/* <Image
             source={IMAGES.homeBanner}
             style={{
               width: '100%',
               height: getScaleSize(200),
             }}
             resizeMode="contain"
-          />
+          /> */}
           {/* {renderServiceRequestView()} */}
           {renderServiceRequestListView()}
         </ScrollView>

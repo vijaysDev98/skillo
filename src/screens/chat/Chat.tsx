@@ -266,7 +266,7 @@ export default function Chat(props: any) {
   const insets = useSafeAreaInsets()
 
   return (
-    <View style={[styles(theme).container, { paddingTop: insets.top }]}>
+    <View style={[styles(theme).container, { paddingTop: insets.top +getScaleSize(16)}]}>
       <Text
         size={getScaleSize(24)}
         font={FONTS.Lato.Bold}
@@ -283,8 +283,9 @@ export default function Chat(props: any) {
           searchInputStyle={{
             color: theme._404040,
             fontSize: getScaleSize(16),
-            fontFamily: FONTS.Lato.Regular
+            fontFamily: FONTS.Lato.Regular,
           }}
+          searchViewStyle={{width:getScaleSize(318)}}
         />
         <TouchableOpacity
           style={styles(theme).filterButton}
@@ -359,15 +360,16 @@ export default function Chat(props: any) {
         </View>
       )} */}
 
-      <View>
+      {/* <View> */}
 
         <FlatList
           data={DummyData.chatListData}
           keyExtractor={(item, index) => index.toString()}
           renderItem={ItemView}
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={styles(theme).contentContainerStyle}
         />
-      </View>
+      {/* </View> */}
 
       <RBSheet
         ref={mediaPickerSheetRef}
@@ -429,7 +431,9 @@ export default function Chat(props: any) {
 
 const styles = (theme: ThemeContextType['theme']) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme._fafafa },
+    container: { flex: 1,
+       backgroundColor: theme._fafafa 
+      },
     scrolledContainer: {
       marginHorizontal: getScaleSize(22),
       flex: 1.0,
@@ -437,7 +441,8 @@ const styles = (theme: ThemeContextType['theme']) =>
     contentContainerStyle: {
       paddingTop: getScaleSize(24),
       gap: getScaleSize(14),
-      paddingHorizontal: getScaleSize(24)
+      paddingHorizontal: getScaleSize(24),
+      paddingBottom:getScaleSize(50)
     },
     buttonContainer: {
       gap: getScaleSize(16),

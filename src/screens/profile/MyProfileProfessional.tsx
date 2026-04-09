@@ -72,8 +72,7 @@ export default function MyProfileProfessional(props: any) {
                 font={FONTS.Lato.Regular}
                 align="center"
                 color={theme._262B43E5}>
-                {/* {(profile?.user?.first_name?.charAt(0) ?? '').toUpperCase() +
-                  (profile?.user?.last_name?.charAt(0) ?? '').toUpperCase()} */}
+               
                 {(userData?.profile?.full_name?.charAt(0) ?? '').toUpperCase()
                   ?? (userData?.profile?.business_name?.charAt(0) ?? '').toUpperCase()
                 }
@@ -85,7 +84,6 @@ export default function MyProfileProfessional(props: any) {
             font={FONTS.Lato.SemiBold}
             color={theme._2B2B2B}
             style={styles(theme).centeredText}>
-            {/* {`${profile?.user?.first_name + " " + profile?.user?.last_name}`} */}
             {userData?.profile?.full_name ?? userData?.profile?.business_name}
           </Text>
           <View style={styles(theme).horizontalContainer}>

@@ -11,8 +11,6 @@ export const loginAction = (data: any, onSuccess?: (resp?: any) => void, onError
         try {
             setLoading(true);
             const result = await API.Instance.post(API.API_ROUTES.auth.login, data);
-
-            console.log("login Api Result", result?.data?.data)
             if (result.status) {
                 Storage.save(Storage.USER_DETAILS, JSON.stringify(result?.data?.data));
                 onSuccess?.(result?.data?.data)
@@ -22,7 +20,6 @@ export const loginAction = (data: any, onSuccess?: (resp?: any) => void, onError
                 ) {
                     dispatch(getProviderProfile())
                 } else {
-                    console.log("customer seeker")
                     dispatch(getSeekerProfile())
                 }
 
@@ -153,7 +150,6 @@ export const verifyOtpAction =
                 }
 
                 const result: any = await API.Instance.post(API.API_ROUTES.auth.verifyOtp, apiData);
-                console.log('verifyOtp result', result?.status, result);
 
                 if (result?.status) {
                     SHOW_TOAST(result?.data?.message ?? 'OTP verified successfully', 'success');
@@ -199,16 +195,10 @@ export const resendOtpAction =
     (data: any, onSuccess?: any, callBack?: any) =>
         async (dispatch: AppDispatch) => {
             try {
-                //    setLoading(true);
                 const result = await API.Instance.post(API.API_ROUTES.auth.resendOtp, data);
-                //    setLoading(false);
-                console.log('result', result.status, result)
+                
                 if (result.status) {
                     SHOW_TOAST(result?.data?.message ?? '', 'success')
-                    //    otpInput.current?.clear();
-                    //    setTimer(60);
-                    //    setIsResendDisabled(true);
-                    // NavigationService.navigate(SCREENS.CreatePassword.identifier, { email: data?.email });
                     onSuccess && onSuccess()
                 } else {
                     SHOW_TOAST(result?.data?.message ?? '', 'error')
@@ -714,6 +704,28 @@ export const editSeekerProfileAction =(data:any,onSuccess?: (resp?: any) => void
             console.log("provider profile result ====>>>", result?.data?.data)
             if (result?.status) {
                 dispatch(getSeekerProfile())
+                 SHOW_TOAST(result?.data?.message , 'success');
+                onSuccess?.(result?.data?.data)
+            } else {
+                SHOW_TOAST(result?.data?.message ?? 'Something went wrong', 'error');
+                onError?.();
+            }
+        } catch (error: any) {
+            SHOW_TOAST(error?.message ?? 'Something went wrong', 'error');
+            onError?.();
+        } finally {
+            dispatch(setLoading(false));
+        }
+    };
+
+    export const editProviderProfileAction =(data:any,onSuccess?: (resp?: any) => void, onError?: () => void) =>
+    async (dispatch: AppDispatch) => {
+        try {
+            dispatch(setLoading(true));
+            const result = await API.Instance.patch(API.API_ROUTES.service_provider.edit_profile,data);
+            console.log("provider profile result ====>>>", result?.data?.data)
+            if (result?.status) {
+               dispatch(getProviderProfile())
                  SHOW_TOAST(result?.data?.message , 'success');
                 onSuccess?.(result?.data?.data)
             } else {

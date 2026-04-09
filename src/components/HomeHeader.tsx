@@ -6,9 +6,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 
-import { AuthContext, ThemeContext, ThemeContextType } from '../context';
+import { ThemeContext, ThemeContextType } from '../context';
 import { getScaleSize, useString } from '../constant';
 import { FONTS, IMAGES } from '../assets';
 import Text from './Text';
@@ -18,11 +18,14 @@ import LinearGradient from 'react-native-linear-gradient';
 const HomeHeader = (props: any) => {
   const STRING = useString();
   const { theme } = useContext(ThemeContext);
-  const { user, profile } = useContext<any>(AuthContext);
   const insets = useSafeAreaInsets();
 
+  const containerDynamicStyle = useMemo(
+    () => ({ paddingTop: insets.top + getScaleSize(20) }),
+    [insets.top],
+  );
+
   const {
-    userData,
     userName,
     userImage,
     bannerImg,
@@ -36,31 +39,22 @@ const HomeHeader = (props: any) => {
 
   return (
     <LinearGradient
-      colors={['#E8C8C5', '#F2DAD6', '#F7E9E6', '#fafafa']}
+      colors={['#E8C8C9', '#F2DAD6', '#F7E9E6', '#fafafa']}
       start={{ x: 1, y: 0 }}
       end={{ x: 1, y: 1 }}
       locations={[0, 0.4, 0.7, 1]}
       style={[
         styles(theme).container,
-        {
-          paddingTop: insets.top,
-          paddingBottom: getScaleSize(10)
-        }, containerStyle
+        styles(theme).containerSpacing,
+        containerDynamicStyle,
+        containerStyle,
       ]}
     >
-
-
-      {props.onBack ?
-        <View style={{ flexDirection: 'row', alignItems: 'center', }}>
-          {props.onBack &&
-            <TouchableOpacity onPress={props.onBack}>
-              <Image source={IMAGES.ic_back} style={{
-                width: getScaleSize(40),
-                height: getScaleSize(40),
-                marginRight: getScaleSize(16)
-              }} />
-            </TouchableOpacity>
-          }
+      {onBack ?
+        <View style={styles(theme).backRow}>
+          <TouchableOpacity onPress={onBack} style={styles(theme).backButton}>
+            <Image source={IMAGES.ic_back} style={styles(theme).backIcon} />
+          </TouchableOpacity>
           <Text
             size={getScaleSize(18)}
             font={FONTS.Lato.SemiBold}
@@ -90,7 +84,7 @@ const HomeHeader = (props: any) => {
                 size={getScaleSize(20)}
                 font={FONTS.Lato.Bold}
               >
-                {userName || "---"}
+                {userName?.charAt(0)?.toUpperCase() + userName?.slice(1) || "---"}
               </Text>
             </View>
           </Pressable>
@@ -120,13 +114,13 @@ const HomeHeader = (props: any) => {
           />
         </Pressable>
       </View>
-
-      {/* {bannerImg && <Image
-        source={bannerImg}
-        style={styles(theme).banner}
-        resizeMode="contain"
-      />} */}
-
+      {bannerImg && (
+        <Image
+          source={bannerImg}
+          style={styles(theme).banner}
+          resizeMode="contain"
+        />
+      )}
     </LinearGradient>
   );
 };
@@ -135,6 +129,20 @@ const styles = (theme: ThemeContextType['theme']) =>
   StyleSheet.create({
     container: {
       paddingHorizontal: getScaleSize(24),
+    },
+    containerSpacing: {
+      paddingBottom: getScaleSize(10),
+    },
+    backRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    backButton: {
+      marginRight: getScaleSize(16),
+    },
+    backIcon: {
+      width: getScaleSize(40),
+      height: getScaleSize(40),
     },
     topRow: {
       flexDirection: 'row',

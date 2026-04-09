@@ -168,5 +168,6 @@ export const IMAGES = {
   addQuoteSuccessImg: require('./addQuotoSuccessImg.png'),
   filterIcon: require('./filterIcon.png'),
   infoIcon: require('./infoIcon.png'),
-  seekerChatsIcon:require('./seekerchatsIcon.png')
+  seekerChatsIcon:require('./seekerchatsIcon.png'),
+  ic_delete2:require('./ic_delete2.png')
 };
