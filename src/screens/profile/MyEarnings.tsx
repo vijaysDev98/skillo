@@ -10,6 +10,9 @@ import { SCREENS } from '..'
 import { API } from '../../api'
 import DateTimePicker from '@react-native-community/datetimepicker';
 
+// DUMMY DATA
+import { earningsData as dummyEarningsData } from '../../constant/dummyData';
+
 export default function MyEarnings(props: any) {
 
     const { theme } = useContext<any>(ThemeContext);
@@ -34,17 +37,17 @@ export default function MyEarnings(props: any) {
     ]
 
     useEffect(() => {
-        fetchActivities(new Date().toISOString().slice(0, 7));
+        // Initialize with dummy data for demo
+        setActivities(dummyEarningsData.activities);
+        setEarningsData(dummyEarningsData);
     }, []);
 
     const onChange = (_: any, date?: Date) => {
         setShowPicker(false);
         if (date) {
-
             setSelectedDate(date);
-            // Call API with new month
-            const month = date.toISOString().slice(0, 7); // YYYY-MM
-            fetchActivities(month);
+            // In demo mode, we keep the same dummy data
+            // In production, you would call fetchActivities(month) here
         }
     };
 

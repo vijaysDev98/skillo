@@ -34,37 +34,37 @@ export default function RatingsReviews(props: any) {
     //     getRatingReviews()
     // }, [])
 
-    async function getRatingReviews() {
-        try {
-            setLoading(true)
-            const result: any = await API.Instance.get(API.API_ROUTES.fetchTransactions + `?section=ratings_reviews&page=${page}&limit=${PAGE_SIZE}`);
-            if (result?.status) {
-                const newData = result?.data?.data?.results ?? [];
-                if (newData?.length < PAGE_SIZE) {
-                    setHasMore(false);
-                    setRatingsReviews((prev: any) => [...prev, ...newData]);
-                }
-                else {
-                    setRatingsReviews((prev: any) => [...prev, ...newData]);
-                }
-            }
-            else {
-                SHOW_TOAST(result?.data?.message, 'error')
-                console.log('ERR', result?.data?.message)
-            }
-        } catch (error: any) {
-            SHOW_TOAST(error?.message ?? '', 'error');
-        } finally {
-            setLoading(false);
-        }
-    }
+    // async function getRatingReviews() {
+    //     try {
+    //         setLoading(true)
+    //         const result: any = await API.Instance.get(API.API_ROUTES.fetchTransactions + `?section=ratings_reviews&page=${page}&limit=${PAGE_SIZE}`);
+    //         if (result?.status) {
+    //             const newData = result?.data?.data?.results ?? [];
+    //             if (newData?.length < PAGE_SIZE) {
+    //                 setHasMore(false);
+    //                 setRatingsReviews((prev: any) => [...prev, ...newData]);
+    //             }
+    //             else {
+    //                 setRatingsReviews((prev: any) => [...prev, ...newData]);
+    //             }
+    //         }
+    //         else {
+    //             SHOW_TOAST(result?.data?.message, 'error')
+    //             console.log('ERR', result?.data?.message)
+    //         }
+    //     } catch (error: any) {
+    //         SHOW_TOAST(error?.message ?? '', 'error');
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // }
 
-    function loadMore() {
-        if (hasMore) {
-            setPage(page + 1);
-            getRatingReviews();
-        }
-    }
+    // function loadMore() {
+    //     if (hasMore) {
+    //         setPage(page + 1);
+    //         getRatingReviews();
+    //     }
+    // }
 
     useEffect(() => {
         setRatingsReviews(DummyData.dummyRatingsReviews);
@@ -92,7 +92,7 @@ export default function RatingsReviews(props: any) {
                         contentContainerStyle={{ paddingBottom: getScaleSize(50) }}
                         showsVerticalScrollIndicator={false}
                         keyExtractor={(item: any, index: number) => index.toString()}
-                        onEndReached={loadMore}
+                        // onEndReached={loadMore}
                         onEndReachedThreshold={0.1}
                         ListFooterComponent={
                             isLoading ? <ActivityIndicator size="large" color={theme.primary} style={{ margin: 20 }} /> : null

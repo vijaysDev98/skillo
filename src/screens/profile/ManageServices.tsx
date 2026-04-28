@@ -37,6 +37,9 @@ import { CommonActions, useIsFocused } from '@react-navigation/native';
 import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 import LinearGradient from 'react-native-linear-gradient';
 
+// DUMMY DATA
+import { manageServicesData } from '../../constant/dummyData';
+
 
 const { width } = Dimensions.get('window');
 
@@ -105,7 +108,9 @@ export default function ManageServices(props: any) {
     const bottomSheetRef = useRef<any>(null);
     const { profile } = useContext<any>(AuthContext);
 
-    const has_purchased = profile?.has_purchased;
+    // Use dummy profile data for demo
+    const dummyProfile = manageServicesData.profile;
+    const has_purchased = dummyProfile?.has_purchased;
 
     const [isLoading, setLoading] = useState(false);
     const [services, setServices] = useState<any>([]);
@@ -116,10 +121,10 @@ export default function ManageServices(props: any) {
     const isFocused = useIsFocused();
 
     useEffect(() => {
-        if (isFocused) {
-            getServices(false);
-        }
-    }, [isFocused]);
+        // Initialize with dummy data for demo
+        setServices(manageServicesData);
+        setSelectedCategoryId(manageServicesData.services[0]?.category_id ?? null);
+    }, []);
 
     /* ================= GET SERVICES ================= */
     async function getServices(keepSelection = true) {
@@ -157,31 +162,31 @@ export default function ManageServices(props: any) {
     }
 
     /* ================= REMOVE SERVICE ================= */
-    async function removeService(id: any) {
-        try {
-            setLoading(true);
-            const result = await API.Instance.delete(
-                API.API_ROUTES.removeService + `/${id}`
-            );
+    // async function removeService(id: any) {
+    //     try {
+    //         setLoading(true);
+    //         const result = await API.Instance.delete(
+    //             API.API_ROUTES.removeService + `/${id}`
+    //         );
 
-            if (result.status) {
-                SHOW_TOAST(result?.data?.message ?? '', 'success');
-                getServices(true);
-                setSelectedServiceId(null);
-                setShowDeleteModal(false);
-            } else {
-                SHOW_TOAST(result?.data?.message ?? '', 'error');
-                setSelectedServiceId(null);
-                setShowDeleteModal(false);
-            }
-        } catch (error: any) {
-            SHOW_TOAST(error?.message ?? '', 'error');
-            setSelectedServiceId(null);
-            setShowDeleteModal(false);
-        } finally {
-            setLoading(false);
-        }
-    }
+    //         if (result.status) {
+    //             SHOW_TOAST(result?.data?.message ?? '', 'success');
+    //             getServices(true);
+    //             setSelectedServiceId(null);
+    //             setShowDeleteModal(false);
+    //         } else {
+    //             SHOW_TOAST(result?.data?.message ?? '', 'error');
+    //             setSelectedServiceId(null);
+    //             setShowDeleteModal(false);
+    //         }
+    //     } catch (error: any) {
+    //         SHOW_TOAST(error?.message ?? '', 'error');
+    //         setSelectedServiceId(null);
+    //         setShowDeleteModal(false);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // }
 
     /* ================= SELECTED SERVICE ================= */
     const selectedService = services?.services?.find(
@@ -227,7 +232,8 @@ export default function ManageServices(props: any) {
     }
 
     return (
-        <AppSafeAreaView style={styles(theme).container}>
+        <AppSafeAreaView 
+        style={styles(theme).container}>
             <Header
                 onBack={() => {
                     if (isFromSelectServices) {
@@ -253,7 +259,7 @@ export default function ManageServices(props: any) {
                         font={FONTS.Lato.Medium}
                         color={theme._737373}
                         style={{ marginHorizontal: getScaleSize(24), marginBottom: getScaleSize(16) }}>
-                        {profile?.user?.service_provider_type === 'professional' ?
+                        {dummyProfile?.user?.service_provider_type === 'professional' ?
                             STRING.all_service_categories_are_included_in_your_plan_Add_as_many_as_you_need_all_included_in_subscription_plan
                             : STRING.here_you_can_easily_manage_your_service_categories_each_additional_category_you_add_will_incur_a_monthly_fee_of}
                     </Text>
@@ -331,7 +337,7 @@ export default function ManageServices(props: any) {
                         marginBottom: getScaleSize(10),
                     }}
                     onPress={() => {
-                        if (profile?.user?.service_provider_type === 'professional') {
+                        if (dummyProfile?.user?.service_provider_type === 'professional') {
                             const subCategoryIds = services?.services?.flatMap((service: any) =>
                                 service.subcategories.map((sub: any) => sub.sub_category_id)
                             ) || [];
@@ -419,7 +425,7 @@ export default function ManageServices(props: any) {
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles(theme).removeButton}
-                                onPress={() => removeService(selectedServiceId)}
+                                // onPress={() => removeService(selectedServiceId)}
                             >
                                 <Text
                                     size={getScaleSize(16)}

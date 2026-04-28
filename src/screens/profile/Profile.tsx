@@ -24,6 +24,7 @@ import { stubFalse } from 'lodash';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { userRoles } from '../../constant/utils';
 import { AppSafeAreaView } from '../../components/AppSafeAreaView';
+import { professionalProfileData } from '../../constant/dummyData';
 
 
 export default function Profile(props: any) {
@@ -36,10 +37,6 @@ export default function Profile(props: any) {
 
   const [isLoading, setLoading] = useState(false);
   const bottomSheetRef = useRef<any>(null);
-
-  console.log('user', insets.bottom)
-
-  props.navigation.navigate(SCREENS.MyProfile.identifier)
 
   const profileSeekerIndividualItems = [
     { id: 1, title: STRING.my_profile, icon: IMAGES.ic_my_profile, onPress: () => { props.navigation.navigate(SCREENS.MyProfile.identifier) } },
@@ -114,8 +111,11 @@ export default function Profile(props: any) {
           paddingBottom: getScaleSize(20)
         }}>
         <View style={styles(theme).mainContainer}>
-          {profile?.user?.profile_photo_url ? (
-            <Image source={{ uri: profile?.user?.profile_photo_url }} resizeMode='cover' style={styles(theme).profileContainer} />
+          {/* {profile?.user?.profile_photo_url ? ( */}
+          {professionalProfileData?.user?.profile_photo_url? (
+            <Image 
+            source={{ uri: professionalProfileData?.user?.profile_photo_url }}
+             resizeMode='cover' style={styles(theme).profileContainer} />
           ) : (
             <View style={styles(theme).EmptyProfileContainer}>
               <Text

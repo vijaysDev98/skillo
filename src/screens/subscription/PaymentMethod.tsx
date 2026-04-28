@@ -18,6 +18,7 @@ import { API } from '../../api';
 import { CommonActions } from '@react-navigation/native';
 import CouponSuccessModal from '../../components/CouponSuccessModal';
 import { userRoles } from '../../constant/utils';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 export default function PaymentMethod(props: any) {
 
@@ -177,7 +178,7 @@ export default function PaymentMethod(props: any) {
     }
 
     return (
-        <View style={styles(theme).container}>
+        <AppSafeAreaView style={styles(theme).container}>
             <Header
                 onBack={() => {
                     props.navigation.goBack();
@@ -449,7 +450,7 @@ export default function PaymentMethod(props: any) {
                 )
             }
 
-        </View>
+        </AppSafeAreaView>
     );
 }
 

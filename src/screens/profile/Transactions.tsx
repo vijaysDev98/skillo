@@ -31,40 +31,40 @@ const PAGE_SIZE = 10;
 /* ================= HELPERS ================= */
 
 // API months → flat transactions
-const normalizeTransactions = (months: any[]) => {
-  return months.flatMap((m: any) =>
-    (m.transactions || []).map((t: any) => ({
-      ...t,
-      __year: m.year,
-      __month: m.month,
-    }))
-  );
-};
+// const normalizeTransactions = (months: any[]) => {
+//   return months.flatMap((m: any) =>
+//     (m.transactions || []).map((t: any) => ({
+//       ...t,
+//       __year: m.year,
+//       __month: m.month,
+//     }))
+//   );
+// };
 
 // flat → SectionList (month-wise)
-const groupByMonth = (transactions: any[]) => {
-  const map = new Map();
+// const groupByMonth = (transactions: any[]) => {
+//   const map = new Map();
 
-  transactions.forEach(txn => {
-    const key = `${txn.__year}-${txn.__month}`;
+//   transactions.forEach(txn => {
+//     const key = `${txn.__year}-${txn.__month}`;
 
-    if (!map.has(key)) {
-      map.set(key, {
-        title: {
-          year: txn.__year,
-          month: txn.__month,
-          total: 0,
-        },
-        data: [],
-      });
-    }
+//     if (!map.has(key)) {
+//       map.set(key, {
+//         title: {
+//           year: txn.__year,
+//           month: txn.__month,
+//           total: 0,
+//         },
+//         data: [],
+//       });
+//     }
 
-    map.get(key).data.push(txn);
-    map.get(key).title.total += Number(txn.amount || 0);
-  });
+//     map.get(key).data.push(txn);
+//     map.get(key).title.total += Number(txn.amount || 0);
+//   });
 
-  return Array.from(map.values());
-};
+//   return Array.from(map.values());
+// };
 
 export default function Transactions(props: any) {
 
@@ -159,36 +159,36 @@ export default function Transactions(props: any) {
 
   /* ================= EFFECTS ================= */
 
-  useEffect(() => {
-    fetchTransactions({ reset: true, customPage: 1 });
-  }, []);
+  // useEffect(() => {
+  //   fetchTransactions({ reset: true, customPage: 1 });
+  // }, []);
 
-  useEffect(() => {
-    fetchTransactions({
-      reset: true,
-      customStatus: requestData.selectedStatus,
-      customStartDate: requestData.startDate,
-      customEndDate: requestData.endDate,
-      customPage: 1,
-    });
-  }, [requestData.selectedStatus, requestData.startDate, requestData.endDate]);
+  // useEffect(() => {
+  //   fetchTransactions({
+  //     reset: true,
+  //     customStatus: requestData.selectedStatus,
+  //     customStartDate: requestData.startDate,
+  //     customEndDate: requestData.endDate,
+  //     customPage: 1,
+  //   });
+  // }, [requestData.selectedStatus, requestData.startDate, requestData.endDate]);
 
-  useEffect(() => {
-    if (requestData.page > 1) {
-      fetchTransactions({ customPage: requestData.page });
-    }
-  }, [requestData.page]);
+  // useEffect(() => {
+  //   if (requestData.page > 1) {
+  //     fetchTransactions({ customPage: requestData.page });
+  //   }
+  // }, [requestData.page]);
 
   /* ================= ACTIONS ================= */
 
-  const loadMore = () => {
-    if (!requestData.isLoading && requestData.hasMore) {
-      setRequestData((prev: any) => ({
-        ...prev,
-        page: prev.page + 1,
-      }));
-    }
-  };
+  // const loadMore = () => {
+  //   if (!requestData.isLoading && requestData.hasMore) {
+  //     setRequestData((prev: any) => ({
+  //       ...prev,
+  //       page: prev.page + 1,
+  //     }));
+  //   }
+  // };
 
   const onStatusChange = (status: any) => {
     setVisible(false);
@@ -202,30 +202,30 @@ export default function Transactions(props: any) {
     }));
   };
 
-  const onDateApply = (start: any, end: any) => {
-    setOpen(false);
+  // const onDateApply = (start: any, end: any) => {
+  //   setOpen(false);
 
-    const prevStart = requestData.startDate;
-    const prevEnd = requestData.endDate;
+  //   const prevStart = requestData.startDate;
+  //   const prevEnd = requestData.endDate;
 
-    const isSame =
-      (prevStart === start || (!prevStart && !start)) &&
-      (prevEnd === end || (!prevEnd && !end));
+  //   const isSame =
+  //     (prevStart === start || (!prevStart && !start)) &&
+  //     (prevEnd === end || (!prevEnd && !end));
 
-    if (isSame) {
-      return;
-    }
+  //   if (isSame) {
+  //     return;
+  //   }
 
-    setRequestData((prev: any) => ({
-      ...prev,
-      startDate: start,
-      endDate: end,
-      page: 1,
-      hasMore: true,
-      flatTransactions: [],
-      transactions: [],
-    }));
-  };
+  //   setRequestData((prev: any) => ({
+  //     ...prev,
+  //     startDate: start,
+  //     endDate: end,
+  //     page: 1,
+  //     hasMore: true,
+  //     flatTransactions: [],
+  //     transactions: [],
+  //   }));
+  // };
 
   const renderEmptyComponent = () => {
     // Show empty only when API call finished
@@ -280,7 +280,7 @@ export default function Transactions(props: any) {
                   <TouchableOpacity
                     key={item.id}
                     style={styles(theme).dropdownItem}
-                    onPress={() => onStatusChange(item)}
+                    // onPress={() => onStatusChange(item)}
                   >
                     <Text
                       size={14}
@@ -333,7 +333,7 @@ export default function Transactions(props: any) {
       <SectionList
         sections={requestData.transactions}
         keyExtractor={(item) => item.id}
-        onEndReached={loadMore}
+        // onEndReached={loadMore}
         onEndReachedThreshold={0.4}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={renderEmptyComponent}
@@ -371,7 +371,7 @@ export default function Transactions(props: any) {
             ? moment.utc(end).endOf('day').toISOString()
             : null;
 
-          onDateApply(startUTC, endUTC);
+          // onDateApply(startUTC, endUTC);
         }}
       />
 

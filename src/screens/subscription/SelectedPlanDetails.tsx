@@ -14,6 +14,7 @@ import { SCREENS } from '..';
 //COMPONENTS
 import { Header, Input, Text, Button } from '../../components';
 import { API } from '../../api';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 export default function SelectedPlanDetails(props: any) {
 
@@ -51,7 +52,7 @@ export default function SelectedPlanDetails(props: any) {
     }
 
     return (
-        <View style={styles(theme).container}>
+        <AppSafeAreaView style={styles(theme).container}>
             <Header
                 onBack={() => {
                     props.navigation.goBack();
@@ -143,8 +144,7 @@ export default function SelectedPlanDetails(props: any) {
                     }}
                 />
             </View>
-            <SafeAreaView />
-        </View>
+        </AppSafeAreaView>
     );
 }
 

@@ -31,6 +31,9 @@ import { CommonActions } from '@react-navigation/native';
 //SCREENS
 import { SCREENS } from '..';
 
+//DUMMY DATA
+import { profileData } from '../../constant/dummyData';
+
 export default function MyProfile(props: any) {
 
     const STRING = useString();
@@ -42,12 +45,12 @@ export default function MyProfile(props: any) {
     const bottomSheetRef = useRef<any>(null);
     const inputHeight = Platform.OS == 'ios' ? getScaleSize(56) : getScaleSize(56)
 
-    const [name, setName] = useState((profile?.user?.first_name ?? "") + " " + (profile?.user?.last_name ?? ""));
+    const [name, setName] = useState((profileData?.user?.first_name ?? "") + " " + (profileData?.user?.last_name ?? ""));
     const [nameError, setNameError] = useState('');
-    const [email, setEmail] = useState(profile?.user?.email ?? "");
+    const [email, setEmail] = useState(profileData?.user?.email ?? "");
     const [emailError, setEmailError] = useState('');
     const [mobileNumberError, setMobileNumberError] = useState('');
-    const [address, setAddress] = useState(profile?.user?.address ?? "");
+    const [address, setAddress] = useState(profileData?.user?.address ?? "");
     const [addressError, setAddressError] = useState('');
     const [isLoading, setLoading] = useState(false);
     const [profileImage, setProfileImage] = useState<any>(null);
@@ -310,7 +313,9 @@ export default function MyProfile(props: any) {
             <KeyBoardAware showsVerticalScrollIndicator={false}>
                 <View style={styles(theme).mainContainer}>
                     {profile?.user?.profile_photo_url ? (
-                        <Image source={{ uri: profile?.user?.profile_photo_url }} resizeMode='cover' style={styles(theme).profileContainer} />
+                        <Image 
+                        source={{ uri: profile?.user?.profile_photo_url }} 
+                        resizeMode='cover' style={styles(theme).profileContainer} />
                     ) : (
                         <View style={styles(theme).EmptyProfileContainer}>
                             <Text

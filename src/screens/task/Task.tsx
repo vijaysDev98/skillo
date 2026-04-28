@@ -27,6 +27,7 @@ import JobDetailBox from '../service/ui/JobDetailx';
 import { buildThreadId } from '../../services/chat';
 import { API } from '../../api';
 import { screenWidth } from '../../constant/scaleSize';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 export default function Task(props: any) {
   const STRING = useString();
@@ -328,7 +329,7 @@ props.navigation.navigate(SCREENS.ProviderRaiseDispute.identifier)
   );
 
   return (
-    <View style={styles(theme).container}>
+    <AppSafeAreaView style={styles(theme).container}>
       <Header />
       <View style={styles(theme).searchContainer}>
         <SearchComponent
@@ -390,7 +391,7 @@ props.navigation.navigate(SCREENS.ProviderRaiseDispute.identifier)
         contentContainerStyle={[styles(theme).listContent,]}
         ListEmptyComponent={renderEmpty}
       />
-    </View>
+    </AppSafeAreaView>
   );
 }
 

@@ -15,6 +15,7 @@ import { SCREENS } from '..';
 import { Header, Input, Text, Button } from '../../components';
 import { API } from '../../api';
 import { CommonActions } from '@react-navigation/native';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 
 
@@ -82,7 +83,7 @@ export default function ChooseYourSubscription(props: any) {
     }
 
     return (
-        <View style={styles(theme).container}>
+        <AppSafeAreaView style={styles(theme).container}>
             <Header
                 onBack={() => {
                     if (isFromSubscriptionButton) {
@@ -258,7 +259,7 @@ export default function ChooseYourSubscription(props: any) {
                 }}
             /> */}
             </View>
-        </View>
+        </AppSafeAreaView>
     );
 }
 

@@ -26,6 +26,8 @@ import {
   useIsFocused,
 } from '@react-navigation/native';
 import { SCREENS, TABS } from '..';
+import NavigationService from '../../screens/NavigationService';
+import { homeUserData, userData } from '../../constant/dummyData';
 import { API } from '../../api';
 import { userRoles } from '../../constant/utils';
 import SubscriptionSuccessModal from '../../components/SubcriptionSuccessModal';
@@ -41,13 +43,12 @@ export default function Home(props: any) {
   const acceptRef = useRef<any>(null);
 
   const [isLoading, setLoading] = useState(false);
-  const [allServices, setAllServices] = useState([]);
-  const [recentRequests, setRecentRequests] = useState([]);
-  const [favoriteProfessionals, setFavoriteProfessionals] = useState([]);
+  const [allServices, setAllServices] = useState(homeUserData.recommended_professionals);
+  const [recentRequests, setRecentRequests] = useState(homeUserData.recent_requests);
+  const [favoriteProfessionals, setFavoriteProfessionals] = useState(homeUserData.recommended_professionals);
   const [professionalConnectedCount, setProfessionalConnectedCount] =
-    useState(0);
-
-    const [subscriptionSuccessModalVisible,setSubscriptionSuccessModalVisible] = useState(false)
+    useState(homeUserData.quick_stats.saved_professionals);
+  const [subscriptionSuccessModalVisible,setSubscriptionSuccessModalVisible] = useState(false)
 
 
   const homeServices = [
@@ -518,7 +519,7 @@ export default function Home(props: any) {
           }
         </View>
 
-        <Button
+        {/* <Button
           title='Add Other'
           style={{ marginTop: getScaleSize(24), marginBottom: getScaleSize(12) }}
           onPress={() => {
@@ -530,7 +531,7 @@ export default function Home(props: any) {
           font={FONTS.Lato.SemiBold}
           size={getScaleSize(12)}
           color={theme._8C8C8C}
-        >{"Can't find what you're looking for? Suggest a new service or category."}</Text>
+        >{"Can't find what you're looking for? Suggest a new service or category."}</Text> */}
 
         {/* <View style={styles(theme).deviderView} />
         <View

@@ -45,6 +45,7 @@ export default function TaskItem(props: any) {
     }
   }
 
+  console.log("item",item)
   return (
     // <TouchableOpacity
     //   style={styles(theme).container}
@@ -159,7 +160,8 @@ export default function TaskItem(props: any) {
         {/* LEFT SIDE */}
         <View style={styles(theme).leftSection}>
           <Image
-            source={{ uri: item?.service_details?.subcategory?.icon }}
+            // source={{ uri: item?.service_details?.subcategory?.icon }}
+            source={{uri:item?.service_image}}
             style={styles(theme).serviceImage}
           />
 
@@ -170,7 +172,8 @@ export default function TaskItem(props: any) {
               numberOfLines={2}
               color={theme.primaryText}
             >
-              {item?.service_details?.subcategory?.name}
+              {/* {item?.service_details?.subcategory?.name} */}
+              {item?.service_category}
             </Text>
 
             <Text

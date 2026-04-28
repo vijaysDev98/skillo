@@ -66,6 +66,9 @@ import {buildThreadId} from '../../services/chat';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import VerificationModal from '../../components/VerificationModal';
 
+// DUMMY DATA
+import { professionalHomeData } from '../../constant/dummyData';
+
 export default function ProfessionalHome(props: any) {
   const skipSubscription = props?.route?.params?.skipSubscription;
 
@@ -87,48 +90,53 @@ export default function ProfessionalHome(props: any) {
 
   const insets = useSafeAreaInsets()
 
+  // Initialize with dummy data
   useEffect(() => {
-    const sub = AppState.addEventListener('change', nextState => {
-      if (currentState === 'active' && nextState === 'background') {
-        onUpdateProfile();
-      }
-
-      if (currentState === 'background' && nextState === 'active') {
-        onUpdateProfile();
-      }
-
-      currentState = nextState;
-    });
-
-    return () => sub.remove();
+    setServiceList(professionalHomeData);
   }, []);
 
-  useEffect(() => {
-    EventRegister.addEventListener('onAccountSuccess', (data: any) => {
-      onUpdateProfile();
-    });
-  }, []);
+  // useEffect(() => {
+  //   const sub = AppState.addEventListener('change', nextState => {
+  //     if (currentState === 'active' && nextState === 'background') {
+  //       onUpdateProfile();
+  //     }
 
-  const onUpdateProfile = async () => {
-    setLoading(true);
-    await fetchProfile();
-    setLoading(false);
-  };
+  //     if (currentState === 'background' && nextState === 'active') {
+  //       onUpdateProfile();
+  //     }
 
-  useEffect(() => {
-    console.log('onAccountCancel');
-    EventRegister.addEventListener('onAccountCancel', (data: any) => {
-      onUpdateProfile();
-    });
-  }, []);
+  //     currentState = nextState;
+  //   });
 
-  useEffect(() => {
-    if (isFocused) {
-      onUpdateProfile();
-      requestPermissions();
-      getLocation();
-    }
-  }, [isFocused]);
+  //   return () => sub.remove();
+  // }, []);
+
+  // useEffect(() => {
+  //   EventRegister.addEventListener('onAccountSuccess', (data: any) => {
+  //     onUpdateProfile();
+  //   });
+  // }, []);
+
+  // const onUpdateProfile = async () => {
+  //   setLoading(true);
+  //   await fetchProfile();
+  //   setLoading(false);
+  // };
+
+  // useEffect(() => {
+  //   console.log('onAccountCancel');
+  //   EventRegister.addEventListener('onAccountCancel', (data: any) => {
+  //     onUpdateProfile();
+  //   });
+  // }, []);
+
+  // useEffect(() => {
+  //   if (isFocused) {
+  //     onUpdateProfile();
+  //     requestPermissions();
+  //     getLocation();
+  //   }
+  // }, [isFocused]);
 
   const hasLocationPermission = async () => {
     if (Platform.OS === 'ios') {

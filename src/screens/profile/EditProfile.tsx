@@ -38,6 +38,9 @@ import { CommonActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
+// DUMMY DATA
+import { professionalProfileData } from '../../constant/dummyData';
+
 export default function EditProfile(props: any) {
 
     const STRING = useString();
@@ -83,19 +86,21 @@ export default function EditProfile(props: any) {
     console.log('profile==>', profile)
 
     useEffect(() => {
-        setName((profile?.user?.first_name ?? "") + " " + (profile?.user?.last_name ?? ""));
-        setEmail(profile?.user?.email ?? '');
-        setMobileNumber(profile?.user?.phone_number ?? '');
-        setAddress(profile?.user?.address ?? '');
+        // Use professional profile dummy data for demo
+        const dummyProfile = professionalProfileData;
+        setName((dummyProfile?.user?.first_name ?? "") + " " + (dummyProfile?.user?.last_name ?? ""));
+        setEmail(dummyProfile?.user?.email ?? '');
+        setMobileNumber(dummyProfile?.user?.phone_number ?? '');
+        setAddress('123 Main Street, New York, NY 10001'); // Static address since dummy data doesn't have address field
         setYearsOfExperience(
-            String(profile?.provider_info?.years_of_experience ?? '')
+            String(dummyProfile?.provider_info?.years_experience ?? '')
         );
-        setBio(profile?.provider_info?.bio ?? '');
-        setExperienceSpecialities(profile?.provider_info?.experience_speciality ?? '');
-        setAchievements(profile?.provider_info?.achievements ?? '');
-        setFirstImageURL(profile?.past_work_files?.[0] ?? null);
-        setSecondImageURL(profile?.past_work_files?.[1] ?? null);
-    }, [profile]);
+        setBio(dummyProfile?.provider_info?.bio ?? '');
+        setExperienceSpecialities(dummyProfile?.provider_info?.experience_speciality ?? '');
+        setAchievements(dummyProfile?.provider_info?.achievements ?? '');
+        setFirstImageURL(dummyProfile?.past_work_files?.[0]?.url ?? null);
+        setSecondImageURL(dummyProfile?.past_work_files?.[1]?.url ?? null);
+    }, []);
 
     console.log('firstImageURL', profile?.past_work_photos)
 
@@ -106,13 +111,13 @@ export default function EditProfile(props: any) {
                 console.log('asset', asset)
                 if (type === 'profile') {
                     setProfileImage(asset);
-                    uploadProfileImage(asset);
+                    // uploadProfileImage(asset);
                 } else if (type === 'first') {
                     setFirstImageURL(asset?.uri);
-                    uploadProductImage(asset, 'first');
+                    // uploadProductImage(asset, 'first');
                 } else if (type === 'second') {
                     setSecondImageURL(asset?.uri);
-                    uploadProductImage(asset, 'second');
+                    // uploadProductImage(asset, 'second');
                 }
             } else {
                 console.log('response', response)
@@ -710,7 +715,7 @@ export default function EditProfile(props: any) {
                         bottomSheetRef.current.close();
                     }}
                     onPressButton={() => {
-                        onDeleteProfile()
+                        // onDeleteProfile()
                     }}
                 />
                 <SelectCountrySheet

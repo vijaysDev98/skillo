@@ -42,6 +42,7 @@ import { SCREENS } from '..';
 import { API } from '../../api';
 import moment from 'moment';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
 export default function Notification(props: any) {
   const STRING = useString();
@@ -707,7 +708,7 @@ const insets = useSafeAreaInsets()
   }
 
   return (
-    <View style={styles(theme).container}>
+    <AppSafeAreaView style={styles(theme).container}>
       <Header
         onBack={() => {
           props.navigation.goBack();
@@ -754,7 +755,7 @@ const insets = useSafeAreaInsets()
           // openStripeCheckout(STRIPE_URL);
         }}
       />
-    </View>
+    </AppSafeAreaView>
 
   );
 }

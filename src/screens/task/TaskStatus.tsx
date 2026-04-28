@@ -87,101 +87,101 @@ export default function TaskStatus(props: any) {
   const cancelScheduledServicePopupRef = useRef<any>(null);
   const cancelScheduledNoPossibleServicePopupRef = useRef<any>(null);
 
-  useEffect(() => {
-    if (isFocused) {
-      getTaskStatus();
-    }
-  }, [isFocused]);
+  // useEffect(() => {
+  //   if (isFocused) {
+  //     getTaskStatus();
+  //   }
+  // }, [isFocused]);
 
   const intervalRef = useRef<any>(null);
 
-  useEffect(() => {
-    if (serviceFlags.isServiceFinalized === false && taskStatusData?.is_renegotiated === "pending") {
-      intervalRef.current = setInterval(() => {
-        getTaskStatus();
-      }, 10000);
-    }
-    else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    }
+  // useEffect(() => {
+  //   if (serviceFlags.isServiceFinalized === false && taskStatusData?.is_renegotiated === "pending") {
+  //     intervalRef.current = setInterval(() => {
+  //       getTaskStatus();
+  //     }, 10000);
+  //   }
+  //   else {
+  //     if (intervalRef.current) {
+  //       clearInterval(intervalRef.current);
+  //       intervalRef.current = null;
+  //     }
+  //   }
 
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    }
-  }, [taskStatusData]);
+  //   return () => {
+  //     if (intervalRef.current) {
+  //       clearInterval(intervalRef.current);
+  //       intervalRef.current = null;
+  //     }
+  //   }
+  // }, [taskStatusData]);
 
-  useEffect(() => {
-    if (!taskStatusLastItem?.stage) return;
+  // useEffect(() => {
+  //   if (!taskStatusLastItem?.stage) return;
 
-    const currentStage = taskStatusLastItem.stage;
-    const prevStage = prevStageRef.current;
+  //   const currentStage = taskStatusLastItem.stage;
+  //   const prevStage = prevStageRef.current;
 
-    // pending ➜ accepted
-    if (prevStage === 'pending' && currentStage === 'accepted') {
-      renegotiatioAcceptSheetRef.current?.open();
-    }
-    // if (prevStage === 'accepted' && currentStage === 'accepted') {
-    //   renegotiatioAcceptSheetRef.current?.open();
-    // }
+  //   // pending ➜ accepted
+  //   if (prevStage === 'pending' && currentStage === 'accepted') {
+  //     renegotiatioAcceptSheetRef.current?.open();
+  //   }
+  //   // if (prevStage === 'accepted' && currentStage === 'accepted') {
+  //   //   renegotiatioAcceptSheetRef.current?.open();
+  //   // }
 
-    prevStageRef.current = currentStage;
-  }, [taskStatusLastItem]);
+  //   prevStageRef.current = currentStage;
+  // }, [taskStatusLastItem]);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      if (Platform.OS === 'android') {
-        StatusBar.setBackgroundColor(theme.white);
-        StatusBar.setBarStyle('dark-content');
-      }
-    }, []),
-  );
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     if (Platform.OS === 'android') {
+  //       StatusBar.setBackgroundColor(theme.white);
+  //       StatusBar.setBarStyle('dark-content');
+  //     }
+  //   }, []),
+  // );
 
-  async function getTaskStatus() {
-    try {
-      setLoading(true);
-      const result = await API.Instance.get(API.API_ROUTES.getTaskStatus + `/${item?.service_request_id}`);
-      if (result.status) {
-        const item = result?.data?.data ?? {}
-        setTaskStatusData(item);
-        let array = item?.task_status_timeline ?? [];
-        let finalArray = array.pop();
-        setTaskStatusLastItem(finalArray);
-        setTaskStatus(array);
-        getServiceStatus(array);
-      } else {
-        SHOW_TOAST(result?.data?.message ?? '', 'error');
-      }
-    } catch (error: any) {
-      SHOW_TOAST(error?.message ?? '', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }
+  // async function getTaskStatus() {
+  //   try {
+  //     setLoading(true);
+  //     const result = await API.Instance.get(API.API_ROUTES.getTaskStatus + `/${item?.service_request_id}`);
+  //     if (result.status) {
+  //       const item = result?.data?.data ?? {}
+  //       setTaskStatusData(item);
+  //       let array = item?.task_status_timeline ?? [];
+  //       let finalArray = array.pop();
+  //       setTaskStatusLastItem(finalArray);
+  //       setTaskStatus(array);
+  //       getServiceStatus(array);
+  //     } else {
+  //       SHOW_TOAST(result?.data?.message ?? '', 'error');
+  //     }
+  //   } catch (error: any) {
+  //     SHOW_TOAST(error?.message ?? '', 'error');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
 
-  function getServiceStatus(timeline: any[]) {
-    const accepted = timeline.find(
-      i => i.name === 'Quote accepted' && i.completed,
-    );
+  // function getServiceStatus(timeline: any[]) {
+  //   const accepted = timeline.find(
+  //     i => i.name === 'Quote accepted' && i.completed,
+  //   );
 
-    const outForService = timeline.find(i => i.name === 'Out for service');
-    const startedService = timeline.find(i => i.name === 'Started service');
-    const serviceCompleted = timeline.find(i => i.name === 'Service completed');
-    const paymentReceived = timeline.find(i => i.name === 'Payment received');
+  //   const outForService = timeline.find(i => i.name === 'Out for service');
+  //   const startedService = timeline.find(i => i.name === 'Started service');
+  //   const serviceCompleted = timeline.find(i => i.name === 'Service completed');
+  //   const paymentReceived = timeline.find(i => i.name === 'Payment received');
 
-    setServiceFlags({
-      isOutForService: !!accepted && !outForService?.completed,
-      isExpertConfirmed: !!outForService?.completed && !startedService?.completed,
-      isServiceCompleted: (startedService?.completed === true && serviceCompleted?.completed === false),
-      isServiceFinalized: (serviceCompleted?.completed === true && startedService?.completed === true && paymentReceived?.completed === false),
-      isPaymentReceived: (paymentReceived?.completed === true && serviceCompleted?.completed === true && startedService?.completed === true)
-    });
-  };
+  //   setServiceFlags({
+  //     isOutForService: !!accepted && !outForService?.completed,
+  //     isExpertConfirmed: !!outForService?.completed && !startedService?.completed,
+  //     isServiceCompleted: (startedService?.completed === true && serviceCompleted?.completed === false),
+  //     isServiceFinalized: (serviceCompleted?.completed === true && startedService?.completed === true && paymentReceived?.completed === false),
+  //     isPaymentReceived: (paymentReceived?.completed === true && serviceCompleted?.completed === true && startedService?.completed === true)
+  //   });
+  // };
 
   async function getCurrentLocation() {
 
@@ -201,7 +201,8 @@ export default function TaskStatus(props: any) {
           console.log('latitude', latitude);
           console.log('longitude', longitude);
           setLocation({ latitude, longitude });
-          onProceedOutOfService()
+          // onProceedOutOfService()
+          mapViewRef.current?.open();
           bottomSheetRef.current?.close();
         },
         (error: any) => {
@@ -220,24 +221,24 @@ export default function TaskStatus(props: any) {
     }
   };
 
-  async function onProceedOutOfService() {
-    try {
-      setLoading(true);
-      const result = await API.Instance.post(API.API_ROUTES.onProceedOutOfService + `/${item?.service_request_id}`);
-      if (result.status) {
-        getTaskStatus()
-        setTimeout(() => {
-          mapViewRef.current?.open();
-        }, 500);
-      } else {
-        SHOW_TOAST(result?.data?.message ?? '', 'error');
-      }
-    } catch (error: any) {
-      SHOW_TOAST(error?.message ?? '', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }
+  // async function onProceedOutOfService() {
+  //   try {
+  //     setLoading(true);
+  //     const result = await API.Instance.post(API.API_ROUTES.onProceedOutOfService + `/${item?.service_request_id}`);
+  //     if (result.status) {
+  //       getTaskStatus()
+  //       setTimeout(() => {
+  //         mapViewRef.current?.open();
+  //       }, 500);
+  //     } else {
+  //       SHOW_TOAST(result?.data?.message ?? '', 'error');
+  //     }
+  //   } catch (error: any) {
+  //     SHOW_TOAST(error?.message ?? '', 'error');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
 
   async function getRenegotiationDetails() {
     try {

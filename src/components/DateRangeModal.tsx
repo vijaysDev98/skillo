@@ -84,7 +84,9 @@ const DateRangeModal = ({
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <View style={styles.overlay}>
+      <TouchableOpacity
+       onPress={onClose}
+       style={styles.overlay}>
         <View style={styles.container}>
 
           {/* HEADER */}
@@ -122,7 +124,7 @@ const DateRangeModal = ({
           </View>
 
         </View>
-      </View>
+      </TouchableOpacity>
     </Modal>
   );
 };

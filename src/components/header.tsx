@@ -74,7 +74,7 @@ const Header = (props: HeaderProps) => {
     } else {
         return (
             <View>
-                <SafeAreaView style={{flex:1,marginTop:insets.top}} />
+                {/* <SafeAreaView style={{flex:1,marginTop:insets.top}} /> */}
                 <View style={styles(theme).statusBar}>
                     <StatusBar
                         translucent={true}

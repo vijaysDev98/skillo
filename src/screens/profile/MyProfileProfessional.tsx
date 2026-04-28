@@ -39,6 +39,9 @@ import { SCREENS } from '..';
 import { Rating } from 'react-native-ratings';
 import { AppSafeAreaView } from '../../components/AppSafeAreaView';
 
+// DUMMY DATA
+import { professionalProfileData } from '../../constant/dummyData';
+
 export default function MyProfileProfessional(props: any) {
 
   const STRING = useString();
@@ -46,10 +49,13 @@ export default function MyProfileProfessional(props: any) {
   const { theme } = useContext<any>(ThemeContext);
   const { profile } = useContext(AuthContext)
 
+  // Use dummy data for demo
+  const dummyProfile = professionalProfileData;
+
   const [showMore, setShowMore] = useState(false);
   const [showMoreExperience, setShowMoreExperience] = useState(false);
 
-  const overallRating = Number(profile?.customer_ratings?.average_rating ?? 0);
+  const overallRating = Number(dummyProfile?.customer_ratings?.average_rating ?? 0);
 
   return (
     <AppSafeAreaView style={styles(theme).container}>
@@ -67,10 +73,10 @@ export default function MyProfileProfessional(props: any) {
         style={styles(theme).scrolledContainer}
         showsVerticalScrollIndicator={false}>
         <View style={styles(theme).informationContainer}>
-          {profile?.user?.profile_photo_url ?
+          {dummyProfile?.user?.profile_photo_url ?
             <Image
               style={styles(theme).profilePic}
-              source={{ uri: profile?.user?.profile_photo_url }}
+              source={{ uri: dummyProfile?.user?.profile_photo_url }}
             />
             :
             <View style={styles(theme).EmptyProfileContainer}>
@@ -79,8 +85,8 @@ export default function MyProfileProfessional(props: any) {
                 font={FONTS.Lato.Regular}
                 align="center"
                 color={theme._262B43E5}>
-                {(profile?.user?.first_name?.charAt(0) ?? '').toUpperCase() +
-                  (profile?.user?.last_name?.charAt(0) ?? '').toUpperCase()}
+                {(dummyProfile?.user?.first_name?.charAt(0) ?? '').toUpperCase() +
+                  (dummyProfile?.user?.last_name?.charAt(0) ?? '').toUpperCase()}
               </Text>
             </View>
           }
@@ -89,7 +95,7 @@ export default function MyProfileProfessional(props: any) {
             font={FONTS.Lato.SemiBold}
             color={theme._2B2B2B}
             style={{ alignSelf: 'center' }}>
-            {`${profile?.user?.first_name + " " + profile?.user?.last_name}`}
+            {`${dummyProfile?.user?.first_name + " " + dummyProfile?.user?.last_name}`}
           </Text>
           <View style={styles(theme).horizontalContainer}>
             <View style={styles(theme).itemContainer}>
@@ -99,7 +105,7 @@ export default function MyProfileProfessional(props: any) {
                   font={FONTS.Lato.Bold}
                   color={theme.primary}
                   style={{ alignSelf: 'center' }}>
-                  {profile?.customer_ratings?.average_rating ?? '0.0'}
+                  {dummyProfile?.customer_ratings?.average_rating ?? '0.0'}
                 </Text>
                 <Text
                   size={getScaleSize(12)}
@@ -117,7 +123,7 @@ export default function MyProfileProfessional(props: any) {
               ]}>
 
               <View>
-                {profile?.provider_info?.is_docs_verified && (
+                {dummyProfile?.provider_info?.is_docs_verified && (
                   <Image
                     style={{
                       height: getScaleSize(24),
@@ -133,7 +139,7 @@ export default function MyProfileProfessional(props: any) {
                   color={'#214C65'}
                   align='center'
                   style={{ marginTop: getScaleSize(4) }}>
-                  {profile?.provider_info?.is_docs_verified === true ? STRING.Certified : 'Not\ncertified'}
+                  {dummyProfile?.provider_info?.is_docs_verified === true ? STRING.Certified : 'Not\ncertified'}
                 </Text>
               </View>
             </View> */}
@@ -144,7 +150,7 @@ export default function MyProfileProfessional(props: any) {
                   font={FONTS.Lato.Bold}
                   color={theme.primary}
                   style={{ alignSelf: 'center' }}>
-                  {profile?.unique_clients_count ?? '0'}
+                  {dummyProfile?.unique_clients_count ?? '0'}
                 </Text>
                 <Text
                   size={getScaleSize(12)}
@@ -169,7 +175,7 @@ export default function MyProfileProfessional(props: any) {
             font={FONTS.Lato.Medium}
             style={{ marginTop: getScaleSize(8) }}
             color={theme._323232}>
-            {profile?.provider_info?.bio ?? '-'}
+            {dummyProfile?.provider_info?.bio ?? '-'}
           </Text>
         </View>
         <View style={styles(theme).informationContainer}>
@@ -185,15 +191,15 @@ export default function MyProfileProfessional(props: any) {
             numberOfLines={showMoreExperience ? undefined : 3}
             style={{ marginTop: getScaleSize(8) }}
             color={theme._323232}>
-            {profile?.provider_info?.experience_speciality ?? '-'}
+            {dummyProfile?.provider_info?.experience_speciality ?? '-'}
           </Text>
-          {profile?.provider_info?.experience_speciality?.length > 100 &&
+          {dummyProfile?.provider_info?.experience_speciality?.length > 100 &&
             <TouchableOpacity style={{ marginTop: getScaleSize(8) }}
               onPress={() => setShowMoreExperience(!showMoreExperience)}>
               <Text
                 size={getScaleSize(16)}
                 font={FONTS.Lato.Medium}
-                color={'#2C6587'}>
+                color={theme.primary}>
                 {showMoreExperience ? STRING.show_less : STRING.read_more}
               </Text>
             </TouchableOpacity>
@@ -211,7 +217,7 @@ export default function MyProfileProfessional(props: any) {
             font={FONTS.Lato.Medium}
             style={{ marginTop: getScaleSize(8) }}
             color={theme._323232}>
-            {profile?.provider_info?.achievements ?? '-'}
+            {dummyProfile?.provider_info?.achievements ?? '-'}
           </Text>
         </View>
         <View style={styles(theme).informationContainer}>
@@ -222,7 +228,7 @@ export default function MyProfileProfessional(props: any) {
             {STRING.Photosofpastwork}
           </Text>
           <FlatList
-            data={profile?.past_work_files ?? []}
+            data={dummyProfile?.past_work_files ?? []}
             horizontal
             keyExtractor={(item: any, index: number) => index.toString()}
             showsHorizontalScrollIndicator={false}
@@ -232,12 +238,12 @@ export default function MyProfileProfessional(props: any) {
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={() => {
-                    props.navigation.navigate(SCREENS.WebViewScreen.identifier, { url: item });
+                    props.navigation.navigate(SCREENS.WebViewScreen.identifier, { url: item.url });
                   }}>
                   <Image
                     style={[styles(theme).photosView]}
                     resizeMode="cover"
-                    source={{ uri: item }}
+                    source={{ uri: item.url }}
                   />
                 </TouchableOpacity>
               );
@@ -260,7 +266,7 @@ export default function MyProfileProfessional(props: any) {
               size={getScaleSize(24)}
               font={FONTS.Lato.SemiBold}
               color={theme._323232}>
-              {profile?.customer_ratings?.average_rating ?? '0.0'}
+              {dummyProfile?.customer_ratings?.average_rating ?? '0.0'}
             </Text>
             <View
               style={{
@@ -285,52 +291,49 @@ export default function MyProfileProfessional(props: any) {
                 style={{ marginTop: getScaleSize(3) }}
                 font={FONTS.Lato.Medium}
                 color={theme._8C8C8C}>
-                {`Based on ${profile?.customer_ratings?.total_ratings ?? 0} ratings`}
+                {`Based on ${dummyProfile?.customer_ratings?.total_ratings ?? 0} ratings`}
               </Text>
             </View>
           </View>
           <View style={{ marginTop: getScaleSize(15) }}>
             <RattingControler
               title={'Work quality'}
-              value={profile?.customer_ratings?.criteria_averages?.overall ?? '0.0'}
-              fillCount={profile?.customer_ratings?.criteria_averages?.overall ?? 0}
+              value={String(dummyProfile?.customer_ratings?.criteria_averages?.overall ?? '0.0')}
+              fillCount={dummyProfile?.customer_ratings?.criteria_averages?.overall ?? 0}
               totalCount={5}
             />
           </View>
           <View style={{ marginTop: getScaleSize(15) }}>
             <RattingControler
               title={'Reliability'}
-              value={profile?.customer_ratings?.criteria_averages?.reliability ?? '0.0'}
-              fillCount={profile?.customer_ratings?.criteria_averages?.reliability ?? 0}
-              totalCount={5}
+              value={String(dummyProfile?.customer_ratings?.criteria_averages?.reliability ?? '0.0')}
+              fillCount={dummyProfile?.customer_ratings?.criteria_averages?.reliability ?? 0}
             />
           </View>
           <View style={{ marginTop: getScaleSize(15) }}>
             <RattingControler
               title={'Punctunality'}
-              value={profile?.customer_ratings?.criteria_averages?.punctuality ?? '0.0'}
-              fillCount={profile?.customer_ratings?.criteria_averages?.punctuality ?? 0}
-              totalCount={5}
+              value={String(dummyProfile?.customer_ratings?.criteria_averages?.punctuality ?? '0.0')}
+              fillCount={dummyProfile?.customer_ratings?.criteria_averages?.punctuality ?? 0}
             />
           </View>
           <View style={{ marginTop: getScaleSize(15) }}>
             <RattingControler
               title={'Soluction'}
-              value={profile?.customer_ratings?.criteria_averages?.solution ?? '0.0'}
-              fillCount={profile?.customer_ratings?.criteria_averages?.solution ?? 0}
-              totalCount={5}
+              value={String(dummyProfile?.customer_ratings?.criteria_averages?.solution ?? '0.0')}
+              fillCount={dummyProfile?.customer_ratings?.criteria_averages?.solution ?? 0}
             />
           </View>
           <View style={{ marginTop: getScaleSize(15) }}>
             <RattingControler
               title={'Payout'}
-              value={profile?.customer_ratings?.criteria_averages?.payout ?? '0.0'}
-              fillCount={profile?.customer_ratings?.criteria_averages?.payout ?? 0}
+              value={String(dummyProfile?.customer_ratings?.criteria_averages?.payout ?? '0.0')}
+              fillCount={dummyProfile?.customer_ratings?.criteria_averages?.payout ?? 0}
               totalCount={5}
             />
           </View>
         </View>
-        {profile?.recent_reviews?.length > 0 &&
+        {dummyProfile?.recent_reviews?.length > 0 &&
           <View style={styles(theme).informationContainer}>
             <Text
               size={getScaleSize(16)}
@@ -338,7 +341,7 @@ export default function MyProfileProfessional(props: any) {
               color={theme._8C8C8C}>
               {STRING.RecentWorksReviews}
             </Text>
-            {profile?.recent_reviews?.map((item: any, index: number) => {
+            {dummyProfile?.recent_reviews?.map((item: any, index: number) => {
               return (
                 <RatingsReviewsItem
                   key={index}

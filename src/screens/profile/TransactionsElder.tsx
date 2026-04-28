@@ -25,6 +25,9 @@ import { API } from '../../api';
 import Tooltip from 'react-native-walkthrough-tooltip';
 import moment from 'moment';
 
+// DUMMY DATA
+import { transactionData } from '../../constant/dummyData';
+
 const PAGE_SIZE = 10;
 
 /* ================= HELPERS ================= */
@@ -93,102 +96,113 @@ export default function TransactionsElder(props: any) {
         customPage?: number;
     };
 
-    const fetchTransactions = async ({
-        reset = false,
-        customStatus,
-        customStartDate,
-        customEndDate,
-        customPage,
-    }: FetchParams = {}) => {
+    // const fetchTransactions = async ({
+    //     reset = false,
+    //     customStatus,
+    //     customStartDate,
+    //     customEndDate,
+    //     customPage,
+    // }: FetchParams = {}) => {
 
-        if (requestData.isLoading) return;
+    //     if (requestData.isLoading) return;
 
-        setRequestData((prev: any) => ({ ...prev, isLoading: true }));
+    //     setRequestData((prev: any) => ({ ...prev, isLoading: true }));
 
-        try {
-            const page = customPage ?? requestData.page;
-            const startDate = customStartDate ?? requestData.startDate;
-            const endDate = customEndDate ?? requestData.endDate;
-            const selectedStatus = customStatus ?? requestData.selectedStatus;
+    //     try {
+    //         const page = customPage ?? requestData.page;
+    //         const startDate = customStartDate ?? requestData.startDate;
+    //         const endDate = customEndDate ?? requestData.endDate;
+    //         const selectedStatus = customStatus ?? requestData.selectedStatus;
 
-            let url = API.API_ROUTES.fetchTransactions;
-            url += `?section=transactions&page=${page}&limit=${PAGE_SIZE}`;
+    //         let url = API.API_ROUTES.fetchTransactions;
+    //         url += `?section=transactions&page=${page}&limit=${PAGE_SIZE}`;
 
-            if (selectedStatus?.value) {
-                url += `&status=${selectedStatus.value}`;
-            }
-            if (startDate) {
-                url += `&start_date=${moment(startDate).format('YYYY-MM-DD')}`;
-            }
-            if (endDate) {
-                url += `&end_date=${moment(endDate).format('YYYY-MM-DD')}`;
-            }
+    //         if (selectedStatus?.value) {
+    //             url += `&status=${selectedStatus.value}`;
+    //         }
+    //         if (startDate) {
+    //             url += `&start_date=${moment(startDate).format('YYYY-MM-DD')}`;
+    //         }
+    //         if (endDate) {
+    //             url += `&end_date=${moment(endDate).format('YYYY-MM-DD')}`;
+    //         }
 
-            const result: any = await API.Instance.get(url);
+    //         const result: any = await API.Instance.get(url);
 
-            if (!result?.status) {
-                SHOW_TOAST(result?.data?.message, 'error');
-                setRequestData((prev: any) => ({ ...prev, isLoading: false }));
-                return;
-            }
+    //         if (!result?.status) {
+    //             SHOW_TOAST(result?.data?.message, 'error');
+    //             setRequestData((prev: any) => ({ ...prev, isLoading: false }));
+    //             return;
+    //         }
 
-            const apiMonths = result?.data?.data?.months ?? [];
+    //         const apiMonths = result?.data?.data?.months ?? [];
 
-            const newFlat = normalizeTransactions(apiMonths);
+    //         const newFlat = normalizeTransactions(apiMonths);
 
-            setRequestData((prev: any) => {
-                const allFlat = reset
-                    ? newFlat
-                    : [...prev.flatTransactions, ...newFlat];
+    //         setRequestData((prev: any) => {
+    //             const allFlat = reset
+    //                 ? newFlat
+    //                 : [...prev.flatTransactions, ...newFlat];
 
-                return {
-                    ...prev,
-                    flatTransactions: allFlat,
-                    transactions: groupByMonth(allFlat),
-                    page,
-                    hasMore: newFlat.length === PAGE_SIZE,
-                    isLoading: false,
-                };
-            });
+    //             return {
+    //                 ...prev,
+    //                 flatTransactions: allFlat,
+    //                 transactions: groupByMonth(allFlat),
+    //                 page,
+    //                 hasMore: newFlat.length === PAGE_SIZE,
+    //                 isLoading: false,
+    //             };
+    //         });
 
-        } catch (error: any) {
-            SHOW_TOAST(error?.message ?? '', 'error');
-            setRequestData((prev: any) => ({ ...prev, isLoading: false }));
-        }
-    };
+    //     } catch (error: any) {
+    //         SHOW_TOAST(error?.message ?? '', 'error');
+    //         setRequestData((prev: any) => ({ ...prev, isLoading: false }));
+    //     }
+    // };
 
     /* ================= EFFECTS ================= */
 
+    // Initialize with dummy data
     useEffect(() => {
-        fetchTransactions({ reset: true, customPage: 1 });
+        const dummyMonths = transactionData.months;
+        const flatTransactions = normalizeTransactions(dummyMonths);
+        const groupedTransactions = groupByMonth(flatTransactions);
+        
+        setRequestData((prev: any) => ({
+            ...prev,
+            flatTransactions: flatTransactions,
+            transactions: groupedTransactions,
+            hasMore: false,
+            isLoading: false,
+        }));
     }, []);
 
-    useEffect(() => {
-        fetchTransactions({
-            reset: true,
-            customStatus: requestData.selectedStatus,
-            customStartDate: requestData.startDate,
-            customEndDate: requestData.endDate,
-            customPage: 1,
-        });
-    }, [requestData.selectedStatus, requestData.startDate, requestData.endDate]);
+    // useEffect(() => {
+    //     fetchTransactions({
+    //         reset: true,
+    //         customStatus: requestData.selectedStatus,
+    //         customStartDate: requestData.startDate,
+    //         customEndDate: requestData.endDate,
+    //         customPage: 1,
+    //     });
+    // }, [requestData.selectedStatus, requestData.startDate, requestData.endDate]);
 
-    useEffect(() => {
-        if (requestData.page > 1) {
-            fetchTransactions({ customPage: requestData.page });
-        }
-    }, [requestData.page]);
+    // useEffect(() => {
+    //     if (requestData.page > 1) {
+    //         fetchTransactions({ customPage: requestData.page });
+    //     }
+    // }, [requestData.page]);
 
     /* ================= ACTIONS ================= */
 
-    const loadMore = () => {
-        if (!requestData.isLoading && requestData.hasMore) {
-            setRequestData((prev: any) => ({
-                ...prev,
-                page: prev.page + 1,
-            }));
-        }
-    };
+    // const loadMore = () => {
+    //     if (!requestData.isLoading && requestData.hasMore) {
+    //         setRequestData((prev: any) => ({
+    //             ...prev,
+    //             page: prev.page + 1,
+    //         }));
+    //     }
+    // };
 
     const onStatusChange = (status: any) => {
         setVisible(false);
@@ -255,7 +269,7 @@ export default function TransactionsElder(props: any) {
             <View style={styles(theme).headerStyle}>
 
                 {/* STATUS */}
-                <View style={styles(theme).filterView}>
+                <TouchableOpacity style={styles(theme).filterView}>
                     <Text size={12} font={FONTS.Lato.SemiBold} color={theme._8C8C8C}>
                         {requestData.selectedStatus.title === 'All'
                             ? 'Status'
@@ -272,25 +286,20 @@ export default function TransactionsElder(props: any) {
                         onClose={() => setVisible(false)}
                         content={
                             <View>
-                                {[
-                                    { id: '1', title: 'All', value: '' },
-                                    { id: '2', title: 'Success', value: 'success' },
-                                    { id: '3', title: 'Failed', value: 'failed' },
-                                    { id: '4', title: 'Pending', value: 'pending' },
-                                ].map(item => (
+                                {transactionData.statusOptions.map((item, index) => (
                                     <TouchableOpacity
-                                        key={item.id}
+                                        key={item.value || `all-${index}`}
                                         style={styles(theme).dropdownItem}
-                                        onPress={() => onStatusChange(item)}
+                                        onPress={() => onStatusChange({ ...item, id: item.value || 'all', title: item.label })}
                                     >
                                         <Text
                                             size={14}
                                             font={FONTS.Lato.SemiBold}
-                                            color={requestData.selectedStatus.id === item.id
+                                            color={requestData.selectedStatus.id === (item.value || 'all')
                                                 ? theme.primary
                                                 : theme._555555}
                                         >
-                                            {item.title}
+                                            {item.label}
                                         </Text>
                                     </TouchableOpacity>
                                 ))}
@@ -301,9 +310,9 @@ export default function TransactionsElder(props: any) {
                             <Image source={IMAGES.ic_down} style={styles(theme).downIcon} />
                         </TouchableOpacity>
                     </Tooltip>
-                </View>
+                </TouchableOpacity>
                  {/* Payment Method */}
-                <View style={styles(theme).filterView}>
+                <TouchableOpacity style={styles(theme).filterView}>
                     <Text size={12} font={FONTS.Lato.SemiBold} color={theme._8C8C8C}>
                         {"Payment Method"}
                     </Text>
@@ -311,10 +320,10 @@ export default function TransactionsElder(props: any) {
                     <TouchableOpacity onPress={() => setOpen(true)}>
                         <Image source={IMAGES.ic_down} style={styles(theme).downIcon} />
                     </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
 
                 {/* DATE */}
-                <View style={styles(theme).filterView}>
+                <TouchableOpacity style={styles(theme).filterView}>
                     <Text size={12} font={FONTS.Lato.SemiBold} color={theme._8C8C8C}>
                         {`${requestData.startDate
                             ? new Date(requestData.startDate).toLocaleDateString()
@@ -326,13 +335,13 @@ export default function TransactionsElder(props: any) {
                     <TouchableOpacity onPress={() => setOpen(true)}>
                         <Image source={IMAGES.ic_down} style={styles(theme).downIcon} />
                     </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
             </View>
 
             <SectionList
                 sections={requestData.transactions}
                 keyExtractor={(item) => item.id}
-                onEndReached={loadMore}
+                // onEndReached={loadMore}
                 onEndReachedThreshold={0.4}
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={renderEmptyComponent}

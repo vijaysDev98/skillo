@@ -28,7 +28,7 @@ export default function ServiceRequest(props: any) {
   const STRING = useString();
 
   const { data, onPress, onPressApply } = props
-console.log("data=====>>>>>",data)
+console.log("Service Data=====>>>>>",data)
   return (
     // <TouchableOpacity
     //   style={styles(theme).container}
@@ -203,7 +203,8 @@ console.log("data=====>>>>>",data)
     >
     <View style={{flexDirection:'row', alignItems:'center', gap:getScaleSize(12)}}>
       <Image
-       source={{ uri: data?.subcategory_info?.sub_category_name?.img_url }}
+      //  source={{ uri: data?.subcategory_info?.sub_category_name?.img_url }}
+     source={{uri:data?.service_image}}
        style={{width:getScaleSize(54), height:getScaleSize(54), borderRadius:getScaleSize(6)}}
        resizeMode="cover"
       />
@@ -212,7 +213,10 @@ console.log("data=====>>>>>",data)
         size={getScaleSize(20)}
         font={FONTS.Lato.Bold}
         color={theme.primaryText}
-        >{data?.subcategory_info?.sub_category_name?.name}</Text>
+        >
+          {/* {data?.subcategory_info?.sub_category_name?.name} */}
+          {data?.service_category}
+          </Text>
         <Text
         size={getScaleSize(16)}
         font={FONTS.Lato.Medium}

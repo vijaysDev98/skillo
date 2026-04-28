@@ -413,6 +413,8 @@ interface Props {
 const roles = [
   { id: userRoles.Service_Seeker_individual, label: userRoles.Service_Seeker_individual },
   { id: userRoles.Service_Seeker_business, label: userRoles.Service_Seeker_business },
+  { id: userRoles.Service_Provider_individual, label: userRoles.Service_Provider_individual },
+  { id: userRoles.Service_Provider_business, label: userRoles.Service_Provider_business }
 ];
 
 function UserRoleModal({
